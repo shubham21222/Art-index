@@ -3,7 +3,7 @@ import { Facebook, Instagram, Twitter, BadgeCent, Music } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="border-t border-gray-200 mt-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 py-10">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 py-10">
         {/* About Us */}
         <div className="space-y-4">
           <h3 className="font-semibold text-lg">About us</h3>
@@ -57,7 +57,7 @@ export default function Footer() {
 
       {/* Bottom Footer */}
       <div className="border-t border-gray-200 py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+        <div className=" mx-auto flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-gray-500 text-sm text-center sm:text-left">
             <span className="border px-2 py-1 text-xs font-semibold">A</span>
             <p>© 2025 Artsy</p>
