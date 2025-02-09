@@ -1,4 +1,7 @@
 import { Facebook, Instagram, Twitter, BadgeCent, Music } from "lucide-react";
+import Image from "next/image";
+import logo from "../../../public/artindex.png"; // Ensure this path is correct
+
 
 export default function Footer() {
   return (
@@ -29,10 +32,10 @@ export default function Footer() {
         <div className="space-y-4">
           <h3 className="font-semibold text-lg">Partnerships</h3>
           <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Artsy for Galleries</a></li>
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Artsy for Museums</a></li>
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Artsy for Auctions</a></li>
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Artsy for Fairs</a></li>
+            <li><a href="#" className="hover:text-gray-900 transition-colors">Art Index for Galleries</a></li>
+            <li><a href="#" className="hover:text-gray-900 transition-colors">Art Index for Museums</a></li>
+            <li><a href="#" className="hover:text-gray-900 transition-colors">Art Index for Auctions</a></li>
+            <li><a href="#" className="hover:text-gray-900 transition-colors">Art Index for Fairs</a></li>
           </ul>
         </div>
 
@@ -42,7 +45,7 @@ export default function Footer() {
             <h3 className="font-semibold text-lg">Support</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li><a href="#" className="hover:text-gray-900 transition-colors">Visit our Help Center</a></li>
-              <li><a href="#" className="hover:text-gray-900 transition-colors">Buying on Artsy</a></li>
+              <li><a href="#" className="hover:text-gray-900 transition-colors">Buying on Art Index</a></li>
             </ul>
           </div>
           <div className="space-y-4">
@@ -59,8 +62,13 @@ export default function Footer() {
       <div className="border-t border-gray-200 py-6 px-4 sm:px-6 lg:px-8">
         <div className=" mx-auto flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-gray-500 text-sm text-center sm:text-left">
-            <span className="border px-2 py-1 text-xs font-semibold">A</span>
-            <p>© 2025 Artsy</p>
+            <Image
+              src={logo} // Pass the imported logo
+              alt="ArtIndex Logo" // Add an appropriate alt text
+              width={120} // Set the width (adjust as needed)
+              height={120} // Set the height (adjust as needed)
+              className="rounded" // Optional: Add styling if needed
+            />            <p>© 2025 Art Index</p>
             <a href="#" className="hover:underline">Terms and Conditions</a>
             <a href="#" className="hover:underline">Auction Supplement</a>
             <a href="#" className="hover:underline">Buyer Guarantee</a>

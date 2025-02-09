@@ -118,7 +118,7 @@ export default function Header() {
                                 <Link href="/editorial" className="hover:text-blue-700">Editorial</Link>
 
                                 {/* Secondary Links */}
-                                <Link href="/whats-new" className="hover:text-blue-700">What's New</Link>
+                                <Link href="/collection/new-this-week" className="hover:text-blue-700">What's New</Link>
                                 <Link href="/artists" className="hover:text-blue-700">Artists</Link>
                                 <Link href="/artworks" className="hover:text-blue-700">Artworks</Link>
                                 <Link href="/auctions" className="hover:text-blue-700">Auctions</Link>
