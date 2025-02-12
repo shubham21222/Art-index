@@ -64,8 +64,8 @@ export default function Header() {
 
                     {/* Navigation Links */}
                     <div className="hidden lg:flex items-center gap-8">
-                        <Link href="/buy" className="hover:text-blue-700">Buy</Link>
-                        <Link href="/sell" className="hover:text-blue-700">Sell</Link>
+                        <Link href="/collect" className="hover:text-blue-700">Buy</Link>
+                        {/* <Link href="/sell" className="hover:text-blue-700">Sell</Link> */}
                         <Link href="/price-database" className="hover:text-blue-700">Price Database</Link>
                         <Link href="/editorial" className="hover:text-blue-700">Editorial</Link>
                     </div>
