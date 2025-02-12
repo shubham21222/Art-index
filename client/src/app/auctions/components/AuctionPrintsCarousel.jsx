@@ -165,7 +165,7 @@ export default function AuctionPrintsCarousel() {
                                         Current Bid: {node.saleArtwork.highestBid.display}
                                     </p>
                                     <p className="text-gray-500 text-xs">
-                                        {node.collectorSignals.auction.bidCount} bids
+                                        {node.collectorSignals?.auction?.bidCount ?? 0} bids
                                     </p>
                                 </div>
                                 <div className="absolute left-0 bottom-[50px] mt-2 opacity-0 group-hover:opacity-100 group-hover:flex transition-opacity duration-300 space-x-2 bg-white p-1">
