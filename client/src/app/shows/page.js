@@ -12,49 +12,49 @@ const shows = [
     title: "Retro Africa",
     subtitle: "Retro Africa at Black-Owned Galleries Now",
     date: "Feb 1 - Feb 28",
-    img: "/retro-africa.jpg",
+    img: "https://d7hftxdivxxvm.cloudfront.net?height=683&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FORQxDPUzg1krVLmlqqq3Mw%2Fmain.jpg&width=910",
   },
   {
     title: "SEPTIEME Gallery",
     subtitle: "SEPTIEME Gallery at Black-Owned Galleries Now",
     date: "Feb 1 - Feb 28",
-    img: "/septieme-gallery.jpg",
+    img: "https://d7hftxdivxxvm.cloudfront.net?height=683&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FlqILmb5Bo3P_PaDKcDEanw%2Fnormalized.jpg&width=910",
   },
   {
     title: "Sakhile&Me",
     subtitle: "Sakhile&Me at Black-Owned Galleries Now",
     date: "Feb 1 - Feb 28",
-    img: "/sakhile-me.jpg",
+    img: "https://d7hftxdivxxvm.cloudfront.net?height=450&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FSMZ_0MXBzztY2_vTzme98w%2Fmain.jpg&width=600",
   },
   {
     title: "Superposition",
     subtitle: "Superposition at Black-Owned Galleries Now",
     date: "Feb 1 - Feb 28",
-    img: "/superposition.jpg",
+    img: "https://d7hftxdivxxvm.cloudfront.net?height=450&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FgUtMHdNR6oX3MVF11zX0iw%2Fnormalized.jpg&width=600",
   },
   {
     title: "Ojiri Gallery",
     subtitle: "Ojiri Gallery at Black-Owned Galleries Now",
     date: "Feb 1 - Feb 28",
-    img: "/ojiri-gallery.jpg",
+    img: "https://d7hftxdivxxvm.cloudfront.net?height=450&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FEiUW5z9_i3SCfpJLKXvuPA%2Fmain.jpg&width=600",
   },
   {
     title: "MASSIMODECARLO",
     subtitle: "Jessie Homer French. In Memoriam",
     date: "Feb 6 - Mar 10",
-    img: "/massimodecarlo.jpg",
+    img: "https://d7hftxdivxxvm.cloudfront.net?height=450&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FB_xBlJCIS5DZriNyyxIV2Q%2Fnormalized.jpg&width=600",
   },
   {
     title: "LXXI",
     subtitle: "Retro-active",
     date: "Jan 28 - Feb 28",
-    img: "/lxxi.jpg",
+    img: "https://d7hftxdivxxvm.cloudfront.net?height=450&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FRXy4p7fDb-Wx8LhyokUwhw%2Fnormalized.jpg&width=600",
   },
   {
     title: "Jonathan Carver Moore",
     subtitle: "Jonathan Carver Moore at Black-Owned Galleries Now",
     date: "Feb 1 - Feb 28",
-    img: "/jonathan-carver-moore.jpg",
+    img: "https://d7hftxdivxxvm.cloudfront.net?height=450&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FPyQXWPz6Z4c1khWE89w6Kg%2Fnormalized.jpg&width=600",
   },
 ];
 
@@ -62,7 +62,7 @@ export default function Home() {
   return (
     <>
     <Header />
-    <div className=" mx-auto mt-[50px] px-4 py-8">
+    <div className=" mx-auto mt-[20px] px-4 py-8">
     <div className="flex space-x-4 pb-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
         {cities.map((city, index) => (
           <button key={index} className="px-4 py-2 text-sm bg-gray-200 rounded-full hover:bg-gray-300">
@@ -74,7 +74,7 @@ export default function Home() {
       <div className="grid grid-cols-1  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
         {shows.map((show, index) => (
           <div key={index} className="group overflow-hidden rounded-lg shadow-lg">
-            <div className="relative w-full h-64">
+            <div className="relative w-full h-[350px]">
               <Image
                 src={show.img}
                 alt={show.title}
