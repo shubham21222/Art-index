@@ -29,9 +29,8 @@ export default function Header() {
 
     return (
         <header
-            className={`w-full border-b transition-all duration-300 ${
-                isScrolled ? "bg-white/80 backdrop-blur-lg shadow-md" : "bg-white"
-            } sticky top-0 z-50`}
+            className={`w-full border-b transition-all duration-300 ${isScrolled ? "bg-white/80 backdrop-blur-lg shadow-md" : "bg-white"
+                } sticky top-0 z-50`}
         >
             <nav className="mx-auto flex flex-col items-center justify-between h-auto">
                 {/* Row 1: Logo and Search Bar */}
@@ -43,8 +42,8 @@ export default function Header() {
                             <Image
                                 src={logo} // Pass the imported logo
                                 alt="ArtIndex Logo" // Add an appropriate alt text
-                                width={100} // Set the width (adjust as needed)
-                                height={100} // Set the height (adjust as needed)
+                                width={80} // Adjust width proportionally
+                                height={20} // Set height to match the search bar
                                 className="rounded" // Optional: Add styling if needed
                             />
                         </Link>
@@ -58,10 +57,12 @@ export default function Header() {
                                 placeholder="Search by artist, gallery, style, theme, tag, etc."
                                 className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
                             />
-                            <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500" size={16} />
+                            <Search
+                                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
+                                size={16}
+                            />
                         </div>
                     </div>
-
                     {/* Navigation Links */}
                     <div className="hidden lg:flex items-center gap-8">
                         <Link href="/collect" className="hover:text-blue-700">Buy</Link>
@@ -85,7 +86,7 @@ export default function Header() {
                 </div>
 
                 {/* Row 2: Secondary Links (Desktop View) */}
-                <div className="hidden px-6 lg:flex w-full flex-wrap items-center justify-between py-1 text-md font-medium">
+                <div className="hidden px-6 lg:flex w-full flex-wrap items-center justify-between pl-0 md:pl-8 py-1 text-md font-medium">
                     <div className="flex items-center space-x-6">
                         <Link href="/collection/new-this-week" className="hover:text-blue-700">What's New</Link>
                         <Link href="/artists" className="hover:text-blue-700">Artists</Link>
