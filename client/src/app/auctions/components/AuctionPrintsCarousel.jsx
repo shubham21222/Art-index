@@ -25,7 +25,7 @@ const AUCTION_ARTWORKS_QUERY = gql`
               lotID
               lotLabel
               highestBid {
-                display
+                display 
               }
               openingBid {
                 display

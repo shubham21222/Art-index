@@ -93,9 +93,9 @@ export default function Header() {
                         <Link href="/auctions" className="hover:text-blue-700">Auctions</Link>
                         <Link href="/viewing-rooms" className="hover:text-blue-700">Viewing Rooms</Link>
                         <Link href="/galleries" className="hover:text-blue-700">Galleries</Link>
-                        <Link href="/fairs-events" className="hover:text-blue-700">Fairs & Events</Link>
+                        <Link href="/art-fairs" className="hover:text-blue-700">Fairs & Events</Link>
                         <Link href="/shows" className="hover:text-blue-700">Shows</Link>
-                        <Link href="/museums" className="hover:text-blue-700">Museums</Link>
+                        <Link href="/institutions" className="hover:text-blue-700">Museums</Link>
                     </div>
                 </div>
 
