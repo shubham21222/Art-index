@@ -68,7 +68,7 @@ export default function Header() {
                         <Link href="/collect" className="hover:text-blue-700">Buy</Link>
                         {/* <Link href="/sell" className="hover:text-blue-700">Sell</Link> */}
                         <Link href="/price-database" className="hover:text-blue-700">Price Database</Link>
-                        <Link href="/editorial" className="hover:text-blue-700">Editorial</Link>
+                        <Link href="/articles" className="hover:text-blue-700">Editorial</Link>
                     </div>
 
                     {/* Buttons */}
