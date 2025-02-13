@@ -3,7 +3,7 @@ import { Search, User, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image"; // Import the Image component
-import logo from "../../../public/artindex.png"; // Ensure this path is correct
+import logo from "../../../public/artindex2.png"; // Ensure this path is correct
 
 export default function Header() {
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,7 +35,7 @@ export default function Header() {
         >
             <nav className="mx-auto flex flex-col items-center justify-between h-auto">
                 {/* Row 1: Logo and Search Bar */}
-                <div className="w-full flex items-center justify-between py-2 gap-3">
+                <div className="w-full flex items-center justify-between py-1 gap-3">
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center text-xl font-bold">
@@ -43,8 +43,8 @@ export default function Header() {
                             <Image
                                 src={logo} // Pass the imported logo
                                 alt="ArtIndex Logo" // Add an appropriate alt text
-                                width={120} // Set the width (adjust as needed)
-                                height={120} // Set the height (adjust as needed)
+                                width={100} // Set the width (adjust as needed)
+                                height={100} // Set the height (adjust as needed)
                                 className="rounded" // Optional: Add styling if needed
                             />
                         </Link>
@@ -85,7 +85,7 @@ export default function Header() {
                 </div>
 
                 {/* Row 2: Secondary Links (Desktop View) */}
-                <div className="hidden px-6 lg:flex w-full flex-wrap items-center justify-between py-2 text-md font-medium">
+                <div className="hidden px-6 lg:flex w-full flex-wrap items-center justify-between py-1 text-md font-medium">
                     <div className="flex items-center space-x-6">
                         <Link href="/collection/new-this-week" className="hover:text-blue-700">What's New</Link>
                         <Link href="/artists" className="hover:text-blue-700">Artists</Link>
