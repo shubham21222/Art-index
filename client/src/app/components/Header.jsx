@@ -103,11 +103,11 @@ export default function Header() {
                     {/* Row 2: Secondary Links (Desktop View) */}
                     <div className="hidden px-6 lg:flex w-full flex-wrap items-center justify-between pl-0 md:pl-8 py-1 text-md font-medium">
                         <div className="flex items-center space-x-6">
-                            <Link href="/collection/new-this-week" className="hover:text-blue-700">What's New</Link>
+                            {/* <Link href="/collection/new-this-week" className="hover:text-blue-700">What's New</Link> */}
                             <Link href="/artists" className="hover:text-blue-700">Artists</Link>
                             <Link href="/collect" className="hover:text-blue-700">Artworks</Link>
                             <Link href="/auctions" className="hover:text-blue-700">Auctions</Link>
-                            <Link href="/viewing-rooms" className="hover:text-blue-700">Viewing Rooms</Link>
+                            {/* <Link href="/viewing-rooms" className="hover:text-blue-700">Viewing Rooms</Link> */}
                             <Link href="/galleries" className="hover:text-blue-700">Galleries</Link>
                             <Link href="/art-fairs" className="hover:text-blue-700">Fairs & Events</Link>
                             <Link href="/shows" className="hover:text-blue-700">Shows</Link>
@@ -134,11 +134,11 @@ export default function Header() {
                                     <Link href="/editorial" className="hover:text-blue-700">Editorial</Link>
 
                                     {/* Secondary Links */}
-                                    <Link href="/collection/new-this-week" className="hover:text-blue-700">What's New</Link>
+                                    {/* <Link href="/collection/new-this-week" className="hover:text-blue-700">What's New</Link> */}
                                     <Link href="/artists" className="hover:text-blue-700">Artists</Link>
                                     <Link href="/artworks" className="hover:text-blue-700">Artworks</Link>
                                     <Link href="/auctions" className="hover:text-blue-700">Auctions</Link>
-                                    <Link href="/viewing-rooms" className="hover:text-blue-700">Viewing Rooms</Link>
+                                    {/* <Link href="/viewing-rooms" className="hover:text-blue-700">Viewing Rooms</Link> */}
                                     <Link href="/galleries" className="hover:text-blue-700">Galleries</Link>
                                     <Link href="/fairs-events" className="hover:text-blue-700">Fairs & Events</Link>
                                     <Link href="/shows" className="hover:text-blue-700">Shows</Link>
