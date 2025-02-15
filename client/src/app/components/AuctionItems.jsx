@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
 
@@ -13,6 +14,7 @@ const AUCTION_QUERY = `
           node {
             internalID
             href
+            slug
             title
             artistNames
             image {
@@ -121,7 +123,7 @@ export default function AuctionCarousel() {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="text-2xl">At Auction</h2>
-          
+
         </div>
         <a href="#" className="text-black text-sm font-medium hover:underline">
           View All Auctions
@@ -147,53 +149,57 @@ export default function AuctionCarousel() {
         >
           {auctionData.length > 0 ? (
             auctionData.map((item, index) => (
-              <div key={index} className="group flex-shrink-0 flex flex-col justify-end min-w-[220px] p-2 rounded-md">
-                {/* Image */}
-                <div className="rounded-md overflow-hidden">
-                  <Image
-                    src={item.image?.src || "/placeholder.svg"}
-                    alt={`${item.title}`}
-                    width={220}
-                    height={240}
-                    className="object-cover transition-transform duration-300 transform group-hover:scale-105"
-                  />
-                </div>
-                <h3 className="mt-2 text-sm font-semibold">{item.artistNames}</h3>
+              <Link
+                key={item.internalID}
+                href={`/artwork/${item.slug}`} >
+                <div key={index} className="group flex-shrink-0 flex flex-col justify-end min-w-[220px] p-2 rounded-md">
+                  {/* Image */}
+                  <div className="rounded-md overflow-hidden">
+                    <Image
+                      src={item.image?.src || "/placeholder.svg"}
+                      alt={`${item.title}`}
+                      width={220}
+                      height={240}
+                      className="object-cover transition-transform duration-300 transform group-hover:scale-105"
+                    />
+                  </div>
+                  <h3 className="mt-2 text-sm font-semibold">{item.artistNames}</h3>
 
-                {/* Artwork Details */}
-                <div className="relative">
-                  {/* Title and Auction House */}
-                  <p className="text-gray-500 italic text-xs">{item.title}</p>
-                  {item.sale && (
-                    <p className="text-gray-500 text-xs">
-                      Ends at {new Date(item.sale.endAt).toLocaleDateString()}
+                  {/* Artwork Details */}
+                  <div className="relative">
+                    {/* Title and Auction House */}
+                    <p className="text-gray-500 italic text-xs">{item.title}</p>
+                    {item.sale && (
+                      <p className="text-gray-500 text-xs">
+                        Ends at {new Date(item.sale.endAt).toLocaleDateString()}
+                      </p>
+                    )}
+
+                    <div className="absolute w-full left-0 bottom-[1px] mt-2 opacity-0 group-hover:opacity-100 group-hover:flex transition-opacity duration-300 space-x-2 bg-white p-1 ">
+                      <button className="btn2 px-3 py-1 bg-gray-700 text-white text-xs font-medium rounded-md">
+                        Prints
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-black font-medium">
+                      {item.saleArtwork?.highestBid?.display ||
+                        item.saleArtwork?.openingBid?.display ||
+                        "N/A"}
                     </p>
-                  )}
-
-                  <div className="absolute w-full left-0 bottom-[1px] mt-2 opacity-0 group-hover:opacity-100 group-hover:flex transition-opacity duration-300 space-x-2 bg-white p-1 ">
-                    <button className="btn2 px-3 py-1 bg-gray-700 text-white text-xs font-medium rounded-md">
-                      Prints
-                    </button>
+                    {item.collectorSignals?.auction?.registrationEndsAt && (
+                      <p className="text-gray-500 text-xs">
+                        Register by{" "}
+                        {new Date(
+                          item.collectorSignals.auction.registrationEndsAt
+                        ).toLocaleDateString()}
+                      </p>
+                    )}
                   </div>
                 </div>
-
-                {/* Price */}
-                <div className="flex justify-between items-center mt-2">
-                  <p className="text-black font-medium">
-                    {item.saleArtwork?.highestBid?.display ||
-                      item.saleArtwork?.openingBid?.display ||
-                      "N/A"}
-                  </p>
-                  {item.collectorSignals?.auction?.registrationEndsAt && (
-                    <p className="text-gray-500 text-xs">
-                      Register by{" "}
-                      {new Date(
-                        item.collectorSignals.auction.registrationEndsAt
-                      ).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-              </div>
+              </Link>
             ))
           ) : (
             <p>Loading...</p>

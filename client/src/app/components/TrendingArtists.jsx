@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
 
@@ -61,6 +62,7 @@ export default function TrendingArtists() {
                     data?.viewer?.curatedTrendingArtists?.edges
                         ?.map((edge) => ({
                             id: edge.node.internalID,
+                            slug: edge.node.slug, // Add this line to include the slug
                             name: edge.node.name,
                             href: edge.node.href,
                             nationalityAndBirthday: edge.node.formattedNationalityAndBirthday,
@@ -143,34 +145,36 @@ export default function TrendingArtists() {
                 >
                     {artists.length > 0 ? (
                         artists.map((artist, index) => (
-                            <div key={index} className="w-80 space-y-2 flex-shrink-0">
-                                {/* Name and Info */}
+                            <Link
+                                key={index}
+                                href={`/trending-shows/${artist.slug}`}  >
+                                <div key={index} className="w-80 space-y-2 flex-shrink-0">
 
-                                {/* Image */}
-                                <div className="relative w-80 h-80">
-                                    <Image
-                                        src={artist.image}
-                                        alt={artist.name}
-                                        layout="fill"
-                                        objectFit="cover"
-                                        className="rounded-md"
-                                    />
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <div className="space-y-1">
-                                        <h3 className="text-sm font-semibold">{artist.name}</h3>
-                                        <p className="text-xs text-gray-600">{artist.nationalityAndBirthday}</p>
-                                        <p className="text-xs text-gray-600">
-                                            Artworks: {artist.artworkCount}, For Sale: {artist.forSaleArtworkCount}
-                                        </p>
-
+                                    <div className="relative w-80 h-80">
+                                        <Image
+                                            src={artist.image}
+                                            alt={artist.name}
+                                            layout="fill"
+                                            objectFit="cover"
+                                            className="rounded-md"
+                                        />
                                     </div>
-                                    <button className="border  px-4 py-[2px] rounded-full text-sm">
-                                        Follow
-                                    </button>
+
+                                    <div className="flex justify-between">
+                                        <div className="space-y-1">
+                                            <h3 className="text-sm font-semibold">{artist.name}</h3>
+                                            <p className="text-xs text-gray-600">{artist.nationalityAndBirthday}</p>
+                                            <p className="text-xs text-gray-600">
+                                                Artworks: {artist.artworkCount}, For Sale: {artist.forSaleArtworkCount}
+                                            </p>
+
+                                        </div>
+                                        <button className="border  px-4 py-[2px] rounded-full text-sm">
+                                            Follow
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))
                     ) : (
                         <p>Loading...</p>

@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link"; // Import Link from Next.js
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
@@ -132,7 +133,11 @@ export default function FeaturedShows() {
         >
           {featuredShows.length > 0 ? (
             featuredShows.map((show, index) => (
-              <div key={index} className="w-[325px] shrink-0">
+              <Link
+                key={index}
+                href={`/show/${show.slug}`} // Dynamic route based on show's slug
+                className="block w-[325px] shrink-0 cursor-pointer"
+              >
                 {/* Image */}
                 <div className="relative w-[325px] h-80">
                   <Image
@@ -153,7 +158,7 @@ export default function FeaturedShows() {
                 <p className="text-sm text-gray-500">
                   {show.exhibitionPeriod || "N/A"}
                 </p>
-              </div>
+              </Link>
             ))
           ) : (
             <p>Loading...</p>
