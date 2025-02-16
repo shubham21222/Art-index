@@ -1,13 +1,17 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Autoplay, EffectFade } from 'swiper/modules';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react'; // Import Lucide icons
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { Navigation } from 'swiper/modules';
-import 'swiper/css/scrollbar';
+import 'swiper/css/effect-fade';
+import 'swiper/css/autoplay';
 
 const Carousel = () => {
-  const [activeIndex, setActiveIndex] = useState(0); // Track active slide index
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
 
   const slides = [
     {
@@ -30,50 +34,157 @@ const Carousel = () => {
     },
   ];
 
+  // Pause autoplay on hover
+  useEffect(() => {
+    const swiperEl = document.querySelector('.swiper-container');
+    if (swiperEl && swiperEl.swiper) {
+      if (isHovering) {
+        swiperEl.swiper.autoplay.stop();
+      } else {
+        swiperEl.swiper.autoplay.start();
+      }
+    }
+  }, [isHovering]);
+
   return (
-    <div className="relative">
+    <div 
+      className="relative overflow-hidden rounded-xl shadow-2xl"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Swiper Carousel */}
       <Swiper
-        navigation={true}
-        modules={[Navigation]}
-        className="mySwiper"
-        loop={true} // Enable infinite loop
-        // scrollbar={{ hide: false }} // Hide scrollbar
-        onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)} // Update active index
+        effect={'fade'}
+        navigation={{
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        }}
+        modules={[Navigation, Autoplay, EffectFade]}
+        className="swiper-container"
+        loop={true}
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+        }}
+        speed={1000}
+        onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
-            <div className="flex flex-col md:flex-row items-center justify-center h-[400px] md:h-[500px] bg-gray-100">
-              {/* Image on the left */}
-              <div className="w-full md:w-1/2 h-full">
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover"
-                />
+            <div className="relative h-[500px] md:h-[600px] overflow-hidden">
+              {/* Background Image with Gradient Overlay */}
+              <div className="absolute inset-0 w-full h-full">
+                <motion.div
+                  initial={{ scale: 1.1 }}
+                  animate={{ 
+                    scale: activeIndex === index ? 1 : 1.1,
+                    filter: activeIndex === index ? 'blur(0px)' : 'blur(5px)'
+                  }}
+                  transition={{ duration: 1.5, ease: 'easeOut' }}
+                  className="w-full h-full"
+                >
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+                </motion.div>
               </div>
 
-              {/* Content on the right */}
-              <div className="w-full md:w-1/2 md:ml-[100px] ml-0 p-6 md:p-12">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">{slide.title}</h2>
-                <p className="text-gray-700 mb-6">{slide.description}</p>
-                <button className="bg-blue-800 btn text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300">
-                  {slide.buttonText}
-                </button>
+              {/* Content Section */}
+              <div className="relative z-10 flex flex-col justify-center h-full w-full px-8 md:px-16 lg:px-24">
+                <div className="max-w-2xl">
+                  <AnimatePresence mode="wait">
+                    {activeIndex === index && (
+                      <motion.div
+                        key={`content-${index}`}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -30 }}
+                        transition={{ 
+                          duration: 0.8,
+                          staggerChildren: 0.1,
+                        }}
+                      >
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: '40%' }}
+                          transition={{ duration: 0.8 }}
+                          className="h-[3px] bg-blue-500 mb-6"
+                        />
+                        
+                        <motion.h2
+                          className="text-3xl md:text-5xl font-bold mb-4 text-white tracking-tight"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          {slide.title}
+                        </motion.h2>
+                        
+                        <motion.p
+                          className="text-lg md:text-xl text-gray-200 mb-8 max-w-lg"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          {slide.description}
+                        </motion.p>
+                        
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.6 }}
+                        >
+                          <button
+                            className="group relative overflow-hidden rounded-lg bg-blue-600 px-8 py-3 text-white shadow-lg transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-500/30"
+                          >
+                            <span className="relative z-10">{slide.buttonText}</span>
+                            <span className="absolute inset-0 -translate-y-full bg-blue-800 transition-transform duration-300 group-hover:translate-y-0"></span>
+                            <span className="absolute inset-0 translate-y-full bg-blue-400 transition-transform duration-300 group-hover:translate-y-0"></span>
+                          </button>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {/* Lines (indicators) below the carousel */}
-      <div className="flex justify-center mt-4 space-x-2">
+      {/* Custom Navigation Arrows with Lucide Icons */}
+      
+        <button className="swiper-button-prev w-12 h-12 flex items-center justify-center ">
+          <ChevronLeft size={24} className="text-white group-hover:scale-110 transition-transform duration-200" />
+        </button>
+      <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-20">
+        <button className="swiper-button-next w-12 h-12 flex items-center justify-center ">
+          <ChevronRight size={24} className="text-white group-hover:scale-110 transition-transform duration-200" />
+        </button>
+      </div>
+
+      {/* Interactive Indicators */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex space-x-3">
         {slides.map((_, index) => (
-          <div
+          <button
             key={index}
-            className={`h-[1px] w-[300px] rounded-full transition-colors duration-300 ${
-              index === activeIndex ? 'bg-black' : 'bg-gray-300'
-            }`}
-          />
+            onClick={() => {
+              const swiper = document.querySelector('.swiper-container').swiper;
+              swiper.slideTo(index + 1);
+            }}
+            className="group flex flex-col items-center"
+          >
+            <span 
+              className={`block h-1 w-6 rounded-full transition-all duration-300 ${
+                index === activeIndex 
+                  ? 'bg-white w-12' 
+                  : 'bg-white/30 group-hover:bg-white/50'
+              }`}
+            />
+          </button>
         ))}
       </div>
     </div>

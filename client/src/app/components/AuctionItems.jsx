@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
 
@@ -118,28 +119,31 @@ export default function AuctionCarousel() {
   }, []);
 
   return (
-    <div className="px-6 py-8">
+    <div className="max-w-[1500px] mx-auto px-6 py-8 bg-gray-50">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h2 className="text-2xl">At Auction</h2>
-
+          <h2 className="text-3xl font-bold text-gray-900">At Auction</h2>
+          <p className="text-gray-500 text-lg mt-2">
+            Discover top picks from ongoing auctions.
+          </p>
         </div>
-        <a href="#" className="text-black text-sm font-medium hover:underline">
+        <a
+          href="#"
+          className="text-black text-sm font-medium hover:underline transition-colors duration-300"
+        >
           View All Auctions
         </a>
       </div>
 
-      <span className="text-lg p-[1px] border-black ml-8   border-b-2">Curators’ Picks</span>
-      <div className="border"></div>
       {/* Carousel with Buttons */}
       <div className="relative">
         {/* Left Button */}
         <button
           onClick={scrollLeft}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full hidden md:flex"
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hidden md:flex transition-transform duration-300 hover:scale-110"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
 
         {/* Artwork Carousel */}
@@ -151,46 +155,40 @@ export default function AuctionCarousel() {
             auctionData.map((item, index) => (
               <Link
                 key={item.internalID}
-                href={`/artwork/${item.slug}`} >
-                <div key={index} className="group flex-shrink-0 flex flex-col justify-end min-w-[220px] p-2 rounded-md">
-                  {/* Image */}
-                  <div className="rounded-md overflow-hidden">
-                    <Image
-                      src={item.image?.src || "/placeholder.svg"}
-                      alt={`${item.title}`}
-                      width={220}
-                      height={240}
-                      className="object-cover transition-transform duration-300 transform group-hover:scale-105"
-                    />
-                  </div>
-                  <h3 className="mt-2 text-sm font-semibold">{item.artistNames}</h3>
+                href={`/artwork/${item.slug}`}
+                className="group relative flex-shrink-0 flex flex-col justify-end min-w-[220px] p-2 rounded-md overflow-hidden transition-shadow duration-300 hover:shadow-xl"
+              >
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
 
-                  {/* Artwork Details */}
-                  <div className="relative">
-                    {/* Title and Auction House */}
-                    <p className="text-gray-500 italic text-xs">{item.title}</p>
-                    {item.sale && (
-                      <p className="text-gray-500 text-xs">
-                        Ends at {new Date(item.sale.endAt).toLocaleDateString()}
-                      </p>
-                    )}
+                {/* Image */}
+                <div className="rounded-md overflow-hidden relative">
+                  <Image
+                    src={item.image?.src || "/placeholder.svg"}
+                    alt={`${item.title}`}
+                    width={220}
+                    height={240}
+                    className="object-cover transition-transform duration-300 transform group-hover:scale-105"
+                  />
+                </div>
 
-                    <div className="absolute w-full left-0 bottom-[1px] mt-2 opacity-0 group-hover:opacity-100 group-hover:flex transition-opacity duration-300 space-x-2 bg-white p-1 ">
-                      <button className="btn2 px-3 py-1 bg-gray-700 text-white text-xs font-medium rounded-md">
-                        Prints
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Price */}
+                {/* Artwork Details */}
+                <div className="relative z-10 mt-4">
+                  <h3 className="text-sm font-semibold text-white">{item.artistNames}</h3>
+                  <p className="text-xs text-gray-300 italic">{item.title}</p>
+                  {item.sale && (
+                    <p className="text-xs text-gray-400">
+                      Ends at {new Date(item.sale.endAt).toLocaleDateString()}
+                    </p>
+                  )}
                   <div className="flex justify-between items-center mt-2">
-                    <p className="text-black font-medium">
+                    <p className="text-white font-medium">
                       {item.saleArtwork?.highestBid?.display ||
                         item.saleArtwork?.openingBid?.display ||
                         "N/A"}
                     </p>
                     {item.collectorSignals?.auction?.registrationEndsAt && (
-                      <p className="text-gray-500 text-xs">
+                      <p className="text-xs text-gray-400">
                         Register by{" "}
                         {new Date(
                           item.collectorSignals.auction.registrationEndsAt
@@ -202,26 +200,29 @@ export default function AuctionCarousel() {
               </Link>
             ))
           ) : (
-            <p>Loading...</p>
+            Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="w-[220px] h-[300px] rounded-md" />
+            ))
           )}
         </div>
 
         {/* Right Button */}
         <button
           onClick={scrollRight}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full hidden md:flex"
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hidden md:flex transition-transform duration-300 hover:scale-110"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-5 h-5 text-gray-700" />
         </button>
       </div>
 
-      {/* Line Indicators */}
-      <div className="flex justify-center mt-4 space-x-2">
+      {/* Animated Scroll Indicators */}
+      <div className="flex justify-center mt-6 space-x-4">
         {[0, 1].map((index) => (
           <div
             key={index}
-            className={`h-[1px] w-[300px] rounded-full transition-colors duration-300 ${index === activeIndex ? "bg-black" : "bg-gray-300"
-              }`}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              index === activeIndex ? "bg-black scale-150" : "bg-gray-300"
+            }`}
           />
         ))}
       </div>

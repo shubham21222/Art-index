@@ -1,90 +1,129 @@
 import { Facebook, Instagram, Twitter, BadgeCent, Music } from "lucide-react";
 import Image from "next/image";
-import logo from "../../../public/artindex.png"; // Ensure this path is correct
-
+import logo from "../../../public/artindex.png";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-200 mt-12">
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 py-10">
-        {/* About Us */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg">About us</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="/about" className="hover:text-gray-900 transition-colors">About</a></li>
-            {/* <li><a href="#" className="hover:text-gray-900 transition-colors">Jobs</a></li>
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Press</a></li> */}
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Contact</a></li>
-          </ul>
-        </div>
+    <footer className="max-w-[1500px] mx-auto border-t border-gray-200 mt-12">
+      {/* Main Footer Content */}
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 py-10">
+          {/* About Us */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">About Us</h3>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>
+                <a href="/about" className="hover:text-gray-900 transition-colors">
+                  About
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-gray-900 transition-colors">
+                  Contact
+                </a>
+              </li>
+            </ul>
+          </div>
 
-        {/* Resources */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Resources</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Open Source</a></li>
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Blog</a></li>
-            <li><a href="#" className="hover:text-gray-900 transition-colors">The Art Genome Project</a></li>
-          </ul>
-        </div>
+          {/* Resources */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">Resources</h3>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>
+                <a href="#" className="hover:text-gray-900 transition-colors">
+                  Blog
+                </a>
+              </li>
+            </ul>
+          </div>
 
-        {/* Partnerships */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Partnerships</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Art Index for Galleries</a></li>
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Art Index for Museums</a></li>
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Art Index for Auctions</a></li>
-            <li><a href="#" className="hover:text-gray-900 transition-colors">Art Index for Fairs</a></li>
-          </ul>
-        </div>
+          {/* Partnerships */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">Partnerships</h3>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>
+                <a href="#" className="hover:text-gray-900 transition-colors">
+                  Art Index for Galleries
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-gray-900 transition-colors">
+                  Art Index for Museums
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-gray-900 transition-colors">
+                  Art Index for Auctions
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-gray-900 transition-colors">
+                  Art Index for Fairs
+                </a>
+              </li>
+            </ul>
+          </div>
 
-        {/* Support & Apps */}
-        <div className="space-y-4">
+          {/* Support */}
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">Support</h3>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li><a href="#" className="hover:text-gray-900 transition-colors">Visit our Help Center</a></li>
-              <li><a href="#" className="hover:text-gray-900 transition-colors">Buying on Art Index</a></li>
-            </ul>
-          </div>
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Get the App</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li><a href="#" className="hover:text-gray-900 transition-colors">iOS App</a></li>
-              <li><a href="#" className="hover:text-gray-900 transition-colors">Android App</a></li>
+              <li>
+                <a href="#" className="hover:text-gray-900 transition-colors">
+                  Visit our Help Center
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-gray-900 transition-colors">
+                  Buying on Art Index
+                </a>
+              </li>
             </ul>
           </div>
         </div>
       </div>
 
       {/* Bottom Footer */}
-      <div className="border-t border-gray-200 py-6 px-4 sm:px-6 lg:px-8">
-        <div className=" mx-auto flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-gray-500 text-sm text-center sm:text-left">
-            <Image
-              src={logo} // Pass the imported logo
-              alt="ArtIndex Logo" // Add an appropriate alt text
-              width={120} // Set the width (adjust as needed)
-              height={120} // Set the height (adjust as needed)
-              className="rounded" // Optional: Add styling if needed
-            />            <p>© 2025 Art Index</p>
-            <a href="#" className="hover:underline">Terms and Conditions</a>
-            <a href="#" className="hover:underline">Auction Supplement</a>
-            <a href="#" className="hover:underline">Buyer Guarantee</a>
-            <a href="#" className="hover:underline">Privacy Policy</a>
-            <a href="#" className="hover:underline">Security</a>
-            <a href="#" className="hover:underline">Do not sell my personal information</a>
-            <a href="#" className="hover:underline">Theme</a>
-          </div>
+      <div className="border-t border-gray-200">
+        <div className="px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
+            {/* Logo and Legal Links */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-gray-500 text-sm">
+              <Image
+                src={logo}
+                alt="ArtIndex Logo"
+                width={120}
+                height={120}
+                className="rounded"
+              />
+              <p>© 2025 Art Index</p>
+              <a href="#" className="hover:underline">Terms and Conditions</a>
+              <a href="#" className="hover:underline">Auction Supplement</a>
+              <a href="#" className="hover:underline">Buyer Guarantee</a>
+              <a href="#" className="hover:underline">Privacy Policy</a>
+              <a href="#" className="hover:underline">Security</a>
+              <a href="#" className="hover:underline">Do not sell my personal information</a>
+              <a href="#" className="hover:underline">Theme</a>
+            </div>
 
-          {/* Social Media Icons */}
-          <div className="flex space-x-4 mt-4 sm:mt-0">
-            <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors"><Twitter size={20} /></a>
-            <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors"><Facebook size={20} /></a>
-            <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors"><Instagram size={20} /></a>
-            <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors"><BadgeCent size={20} /></a>
-            <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors"><Music size={20} /></a>
+            {/* Social Media Icons */}
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors">
+                <Twitter size={20} />
+              </a>
+              <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors">
+                <Facebook size={20} />
+              </a>
+              <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors">
+                <Instagram size={20} />
+              </a>
+              <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors">
+                <BadgeCent size={20} />
+              </a>
+              <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors">
+                <Music size={20} />
+              </a>
+            </div>
           </div>
         </div>
       </div>

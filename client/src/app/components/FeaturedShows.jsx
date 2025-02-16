@@ -1,8 +1,9 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link"; // Import Link from Next.js
+import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
 
@@ -70,13 +71,13 @@ export default function FeaturedShows() {
 
   const scrollLeft = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: -220, behavior: "smooth" });
+      carouselRef.current.scrollBy({ left: -345, behavior: "smooth" });
     }
   };
 
   const scrollRight = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: 220, behavior: "smooth" });
+      carouselRef.current.scrollBy({ left: 345, behavior: "smooth" });
     }
   };
 
@@ -107,12 +108,20 @@ export default function FeaturedShows() {
   }, []);
 
   return (
-    <section className="px-6 py-8">
+    <section className="max-w-[1500px] mx-auto px-6 py-8 bg-gray-50">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl ">Featured Shows</h2>
-        <a href="#" className="text-sm font-medium underline">
-          Explore All Shows
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Featured Shows</h2>
+          <p className="text-gray-500 text-lg mt-2">
+            Explore the latest exhibitions from galleries around the world.
+          </p>
+        </div>
+        <a
+          href="#"
+          className="text-black text-sm font-medium hover:underline transition-colors duration-300"
+        >
+          View All Shows
         </a>
       </div>
 
@@ -121,66 +130,70 @@ export default function FeaturedShows() {
         {/* Left Button */}
         <button
           onClick={scrollLeft}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full hidden md:flex"
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hidden md:flex transition-transform duration-300 hover:scale-110"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
 
         {/* Featured Shows Carousel */}
         <div
           ref={carouselRef}
-          className="flex overflow-x-auto space-x-6 scrollbar-hide pt-4"
+          className="flex overflow-x-auto scrollbar-hide space-x-6 pt-4"
         >
           {featuredShows.length > 0 ? (
             featuredShows.map((show, index) => (
               <Link
                 key={index}
-                href={`/show/${show.slug}`} // Dynamic route based on show's slug
-                className="block w-[325px] shrink-0 cursor-pointer"
+                href={`/show/${show.slug}`}
+                className="group relative flex-shrink-0 w-[345px] cursor-pointer rounded-md overflow-hidden transition-shadow duration-300 hover:shadow-xl"
               >
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+
                 {/* Image */}
-                <div className="relative w-[325px] h-80">
+                <div className="relative w-[345px] h-[220px]">
                   <Image
                     src={show.coverImage?.cropped?.src || "/placeholder.svg"}
                     alt={show.name}
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-md"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-300 transform group-hover:scale-105"
                   />
                 </div>
-                {/* Title */}
-                <h3 className="mt-2 text-lg ">{show.name}</h3>
-                {/* Gallery */}
-                <p className="text-sm text-gray-900">
-                  {show.partner?.name || "N/A"}
-                </p>
-                {/* Date */}
-                <p className="text-sm text-gray-500">
-                  {show.exhibitionPeriod || "N/A"}
-                </p>
+
+                {/* Details */}
+                <div className="relative z-10 p-4">
+                  <h3 className="text-lg font-semibold text-white">{show.name}</h3>
+                  <p className="text-sm text-gray-300">{show.partner?.name || "N/A"}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {show.exhibitionPeriod || "N/A"}
+                  </p>
+                </div>
               </Link>
             ))
           ) : (
-            <p>Loading...</p>
+            Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="w-[345px] h-[320px] rounded-md" />
+            ))
           )}
         </div>
 
         {/* Right Button */}
         <button
           onClick={scrollRight}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full hidden md:flex"
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hidden md:flex transition-transform duration-300 hover:scale-110"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-5 h-5 text-gray-700" />
         </button>
       </div>
 
-      {/* Line Indicators */}
-      <div className="flex justify-center mt-4 space-x-2">
+      {/* Animated Scroll Indicators */}
+      <div className="flex justify-center mt-6 space-x-4">
         {[0, 1].map((index) => (
           <div
             key={index}
-            className={`h-[1px] w-[300px] rounded-full transition-colors duration-300 ${
-              index === activeIndex ? "bg-black" : "bg-gray-300"
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              index === activeIndex ? "bg-black scale-150" : "bg-gray-300"
             }`}
           />
         ))}

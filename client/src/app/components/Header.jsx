@@ -1,22 +1,22 @@
 'use client';
-import { Search, User, Menu, X } from "lucide-react";
+import { Search, User, Menu, X, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image"; // Import the Image component
-import logo from "../../../public/artindex2.png"; // Ensure this path is correct
-import SignUpModal from "./SignUpModal"; // Import the modal
+import Image from "next/image";
+import logo from "../../../public/artindex2.png";
+import SignUpModal from "./SignUpModal";
 import LoginModal from "./LoginModal";
 
 export default function Header() {
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false); // State for Sign Up Modal
-    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // State for Login Modal
+    const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState(null);
 
-    // Detect scroll event to toggle glassmorphism effect
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 0) {
+            if (window.scrollY > 50) {
                 setIsScrolled(true);
             } else {
                 setIsScrolled(false);
@@ -31,138 +31,226 @@ export default function Header() {
         setMobileMenuOpen(!isMobileMenuOpen);
     };
 
+    const handleDropdown = (name) => {
+        if (activeDropdown === name) {
+            setActiveDropdown(null);
+        } else {
+            setActiveDropdown(name);
+        }
+    };
+
+    const primaryLinks = [
+        { name: "Buy", href: "/collect" },
+        { name: "Price Database", href: "/price-database" },
+        { name: "Editorial", href: "/articles" },
+    ];
+
+    const secondaryLinks = [
+        { name: "Artists", href: "/artists" },
+        { name: "Artworks", href: "/collect" },
+        { name: "Auctions", href: "/auctions" },
+        { name: "Galleries", href: "/galleries" },
+        { name: "Fairs & Events", href: "/art-fairs" },
+        { name: "Shows", href: "/shows" },
+        { name: "Museums", href: "/institutions" },
+    ];
+
     return (
         <>
             <header
-                className={`w-full border-b transition-all duration-300 ${isScrolled ? "bg-white/80 backdrop-blur-lg shadow-md" : "bg-white"
-                    } sticky top-0 z-50`}
+                className={`fixed w-full  transition-all duration-500 z-50 
+                ${isScrolled 
+                    ? 'bg-black/60 backdrop-blur-md shadow-xl' 
+                    : 'bg-white border-b'}`}
             >
-                <nav className="mx-auto flex flex-col items-center justify-between h-auto">
-                    {/* Row 1: Logo and Search Bar */}
-                    <div className="w-full flex items-center justify-between py-1 gap-3">
-                        {/* Logo */}
-                        <div className="flex items-center">
-                            <Link href="/" className="flex items-center text-xl font-bold">
-                                {/* Use the Image component for the logo */}
-                                <Image
-                                    src={logo} // Pass the imported logo
-                                    alt="ArtIndex Logo" // Add an appropriate alt text
-                                    width={80} // Adjust width proportionally
-                                    height={20} // Set height to match the search bar
-                                    className="rounded" // Optional: Add styling if needed
-                                />
-                            </Link>
-                        </div>
-
-                        {/* Search Bar */}
-                        <div className="flex-1 hidden lg:block">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Search by artist, gallery, style, theme, tag, etc."
-                                    className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                                />
-                                <Search
-                                    className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
-                                    size={16}
-                                />
-                            </div>
-                        </div>
-                        {/* Navigation Links */}
-                        <div className="hidden lg:flex items-center gap-8">
-                            <Link href="/collect" className="hover:text-blue-700">Buy</Link>
-                            {/* <Link href="/sell" className="hover:text-blue-700">Sell</Link> */}
-                            <Link href="/price-database" className="hover:text-blue-700">Price Database</Link>
-                            <Link href="/articles" className="hover:text-blue-700">Editorial</Link>
-                        </div>
-
-                        {/* Buttons */}
-                        <div className="hidden lg:flex items-center gap-4">
-                            <button
-                                className="btn2 hover:text-white hover:bg-blue-800 border border-black rounded-full px-4 py-1 text-sm font-medium"
-                                onClick={() => setIsLoginModalOpen(true)} // Open Login Modal
-                            >
-                                Log In
-                            </button>
-                            <button
-                                className="bg-black text-white rounded-full hover:bg-blue-800 px-4 py-1 text-sm font-medium"
-                                onClick={() => setIsSignUpModalOpen(true)} // Open Sign Up Modal
-                            >
-                                Sign Up
-                            </button>
-                        </div>
-
-                        {/* Hamburger Menu Button */}
-                        <div className="lg:hidden flex items-center">
-                            <button onClick={toggleMobileMenu} className="p-2">
-                                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Row 2: Secondary Links (Desktop View) */}
-                    <div className="hidden px-6 lg:flex w-full flex-wrap items-center justify-between pl-0 md:pl-8 py-1 text-md font-medium">
-                        <div className="flex items-center space-x-6">
-                            {/* <Link href="/collection/new-this-week" className="hover:text-blue-700">What's New</Link> */}
-                            <Link href="/artists" className="hover:text-blue-700">Artists</Link>
-                            <Link href="/collect" className="hover:text-blue-700">Artworks</Link>
-                            <Link href="/auctions" className="hover:text-blue-700">Auctions</Link>
-                            {/* <Link href="/viewing-rooms" className="hover:text-blue-700">Viewing Rooms</Link> */}
-                            <Link href="/galleries" className="hover:text-blue-700">Galleries</Link>
-                            <Link href="/art-fairs" className="hover:text-blue-700">Fairs & Events</Link>
-                            <Link href="/shows" className="hover:text-blue-700">Shows</Link>
-                            <Link href="/institutions" className="hover:text-blue-700">Museums</Link>
-                        </div>
-                    </div>
-
-                    {/* Mobile Menu */}
-                    {isMobileMenuOpen && (
-                        <div className="w-full bg-white border-t lg:hidden">
-                            <div className="px-4 py-2">
-                                <div className="mb-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Search..."
-                                        className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+                    <nav className="flex flex-col">
+                        {/* Primary navigation */}
+                        <div className="flex items-center justify-between h-16">
+                            {/* Logo */}
+                            <div className="flex-shrink-0">
+                                <Link href="/" className="flex items-center">
+                                    <Image
+                                        src={logo}
+                                        alt="ArtIndex Logo"
+                                        width={80}
+                                        height={20}
+                                        className={`transition-all duration-300 ${isScrolled ? 'brightness-0 invert' : ''}`}
                                     />
-                                </div>
-                                <div className="flex flex-col gap-4">
-                                    {/* Primary Links */}
-                                    <Link href="/buy" className="hover:text-blue-700">Buy</Link>
-                                    <Link href="/sell" className="hover:text-blue-700">Sell</Link>
-                                    <Link href="/price-database" className="hover:text-blue-700">Price Database</Link>
-                                    <Link href="/editorial" className="hover:text-blue-700">Editorial</Link>
+                                </Link>
+                            </div>
 
-                                    {/* Secondary Links */}
-                                    {/* <Link href="/collection/new-this-week" className="hover:text-blue-700">What's New</Link> */}
-                                    <Link href="/artists" className="hover:text-blue-700">Artists</Link>
-                                    <Link href="/artworks" className="hover:text-blue-700">Artworks</Link>
-                                    <Link href="/auctions" className="hover:text-blue-700">Auctions</Link>
-                                    {/* <Link href="/viewing-rooms" className="hover:text-blue-700">Viewing Rooms</Link> */}
-                                    <Link href="/galleries" className="hover:text-blue-700">Galleries</Link>
-                                    <Link href="/fairs-events" className="hover:text-blue-700">Fairs & Events</Link>
-                                    <Link href="/shows" className="hover:text-blue-700">Shows</Link>
-                                    <Link href="/museums" className="hover:text-blue-700">Museums</Link>
+                            {/* Desktop navigation */}
+                            <div className="hidden lg:flex lg:items-center lg:justify-between lg:flex-1">
+                                {/* Primary links */}
+                                <div className="ml-10 flex items-baseline space-x-8">
+                                    {primaryLinks.map((link) => (
+                                        <Link 
+                                            key={link.name}
+                                            href={link.href}
+                                            className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-300
+                                            ${isScrolled
+                                                ? 'text-white hover:bg-white/10'
+                                                : 'text-gray-900 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    ))}
                                 </div>
-                                <div className="mt-4 flex flex-col gap-2">
+
+                                {/* Search bar */}
+                                <div className="flex-1 mx-8 relative">
+                                    <div className={`relative rounded-full overflow-hidden transition-all duration-300 ${isScrolled ? 'bg-white/20' : 'bg-gray-100'}`}>
+                                        <input
+                                            type="text"
+                                            placeholder="Search by artist, gallery, style, theme..."
+                                            className={`w-full border-none rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2
+                                            ${isScrolled 
+                                                ? 'bg-transparent placeholder-white/70 text-white focus:ring-white/50' 
+                                                : 'bg-transparent placeholder-gray-500 text-gray-900 focus:ring-black/30'
+                                            }`}
+                                        />
+                                        <Search
+                                            className={`absolute top-1/2 right-3 transform -translate-y-1/2 
+                                            ${isScrolled ? 'text-white/70' : 'text-gray-500'}`}
+                                            size={16}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Auth buttons */}
+                                <div className="flex items-center space-x-3">
                                     <button
-                                        className="border border-black rounded-full px-4 py-1 text-sm font-medium w-full"
-                                        onClick={() => setIsLoginModalOpen(true)} // Open Login Modal
+                                        onClick={() => setIsLoginModalOpen(true)}
+                                        className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-300
+                                        ${isScrolled
+                                            ? 'border border-white text-white hover:bg-white/10'
+                                            : 'border border-black text-black hover:bg-gray-100'
+                                        }`}
                                     >
                                         Log In
                                     </button>
                                     <button
-                                        className="bg-black text-white rounded-full px-4 py-1 text-sm font-medium w-full"
-                                        onClick={() => setIsSignUpModalOpen(true)} // Open Sign Up Modal
+                                        onClick={() => setIsSignUpModalOpen(true)}
+                                        className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-300
+                                        ${isScrolled
+                                            ? 'bg-white text-black hover:bg-white/90'
+                                            : 'bg-black text-white hover:bg-gray-800'
+                                        }`}
+                                    >
+                                        Sign Up
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Mobile menu button */}
+                            <div className="lg:hidden">
+                                <button 
+                                    onClick={toggleMobileMenu}
+                                    className={`p-2 rounded-md transition-colors duration-300
+                                    ${isScrolled
+                                        ? 'text-white hover:bg-white/10'
+                                        : 'text-gray-900 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    {isMobileMenuOpen ? (
+                                        <X className="block h-6 w-6" aria-hidden="true" />
+                                    ) : (
+                                        <Menu className="block h-6 w-6" aria-hidden="true" />
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Secondary navigation - desktop */}
+                        <div className={`hidden lg:block border-t transition-all duration-300 ${isScrolled ? 'border-white/10' : 'border-gray-200'}`}>
+                            <div className="flex justify-center py-2">
+                                <div className="flex space-x-6">
+                                    {secondaryLinks.map((link) => (
+                                        <Link
+                                            key={link.name}
+                                            href={link.href}
+                                            className={`text-sm font-medium transition-colors duration-300
+                                            ${isScrolled
+                                                ? 'text-white/90 hover:text-white'
+                                                : 'text-gray-700 hover:text-black'
+                                            }`}
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Mobile menu, show/hide based on menu state */}
+                        <div className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <div className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 transition-colors duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-md' : 'bg-white'}`}>
+                                {/* Mobile search */}
+                                <div className="relative rounded-md mb-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        className={`w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2
+                                        ${isScrolled
+                                            ? 'bg-white/10 border-white/20 placeholder-white/70 text-white focus:ring-white/50'
+                                            : 'bg-gray-100 border-gray-200 placeholder-gray-500 text-gray-900 focus:ring-black/30'
+                                        }`}
+                                    />
+                                    <Search
+                                        className={`absolute top-1/2 right-3 transform -translate-y-1/2 ${isScrolled ? 'text-white/70' : 'text-gray-500'}`}
+                                        size={16}
+                                    />
+                                </div>
+                                
+                                {/* Primary links + Secondary links */}
+                                {[...primaryLinks, ...secondaryLinks].map((link) => (
+                                    <Link
+                                        key={link.name}
+                                        href={link.href}
+                                        className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300
+                                        ${isScrolled
+                                            ? 'text-white hover:bg-white/10'
+                                            : 'text-gray-900 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        {link.name}
+                                    </Link>
+                                ))}
+                                
+                                {/* Mobile auth buttons */}
+                                <div className="pt-4 pb-3 space-y-2">
+                                    <button
+                                        onClick={() => setIsLoginModalOpen(true)}
+                                        className={`w-full rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300
+                                        ${isScrolled
+                                            ? 'border border-white text-white hover:bg-white/10'
+                                            : 'border border-black text-black hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        Log In
+                                    </button>
+                                    <button
+                                        onClick={() => setIsSignUpModalOpen(true)}
+                                        className={`w-full rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300
+                                        ${isScrolled
+                                            ? 'bg-white text-black hover:bg-white/90'
+                                            : 'bg-black text-white hover:bg-gray-800'
+                                        }`}
                                     >
                                         Sign Up
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    )}
-                </nav>
+                    </nav>
+                </div>
             </header>
+
+            {/* Push content down to account for fixed header */}
+            <div className="h-32 md:h-24"></div>
+
             {/* Modals */}
             <SignUpModal isOpen={isSignUpModalOpen} onClose={() => setIsSignUpModalOpen(false)} />
             <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />

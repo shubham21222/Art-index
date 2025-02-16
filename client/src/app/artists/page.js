@@ -21,7 +21,7 @@ const artists = [
     name: 'Alex Jackson',
     birthYear: 'b. 1993',
     image: 'https://d7hftxdivxxvm.cloudfront.net?height=450&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FP2PBzTmhDlq2AD7D6G9S5g%2Fwide.jpg&width=600',
-  },
+  },  
 ];
 
 export default function FeaturedArtists() {

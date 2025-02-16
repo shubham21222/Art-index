@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const articles = [
     {
@@ -53,54 +54,64 @@ const articles = [
     },
 ];
 
+
+
 export default function ArtsySection() {
     const largeArticle = articles.find((article) => article.large);
     const remainingArticles = articles.filter((article) => !article.large);
 
     return (
-        <div className="mx-auto px-6 py-8">
-            <h1 className="text-4xl  mb-6">Artsy Editorial</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="max-w-[1500px] mx-auto px-6 py-8">
+            <h1 className="text-4xl font-bold text-center mb-10">Art Index Editorial</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Left Column (50%) - Large Article */}
-                <div className="w-full">
-                    {largeArticle && (
-                        <div className="relative">
+                <div className="relative group overflow-hidden rounded-lg shadow-md transition-all duration-300 hover:shadow-lg">
+                    {largeArticle ? (
+                        <>
                             <Image
                                 src={largeArticle.image}
                                 alt={largeArticle.title}
                                 width={1200}
                                 height={800}
-                                className="w-full h-auto rounded-md"
+                                className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                             />
-                            <div className=" bottom-4 left-4 bg-white p-6">
-                                <p className="text-xs uppercase text-gray-500">{largeArticle.category}</p>
-                                <h2 className="text-2xl font-semibold">{largeArticle.title}</h2>
-                                <p className="text-gray-500 text-sm mt-1">By {largeArticle.author}</p>
-                                <p className="text-gray-500 text-xs">{largeArticle.date}</p>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                                <p className="text-xs uppercase text-white">{largeArticle.category}</p>
+                                <h2 className="text-2xl font-bold text-white">{largeArticle.title}</h2>
+                                <p className="text-sm text-gray-300 mt-1">By {largeArticle.author}</p>
+                                <p className="text-xs text-gray-400">{largeArticle.date}</p>
                             </div>
-                        </div>
+                        </>
+                    ) : (
+                        <Skeleton className="w-full h-[400px] rounded-lg" />
                     )}
                 </div>
 
                 {/* Right Column (50%) - Remaining Articles */}
-                <div className="w-full grid grid-cols-2 gap-4">
-                    {remainingArticles.map((article, index) => (
-                        <div key={index} className="relative">
-                            <Image
-                                src={article.image}
-                                alt={article.title}
-                                width={600}
-                                height={400}
-                                className="w-full h-auto rounded-md"
-                            />
-                            <div className="inset-0  text-black p-4 flex flex-col justify-end">
-                                <p className="text-xs uppercase text-gray-700">{article.category}</p>
-                                <h3 className="text-black text-lg font-semibold leading-tight">{article.title}</h3>
-                                <p className="text-gray-700 text-sm">By {article.author}</p>
-                                <p className="text-gray-700 text-xs">{article.date}</p>
+                <div className="grid grid-cols-2 gap-6">
+                    {remainingArticles.length > 0 ? (
+                        remainingArticles.map((article, index) => (
+                            <div key={index} className="relative group overflow-hidden rounded-lg shadow-md transition-all duration-300 hover:shadow-lg">
+                                <Image
+                                    src={article.image}
+                                    alt={article.title}
+                                    width={600}
+                                    height={400}
+                                    className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                                    <p className="text-xs uppercase text-gray-300">{article.category}</p>
+                                    <h3 className="text-lg font-bold text-white leading-tight">{article.title}</h3>
+                                    <p className="text-sm text-gray-400">By {article.author}</p>
+                                    <p className="text-xs text-gray-500">{article.date}</p>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        Array.from({ length: 6 }).map((_, index) => (
+                            <Skeleton key={index} className="w-full h-[200px] rounded-lg" />
+                        ))
+                    )}
                 </div>
             </div>
         </div>
