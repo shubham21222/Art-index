@@ -204,7 +204,7 @@ const categories = [
 
 export default function ArtGallery() {
     return (
-        <div className="mx-auto px-4 py-8">
+        <div className="max-w-[1500px] mx-auto px-4 py-8">
             {categories.map((category, index) => (
                 <div key={index} className="mb-16">
                     {/* Category Title */}

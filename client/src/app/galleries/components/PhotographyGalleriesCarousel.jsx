@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ApolloClient, gql, InMemoryCache, useQuery } from "@apollo/client";
+import Link from "next/link";
 
 
 
@@ -161,6 +162,9 @@ export default function PhotographyGalleriesCarousel() {
                     className="overflow-x-auto scrollbar-hide pt-8 flex space-x-4 scroll-smooth px-2"
                 >
                     {partners.map((partner) => (
+                        <Link
+                        key={partner.internalID}
+                        href={`/visit-gallery/${partner.slug}`} >
                         <div key={partner.internalID} className="group flex-shrink-0 flex flex-col justify-end min-w-[220px] p-2 rounded-md">
                             {/* Image */}
                             <div className="rounded-md overflow-hidden">
@@ -189,6 +193,7 @@ export default function PhotographyGalleriesCarousel() {
                                 </p>
                             </div>
                         </div>
+                        </Link>
                     ))}
                 </div>
 

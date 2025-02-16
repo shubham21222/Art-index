@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
 
@@ -153,28 +154,31 @@ export default function OldMasters() {
         >
           {partners.length > 0 ? (
             partners.map((partner, index) => (
-              <div key={index} className="w-[325px] shrink-0">
-                {/* Image */}
-                <div className="relative w-[325px] h-80">
-                  <Image
-                    src={partner.profile?.image?.cropped?.src || "/placeholder.svg"}
-                    alt={partner.name}
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-md"
-                  />
+              <Link key={partner.internalID}
+                href={`/visit-gallery/${partner.slug}`} >
+                <div key={index} className="w-[325px] shrink-0">
+                  {/* Image */}
+                  <div className="relative w-[325px] h-80">
+                    <Image
+                      src={partner.profile?.image?.cropped?.src || "/placeholder.svg"}
+                      alt={partner.name}
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-md"
+                    />
+                  </div>
+                  {/* Title */}
+                  <h3 className="mt-2 text-lg">{partner.name}</h3>
+                  {/* Location */}
+                  <p className="text-sm text-gray-900">
+                    {partner.locationsConnection?.edges[0]?.node.city || "N/A"}
+                  </p>
+                  {/* Categories */}
+                  <p className="text-sm text-gray-500">
+                    {partner.categories.map(cat => cat.name).join(", ") || "N/A"}
+                  </p>
                 </div>
-                {/* Title */}
-                <h3 className="mt-2 text-lg">{partner.name}</h3>
-                {/* Location */}
-                <p className="text-sm text-gray-900">
-                  {partner.locationsConnection?.edges[0]?.node.city || "N/A"}
-                </p>
-                {/* Categories */}
-                <p className="text-sm text-gray-500">
-                  {partner.categories.map(cat => cat.name).join(", ") || "N/A"}
-                </p>
-              </div>
+              </Link>
             ))
           ) : (
             <p>Loading...</p>
@@ -195,9 +199,8 @@ export default function OldMasters() {
         {[0, 1].map((index) => (
           <div
             key={index}
-            className={`h-[1px] w-[300px] rounded-full transition-colors duration-300 ${
-              index === activeIndex ? "bg-black" : "bg-gray-300"
-            }`}
+            className={`h-[1px] w-[300px] rounded-full transition-colors duration-300 ${index === activeIndex ? "bg-black" : "bg-gray-300"
+              }`}
           />
         ))}
       </div>

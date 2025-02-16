@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link"; // Import Link for client-side navigation
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ApolloClient, gql, InMemoryCache, useQuery } from "@apollo/client";
 
@@ -143,7 +144,11 @@ export default function GraffitiAndStreetArtCarousel() {
           className="overflow-x-auto scrollbar-hide pt-8 flex space-x-4 scroll-smooth px-2"
         >
           {partners.map((partner) => (
-            <div key={partner.internalID} className="group flex-shrink-0 flex flex-col justify-end min-w-[220px] p-2 rounded-md">
+            <Link
+              key={partner.internalID}
+              href={`/visit-gallery/${partner.slug}`} // Use the slug for dynamic routing
+              className="group flex-shrink-0 flex flex-col justify-end min-w-[220px] p-2 rounded-md cursor-pointer"
+            >
               {/* Image */}
               <div className="rounded-md overflow-hidden">
                 {partner.profile?.image?.cropped?.src ? (
@@ -168,7 +173,7 @@ export default function GraffitiAndStreetArtCarousel() {
                   {partner.locationsConnection.edges.map(({ node }) => node.city).join(", ")}
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 

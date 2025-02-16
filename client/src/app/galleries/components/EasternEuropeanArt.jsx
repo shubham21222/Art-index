@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
 
@@ -150,6 +151,8 @@ export default function EasternEuropeanArt() {
         >
           {partners.length > 0 ? (
             partners.map((partner, index) => (
+              <Link key={partner.internalID}
+                href={`/visit-gallery/${partner.slug}`} >
               <div key={index} className="w-[325px] shrink-0">
                 {/* Image */}
                 <div className="relative w-[325px] h-80">
@@ -172,6 +175,7 @@ export default function EasternEuropeanArt() {
                   {partner.categories.map(cat => cat.name).join(", ") || "N/A"}
                 </p>
               </div>
+              </Link>
             ))
           ) : (
             <p>Loading...</p>
