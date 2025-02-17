@@ -249,7 +249,7 @@ export default function Header() {
             </header>
 
             {/* Push content down to account for fixed header */}
-            <div className="h-32 md:h-12"></div>
+            <div className="lg:h-12 md:h-12 sm:h-12"></div>
 
             {/* Modals */}
             <SignUpModal isOpen={isSignUpModalOpen} onClose={() => setIsSignUpModalOpen(false)} />
