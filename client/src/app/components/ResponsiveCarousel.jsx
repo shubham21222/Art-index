@@ -34,7 +34,6 @@ const Carousel = () => {
     },
   ];
 
-  // Pause autoplay on hover
   useEffect(() => {
     const swiperEl = document.querySelector('.swiper-container');
     if (swiperEl && swiperEl.swiper) {
@@ -94,7 +93,7 @@ const Carousel = () => {
 
               {/* Content Section */}
               <div className="relative z-10 flex flex-col justify-center h-full w-full px-8 md:px-16 lg:px-24">
-                <div className="max-w-2xl">
+                <div className="max-w-2xl mx-auto"> {/* Added mx-auto for centering */}
                   <AnimatePresence mode="wait">
                     {activeIndex === index && (
                       <motion.div
@@ -107,24 +106,26 @@ const Carousel = () => {
                           staggerChildren: 0.1,
                         }}
                       >
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: '40%' }}
-                          transition={{ duration: 0.8 }}
-                          className="h-[3px] bg-blue-500 mb-6"
-                        />
+                       
                         
                         <motion.h2
-                          className="text-3xl md:text-5xl font-bold mb-4 text-white tracking-tight"
+                          className="text-3xl md:text-5xl font-bold mb-4 text-white tracking-tight text-center" // Centered text
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
                         >
                           {slide.title}
                         </motion.h2>
+
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: '40%' }}
+                          transition={{ duration: 0.8 }}
+                          className="h-[3px] bg-blue-500 mb-6 mx-auto" // Centered line
+                        />
                         
                         <motion.p
-                          className="text-lg md:text-xl text-gray-200 mb-8 max-w-lg"
+                          className="text-lg md:text-xl text-gray-200 mb-8 max-w-lg mx-auto text-center" // Centered text
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.4 }}
@@ -136,6 +137,7 @@ const Carousel = () => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.6 }}
+                          className="flex justify-center" // Centered button
                         >
                           <button
                             className="group relative overflow-hidden rounded-lg bg-blue-600 px-8 py-3 text-white shadow-lg transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-500/30"
@@ -156,10 +158,9 @@ const Carousel = () => {
       </Swiper>
 
       {/* Custom Navigation Arrows with Lucide Icons */}
-      
-        <button className="swiper-button-prev w-12 h-12 flex items-center justify-center ">
-          <ChevronLeft size={24} className="text-white group-hover:scale-110 transition-transform duration-200" />
-        </button>
+      <button className="swiper-button-prev w-12 h-12 flex items-center justify-center ">
+        <ChevronLeft size={24} className="text-white group-hover:scale-110 transition-transform duration-200" />
+      </button>
       <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-20">
         <button className="swiper-button-next w-12 h-12 flex items-center justify-center ">
           <ChevronRight size={24} className="text-white group-hover:scale-110 transition-transform duration-200" />
@@ -190,5 +191,6 @@ const Carousel = () => {
     </div>
   );
 };
+
 
 export default Carousel;
