@@ -63,7 +63,7 @@ export default function Header() {
                     ? 'bg-black/60 backdrop-blur-md shadow-xl' 
                     : 'bg-white border-b'}`}
             >
-                <div className="max-w-[1500px] mx-auto md:px-6 sm:px-3 lg:px-8">
+                <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
                     <nav className="flex flex-col">
                         {/* Primary navigation */}
                         <div className="flex items-center justify-between h-16">
@@ -148,7 +148,7 @@ export default function Header() {
                             <div className="lg:hidden">
                                 <button 
                                     onClick={toggleMobileMenu}
-                                    className={` rounded-md transition-colors duration-300
+                                    className={`p-2 rounded-md transition-colors duration-300
                                     ${isScrolled
                                         ? 'text-white hover:bg-white/10'
                                         : 'text-gray-900 hover:bg-gray-100'
@@ -249,7 +249,7 @@ export default function Header() {
             </header>
 
             {/* Push content down to account for fixed header */}
-            <div className="h-32 md:h-24"></div>
+            <div className="h-32 md:h-12"></div>
 
             {/* Modals */}
             <SignUpModal isOpen={isSignUpModalOpen} onClose={() => setIsSignUpModalOpen(false)} />
