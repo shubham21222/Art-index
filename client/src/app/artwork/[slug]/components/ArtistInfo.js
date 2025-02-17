@@ -136,7 +136,7 @@ export default function ArtistInfo({ slug }) {
 
     return (
         <>
-        <div className="space-y-8 px-6">
+        <div className="max-w-[1500px] mx-auto space-y-8 px-6">
             {/* Artist Header */}
             <div className="flex items-center space-x-6 bg-gray-50 p-6 rounded-lg shadow-sm">
                 <img

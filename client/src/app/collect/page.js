@@ -4,8 +4,16 @@ import { useState, useEffect } from 'react';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 import Masonry from 'react-masonry-css';
 import Image from 'next/image';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
+import Link from 'next/link';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -18,6 +26,57 @@ const categories = [
   { name: '20th-Century Art', image: '/images/century.jpg' },
 ];
 
+const ArtworkCard = ({ artwork }) => (
+  <Link href={`/artwork/${artwork.slug}`} className="block mb-4 group">
+    <div className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div className="relative aspect-[3/4]">
+        <Image
+          src={artwork.image}
+          alt={artwork.title}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+          <span className="inline-block px-3 py-1 bg-white/90 rounded-full text-sm font-medium text-gray-900 mb-2">
+            {artwork.primaryLabel}
+          </span>
+        </div>
+      </div>
+      <div className="p-4 space-y-2">
+        <h2 className="font-semibold text-lg text-gray-900 line-clamp-1">
+          {artwork.title}
+        </h2>
+        <p className="text-gray-600 font-medium">{artwork.artist}</p>
+        <p className="text-sm text-gray-500">{artwork.gallery}</p>
+        <div className="flex justify-between items-center pt-2 border-t">
+          <span className="font-bold text-gray-900">{artwork.price}</span>
+          <span className="text-sm text-gray-500">
+            Demand: {artwork.demandRank}
+          </span>
+        </div>
+      </div>
+    </div>
+  </Link>
+);
+
+const LoadingSkeleton = () => (
+  <div className="mb-4">
+    <div className="bg-white rounded-xl overflow-hidden">
+      <Skeleton className="aspect-[3/4] w-full" />
+      <div className="p-4 space-y-3">
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-4 w-2/3" />
+        <div className="pt-2 border-t">
+          <Skeleton className="h-5 w-1/3" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 export default function ArtGallery() {
   const [sort, setSort] = useState('Recommended');
   const [artworks, setArtworks] = useState([]);
@@ -26,13 +85,11 @@ export default function ArtGallery() {
   const [endCursor, setEndCursor] = useState(null);
   const [hasNextPage, setHasNextPage] = useState(false);
 
-  // Initialize Apollo Client for GraphQL queries
   const client = new ApolloClient({
     uri: 'https://metaphysics-cdn.artsy.net/v2',
     cache: new InMemoryCache(),
   });
 
-  // Fetch artworks from the Artsy API
   const fetchArtworks = async (afterCursor = null) => {
     try {
       setLoading(afterCursor ? false : true);
@@ -91,21 +148,21 @@ export default function ArtGallery() {
         variables: {
           input: {
             after: afterCursor,
-            first: 50, // Number of artworks per page
+            first: 50,
           },
         },
       });
 
-      // Extract artwork data from the response
       const fetchedArtworks = data?.viewer?.filtered_artworks?.edges.map(
         (edge) => ({
           id: edge.node.id,
+          slug: edge.node.slug,
           image: edge.node.image?.url || '/images/placeholder.jpg',
           title: edge.node.title,
           artist: edge.node.artist?.name,
           gallery: edge.node.partner?.name,
-          price: edge.node.saleMessage || 'Price not available', // Use saleMessage for price
-          primaryLabel: edge.node.collectorSignals?.primaryLabel || 'No label',
+          price: edge.node.saleMessage || 'Price on request',
+          primaryLabel: edge.node.collectorSignals?.primaryLabel || 'Available',
           demandRank: edge.node.marketPriceInsights?.demandRank || 'N/A',
         })
       );
@@ -127,151 +184,76 @@ export default function ArtGallery() {
     fetchArtworks();
   }, []);
 
-  // Masonry layout options
   const masonryOptions = {
-    default: 4, // Columns for larger screens
-    1100: 3, // Columns for medium screens
-    700: 2, // Columns for small screens
-    500: 1, // Columns for very small screens
+    default: 4,
+    1100: 3,
+    700: 2,
+    500: 1,
   };
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <Header />
       <div className="max-w-[1500px] mx-auto px-6 py-8">
-        {/* Hero Section */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
-            Collect art and design online
-          </h1>
-          <a
-            href="#"
-            className="text-blue-600 hover:text-blue-800 transition-colors duration-300 font-medium"
-          >
-            Browse by collection
-          </a>
+        <div className="flex justify-between items-center mb-12">
+          <div className="space-y-2">
+            <h1 className="text-5xl font-bold text-gray-900 tracking-tight">
+              Collect Art & Design
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Discover and collect contemporary artworks
+            </p>
+          </div>
+          <Button variant="outline" size="lg">
+            Browse Collections
+          </Button>
         </div>
 
-        {/* Categories */}
-        {/* <div className="flex space-x-4 overflow-x-auto py-6 scrollbar-hide">
-          {categories.map((cat, index) => (
-            <div key={index} className="w-40 flex-shrink-0">
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className="w-full h-24 object-cover rounded-lg shadow-md"
-              />
-              <p className="text-center mt-2 text-sm font-medium text-gray-700">
-                {cat.name}
-              </p>
-            </div>
-          ))}
-        </div> */}
-
-        {/* Filters */}
         <div className="flex justify-between mt-8 items-center border-b pb-4">
-          <div className="flex space-x-4">
-            <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-300">
-              All Filters
-            </button>
-            <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-300">
-              Rarity
-            </button>
-            <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-300">
-              Medium
-            </button>
-            <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-300">
-              Price Range
-            </button>
+          <div className="flex gap-2">
+            <Button variant="outline">All Filters</Button>
+            <Button variant="outline">Rarity</Button>
+            <Button variant="outline">Medium</Button>
+            <Button variant="outline">Price Range</Button>
           </div>
-          <div>
-            <label className="mr-2 text-gray-700">Sort:</label>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option>Recommended</option>
-              <option>Newest</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-            </select>
-          </div>
+          <Select value={sort} onValueChange={setSort}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Recommended">Recommended</SelectItem>
+              <SelectItem value="Newest">Newest</SelectItem>
+              <SelectItem value="PriceLowHigh">Price: Low to High</SelectItem>
+              <SelectItem value="PriceHighLow">Price: High to Low</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Artwork Grid */}
         <Masonry
           breakpointCols={masonryOptions}
           className="flex mt-8 -ml-4 w-auto"
           columnClassName="pl-4 bg-transparent"
         >
-          {loading ? (
-            Array.from({ length: 12 }).map((_, index) => (
-              <div key={index} className="mb-4">
-                <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300">
-                  <Skeleton height={350} />
-                  <div className="p-4 space-y-2">
-                    <Skeleton height={20} width="80%" />
-                    <Skeleton height={16} width="60%" />
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : artworks.length > 0 ? (
-            artworks.map((art) => (
-              <div key={art.id} className="mb-4 group">
-                <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-zoom-in">
-                  <div className="relative">
-                    <Image
-                      src={art.image}
-                      alt={art.title}
-                      width={400}
-                      height={600}
-                      className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      style={{ aspectRatio: 'auto' }}
-                    />
-                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <h2 className="text-white font-semibold truncate">
-                        {art.title}
-                      </h2>
-                    </div>
-                  </div>
-                  <div className="p-4 opacity-100 group-hover:opacity-90 transition-opacity duration-300">
-                    <p className="font-medium text-gray-900 truncate">
-                      {art.artist}
-                    </p>
-                    <p className="text-gray-600 text-sm truncate">
-                      {art.gallery}
-                    </p>
-                    <p className="text-gray-900 font-semibold mt-2">
-                      Price: {art.price}
-                    </p>
-                    <p className="text-gray-600 text-sm mt-1">
-                      Primary Label: {art.primaryLabel}
-                    </p>
-                    <p className="text-gray-600 text-sm mt-1">
-                      Demand Rank: {art.demandRank}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No artworks found.</p>
-          )}
+          {loading
+            ? Array.from({ length: 12 }).map((_, index) => (
+                <LoadingSkeleton key={index} />
+              ))
+            : artworks.length > 0
+            ? artworks.map((artwork) => (
+                <ArtworkCard key={artwork.id} artwork={artwork} />
+              ))
+            : null}
         </Masonry>
 
-        {/* Load More Button */}
         {hasNextPage && (
-          <div className="flex justify-center mt-8">
-            <button
+          <div className="flex justify-center mt-12">
+            <Button
+              size="lg"
               onClick={() => fetchArtworks(endCursor)}
               disabled={loadingMore}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 disabled:bg-gray-400"
             >
-              {loadingMore ? 'Loading...' : 'Load More'}
-            </button>
+              {loadingMore ? 'Loading...' : 'Load More Artworks'}
+            </Button>
           </div>
         )}
       </div>

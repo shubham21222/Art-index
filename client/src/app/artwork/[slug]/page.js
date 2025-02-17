@@ -202,7 +202,7 @@ export default function ArtworkPage() {
     return (
         <>
             <Header />
-            <div className="px-6 py-8">
+            <div className="max-w-[1500px] mx-auto px-6 py-8">
                 {/* Header */}
                 <h1 className="text-3xl font-bold mb-4">{artist.name}</h1>
 

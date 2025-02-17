@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Masonry from 'react-masonry-css';
 import Skeleton from 'react-loading-skeleton';
+import Link from 'next/link'; // Import Link from Next.js
 import 'react-loading-skeleton/dist/skeleton.css';
 
 const SHOWS_QUERY = `
@@ -38,6 +39,7 @@ const SHOWS_QUERY = `
                   }
                   artistNames
                   href
+                  slug
                   date
                   saleMessage
                 }
@@ -87,6 +89,7 @@ export default function ShowsGallery() {
       const fetchedShows = data.data.viewer.showsConnection.edges.map(({ node }) => ({
         id: node.id,
         name: node.name,
+       
         href: node.href,
         startDate: node.startAt,
         endDate: node.endAt,
@@ -96,6 +99,7 @@ export default function ShowsGallery() {
           image: artwork.image?.url || '/placeholder.jpg',
           artistNames: artwork.artistNames,
           href: artwork.href,
+          slug: artwork.slug, // Ensure slug is included
           date: artwork.date,
           saleMessage: artwork.saleMessage,
         })),
@@ -135,7 +139,7 @@ export default function ShowsGallery() {
 
   return (
     <>
-      <div className="mx-auto px-4 py-8 border-t-gray-700">
+      <div className="max-w-[1500px] mx-auto px-4 py-8 border-t-gray-700">
         <h1 className="text-4xl mb-4">Current Museum & Gallery Shows</h1>
 
         {loading ? (
@@ -171,24 +175,30 @@ export default function ShowsGallery() {
               >
                 {shows.flatMap((show) =>
                   show.artworks.map((artwork) => (
-                    <div key={artwork.href} className="mb-4">
-                      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                        <Image
-                          src={artwork.image}
-                          alt={artwork.title}
-                          width={400}
-                          height={600}
-                          className="w-full object-cover"
-                          style={{ aspectRatio: 'auto' }}
-                        />
-                        <div className="p-4">
-                          <h4 className="font-semibold text-lg">{artwork.title}</h4>
-                          <p className="text-sm text-gray-600">{artwork.artistNames}</p>
-                          <p className="text-sm text-gray-600">{artwork.date}</p>
-                          <p className="text-sm text-gray-600">{artwork.saleMessage}</p>
+                    <Link
+                      key={artwork.href}
+                      href={`/artwork/${artwork.slug}`} // Use the show's slug for navigation
+                      passHref
+                    >
+                      <div className="mb-4 cursor-pointer">
+                        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                          <Image
+                            src={artwork.image}
+                            alt={artwork.title}
+                            width={400}
+                            height={600}
+                            className="w-full object-cover"
+                            style={{ aspectRatio: 'auto' }}
+                          />
+                          <div className="p-4">
+                            <h4 className="font-semibold text-lg">{artwork.title}</h4>
+                            <p className="text-sm text-gray-600">{artwork.artistNames}</p>
+                            <p className="text-sm text-gray-600">{artwork.date}</p>
+                            <p className="text-sm text-gray-600">{artwork.saleMessage}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))
                 )}
               </Masonry>

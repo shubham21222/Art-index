@@ -15,7 +15,8 @@ const page = () => {
   return (
     <>
     <Header />
-    <Carousel3 />
+    <Carousel3 /> 
+    <div className="max-w-[1500px] mx-auto">
     <UniversityMuseums />
     <NonprofitOrganizations />
     <ArtistEstates />
@@ -24,6 +25,7 @@ const page = () => {
     <HistoricalArt />
     <PrivateCollections />
     <OutdoorArt />
+    </div>
     <Footer />
     </>
 )
