@@ -42,7 +42,7 @@ export default function Header() {
     const primaryLinks = [
         { name: "Buy", href: "/collect" },
         { name: "Price Database", href: "/price-database" },
-        { name: "Editorial", href: "/articles" },
+        // { name: "Editorial", href: "/articles" },
     ];
 
     const secondaryLinks = [
