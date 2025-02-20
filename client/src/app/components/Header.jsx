@@ -54,7 +54,7 @@ export default function Header() {
                 className={`fixed top-4 left-0 right-0 z-[9999] transition-all duration-300 w-full max-w-screen-2xl mx-auto
                     ${isScrolled 
                         ? "bg-white/5 shadow-lg rounded-2xl md:rounded-full border md:border-white/18 md:backdrop-blur-2xl"
-                        : "bg-white "
+                        : "bg-white"
                     }`}
                 style={{
                     padding: isScrolled
@@ -72,8 +72,11 @@ export default function Header() {
                 <div className="container mx-auto px-6">
                     <nav className="flex flex-col">
                         <div className="flex items-center justify-between">
-                            {/* Logo */}
-                            <div className="flex-shrink-0">
+                            {/* Empty div for mobile layout balance */}
+                            <div className="w-10 lg:hidden"></div>
+
+                            {/* Logo - Centered on mobile, left-aligned on desktop */}
+                            <div className="flex-1 lg:flex-initial flex justify-center lg:justify-start">
                                 <Link href="/" className="flex items-center">
                                     <Image
                                         src={logo}
@@ -144,7 +147,7 @@ export default function Header() {
                                 </div>
                             </div>
 
-                            {/* Mobile Menu Button */}
+                            {/* Mobile Menu Button (Right) */}
                             <div className="lg:hidden">
                                 <button
                                     onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
