@@ -3,7 +3,7 @@ import { Search, User, Menu, X, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "../../../public/artindex2.png";
+import logo from "../../../public/logo2.png";
 import SignUpModal from "./SignUpModal";
 import LoginModal from "./LoginModal";
 
@@ -57,12 +57,18 @@ export default function Header() {
     return (
         <>
             <header
-                className={`fixed w-full transition-all duration-500 z-50 
+                className={`fixed  w-full  transition-all duration-500 z-50 
                 ${isScrolled 
-                    ? 'bg-black/60 backdrop-blur-md shadow-xl' 
-                    : 'bg-white border-b'}`}
+                    ? 'bg-black/60 backdrop-blur-xl shadow-xl w-[100%] mx-auto rounded-full' 
+                    : 'bg-white border-b'
+                }`}
             >
-                <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Dynamically adjust max-width */}
+                <div
+                    className={`mx-auto px-4 sm:px-6 lg:px-12 transition-all duration-500 ${
+                        isScrolled ? 'max-w-[1500px]' : 'max-w-[1500px]'
+                    }`}
+                >
                     <nav className="flex flex-col">
                         {/* Primary navigation */}
                         <div className="flex items-center justify-between h-16">
@@ -72,8 +78,8 @@ export default function Header() {
                                     <Image
                                         src={logo}
                                         alt="ArtIndex Logo"
-                                        width={80}
-                                        height={20}
+                                        width={60}
+                                        height={10}
                                         className={`transition-all duration-300 ${isScrolled ? 'brightness-0 invert' : ''}`}
                                     />
                                 </Link>

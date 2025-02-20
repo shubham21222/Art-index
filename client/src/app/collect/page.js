@@ -194,30 +194,40 @@ export default function ArtGallery() {
   return (
     <div className="bg-gray-50 min-h-screen">
       <Header />
-      <div className="max-w-[1500px] mx-auto px-6 py-8">
-        <div className="flex justify-between items-center mb-12">
-          <div className="space-y-2">
-            <h1 className="text-5xl font-bold text-gray-900 tracking-tight">
+      <div className="max-w-[1500px] mx-auto px-4 mt-8 md:mt-0 sm:px-6 py-8">
+        {/* Hero Section */}
+        <div className="flex flex-col md:flex-row justify-between items-center mt-[60px] md:mt-0 mb-8 md:mb-12">
+          <div className="space-y-2 text-center md:text-left mb-6 md:mb-0">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
               Collect Art & Design
             </h1>
-            <p className="text-gray-600 text-lg">
+            <p className="text-gray-600 text-base sm:text-lg">
               Discover and collect contemporary artworks
             </p>
           </div>
-          <Button variant="outline" size="lg">
+          <Button variant="outline" size="lg" className="w-full md:w-auto">
             Browse Collections
           </Button>
         </div>
 
-        <div className="flex justify-between mt-8 items-center border-b pb-4">
-          <div className="flex gap-2">
-            <Button variant="outline">All Filters</Button>
-            <Button variant="outline">Rarity</Button>
-            <Button variant="outline">Medium</Button>
-            <Button variant="outline">Price Range</Button>
+        {/* Filters and Sort Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-b pb-4">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <Button variant="outline" className="w-full sm:w-auto">
+              All Filters
+            </Button>
+            <Button variant="outline" className="w-full sm:w-auto">
+              Rarity
+            </Button>
+            <Button variant="outline" className="w-full sm:w-auto">
+              Medium
+            </Button>
+            <Button variant="outline" className="w-full sm:w-auto">
+              Price Range
+            </Button>
           </div>
           <Select value={sort} onValueChange={setSort}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -229,6 +239,7 @@ export default function ArtGallery() {
           </Select>
         </div>
 
+        {/* Masonry Grid */}
         <Masonry
           breakpointCols={masonryOptions}
           className="flex mt-8 -ml-4 w-auto"
@@ -245,12 +256,14 @@ export default function ArtGallery() {
             : null}
         </Masonry>
 
+        {/* Load More Button */}
         {hasNextPage && (
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center mt-8">
             <Button
               size="lg"
               onClick={() => fetchArtworks(endCursor)}
               disabled={loadingMore}
+              className="w-full sm:w-auto"
             >
               {loadingMore ? 'Loading...' : 'Load More Artworks'}
             </Button>

@@ -1,6 +1,6 @@
 import { Facebook, Instagram, Twitter, BadgeCent, Music } from "lucide-react";
 import Image from "next/image";
-import logo from "../../../public/artindex.png";
+import logo from "../../../public/logo2.png";
 
 export default function Footer() {
   return (
@@ -10,7 +10,6 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 py-10">
           {/* About Us */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">About Us</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <a href="/about" className="hover:text-gray-900 transition-colors">
@@ -26,9 +25,8 @@ export default function Footer() {
           </div>
 
           {/* Resources */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Resources</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+          <div className="md:space-y-4 space-y-0">
+            <ul className="md:space-y-2 text-sm text-gray-600">
               <li>
                 <a href="#" className="hover:text-gray-900 transition-colors">
                   Blog
@@ -39,34 +37,17 @@ export default function Footer() {
 
           {/* Partnerships */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Partnerships</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <a href="/partnerships" className="hover:text-gray-900 transition-colors">
-                Partnerships
+                  Partnerships
                 </a>
               </li>
-              {/* <li>
-                <a href="#" className="hover:text-gray-900 transition-colors">
-                  Art Index for Museums
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-gray-900 transition-colors">
-                  Art Index for Auctions
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-gray-900 transition-colors">
-                  Art Index for Fairs
-                </a>
-              </li> */}
             </ul>
           </div>
 
           {/* Support */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Support</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <a href="#" className="hover:text-gray-900 transition-colors">
@@ -92,18 +73,13 @@ export default function Footer() {
               <Image
                 src={logo}
                 alt="ArtIndex Logo"
-                width={120}
-                height={120}
+                width={70}
+                height={60}
                 className="rounded"
               />
               <p>© 2025 Art Index</p>
               <a href="#" className="hover:underline">Terms and Conditions</a>
-              <a href="#" className="hover:underline">Auction Supplement</a>
-              <a href="#" className="hover:underline">Buyer Guarantee</a>
               <a href="#" className="hover:underline">Privacy Policy</a>
-              <a href="#" className="hover:underline">Security</a>
-              <a href="#" className="hover:underline">Do not sell my personal information</a>
-              <a href="#" className="hover:underline">Theme</a>
             </div>
 
             {/* Social Media Icons */}

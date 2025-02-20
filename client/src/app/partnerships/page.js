@@ -29,13 +29,13 @@ const PartnershipForm = () => {
 
             {/* Animated Heading Section */}
             <motion.div
-                className="flex justify-center items-center min-h-[30vh] bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                className="flex justify-center items-center min-h-[30vh] bg-gradient-to-r from-blue-600 to-purple-600 text-white md:pt-4 pt-8"
                 variants={headingVariants} // Apply animation variants
                 initial="hidden" // Start in the hidden state
                 animate="visible" // Animate to the visible state
             >
                 <motion.h1
-                    className="text-4xl md:text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 drop-shadow-lg"
+                    className="text-xl md:text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 drop-shadow-lg"
                     variants={headingVariants}
                 >
                     Join the leading global platform for buying and selling art.

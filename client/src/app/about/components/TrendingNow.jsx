@@ -162,7 +162,7 @@ export default function TrendingNow() {
 
                                 {/* Details */}
                                 <div className="space-y-1">
-                                    <h3 className="text-sm font-semibold">{artwork.title}</h3>
+                                    <h3 className="text-sm font-semibold w-[85%] flex flex-wrap break-words overflow-hidden">{artwork.title}</h3>
                                     <p className="text-xs text-gray-600">{artwork.artistNames}</p>
                                     <p className="text-xs text-gray-600">{artwork.saleMessage}</p>
                                     {artwork.collectingInstitution && (

@@ -108,7 +108,7 @@ export default function ArtGallery() {
     return (
         <>
             <Header />
-            <div className="mx-auto px-4 py-8">
+            <div className="mx-auto px-4 py-8 md:pt-4 pt-8">
                 <div className="flex justify-between items-center">
                     <h1 className="text-4xl font-bold mb-8">New This Week</h1>
                     <p className="text-gray-600 mt-2">

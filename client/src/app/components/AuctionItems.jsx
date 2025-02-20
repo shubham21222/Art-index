@@ -123,7 +123,7 @@ export default function AuctionCarousel() {
       {/* Header Section */}
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">At Auction</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Art Auctions</h2>
           <p className="text-gray-500 text-lg mt-2">
             Discover top picks from ongoing auctions.
           </p>

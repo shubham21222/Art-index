@@ -124,7 +124,7 @@ export default function PartnerPage() {
     return (
         <>
             <Header />
-            <div className="max-w-[1500px] mx-auto px-6 py-8">
+            <div className="max-w-[1500px] mx-auto px-6 md:pt-4 pt-8  py-8">
                 {/* Header Section */}
                 <div className="flex justify-between items-center mb-8">
                     <div>

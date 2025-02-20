@@ -79,9 +79,9 @@ export default function Home() {
   return (
     <>
       <Header />
-      <div className="max-w-[1500px] mx-auto mt-[20px] px-4 py-8">
+      <div className="max-w-[1500px] mx-auto  px-4 py-8 md:pt-4 pt-8">
         {/* City Buttons */}
-        <div className="flex space-x-4 pb-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
+        <div className="flex space-x-4 pb-4 mt-[80px] md:mt-[20px] overflow-x-auto whitespace-nowrap scrollbar-hide">
           {cities.map((city, index) => (
             <button key={index} className="px-4 py-2 text-sm bg-gray-200 rounded-full hover:bg-gray-300">
               {city}

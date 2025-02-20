@@ -27,7 +27,7 @@ export default async function ShowPage({ params }) {
   return (
     <>
     <Header />
-    <div className=" mx-auto px-4 sm:px-6 py-8">
+    <div className=" mx-auto px-4 sm:px-6 py-8 md:pt-4 pt-8">
       <ShowHeader name={show.name} />
       <PartnerInfo partner={show.partner} />
       <ArtworkGrid artworks={artworks} />

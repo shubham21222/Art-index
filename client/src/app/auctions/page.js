@@ -11,10 +11,12 @@ const page = () => {
   return (
     <>
     <Header />
+    <div className='md:pt-2 pt-12'>
     <CuratorsPicks />
     <AuctionPrintsCarousel />
     <AuctionArtworksPage />
     <AuctionArtworksPage2 />
+    </div>
     <Footer />
     </>
   )

@@ -28,8 +28,8 @@ export default function FeaturedArtists() {
   return (
     <>
       <Header />
-      <section className="max-w-[1500px] mx-auto px-6 py-12 mx-auto">
-        <div className="flex justify-between items-center mb-6">
+      <section className="max-w-[1500px] mx-auto md:mt-0  px-6 py-12 ">
+        <div className="flex justify-between items-center mt-8 md:mt-0 mb-6">
           <h2 className="text-3xl font-bold">Featured Artists</h2>
           <div className="hidden md:flex space-x-2 text-gray-600">
             {'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map((letter) => (

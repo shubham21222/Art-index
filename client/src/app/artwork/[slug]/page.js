@@ -202,9 +202,9 @@ export default function ArtworkPage() {
     return (
         <>
             <Header />
-            <div className="max-w-[1500px] mx-auto px-6 py-8">
+            <div className="max-w-[1500px]  mx-auto px-6 py-8">
                 {/* Header */}
-                <h1 className="text-3xl font-bold mb-4">{artist.name}</h1>
+                <h1 className="text-3xl md:mt-6 mt-[80px] font-bold mb-4">{artist.name}</h1>
 
                 {/* Two-Column Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

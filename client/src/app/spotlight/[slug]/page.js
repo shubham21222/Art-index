@@ -188,7 +188,7 @@ const ShowPage = () => {
   return (
     <>
       <Header />
-      <div className="max-w-[1500px] mx-auto p-4">
+      <div className="max-w-[1500px] mx-auto p-4 md:pt-4 pt-8">
         {/* Title and Description */}
         {loading ? (
           <div>

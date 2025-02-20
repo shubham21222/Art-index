@@ -47,11 +47,11 @@ export default function Home() {
         <>
         <Header />
         <div className=" min-h-screen">
-            <header className="bg-gradient-to-b from-gray-600 to-gray-400 text-white py-6 text-center text-2xl font-semibold">
+            <header className="md:pt-6 pt-[90px] bg-gradient-to-b from-gray-600 to-gray-400 text-white py-6 text-center text-2xl font-semibold">
                 The Future of Art Collecting
             </header>
 
-            <section className="text-center py-10 px-4">
+            <section className=" text-center py-10 px-4">
                 <h2 className="text-2xl font-semibold">Art Index is for art collecting.</h2>
                 <p className="text-gray-700 mt-2 max-w-2xl mx-auto">
                     As the leading marketplace for art by the world&apos;s emerging and established artists, we&apos;ve made it easy for new and experienced collectors to discover and buy art — and so much more. Everything you&apos;ll ever need to collect art, you&apos;ll find on Artsy.
