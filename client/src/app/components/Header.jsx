@@ -42,7 +42,6 @@ export default function Header() {
     const primaryLinks = [
         { name: "Buy", href: "/collect" },
         { name: "Price Database", href: "/price-database" },
-        // { name: "Editorial", href: "/articles" },
     ];
 
     const secondaryLinks = [
@@ -58,7 +57,7 @@ export default function Header() {
     return (
         <>
             <header
-                className={`fixed w-full  transition-all duration-500 z-50 
+                className={`fixed w-full transition-all duration-500 z-50 
                 ${isScrolled 
                     ? 'bg-black/60 backdrop-blur-md shadow-xl' 
                     : 'bg-white border-b'}`}
@@ -81,9 +80,9 @@ export default function Header() {
                             </div>
 
                             {/* Desktop navigation */}
-                            <div className="hidden lg:flex lg:items-center lg:justify-between lg:flex-1">
+                            <div className="hidden lg:flex lg:items-center lg:space-x-8 lg:flex-1 lg:ml-10">
                                 {/* Primary links */}
-                                <div className="ml-10 flex items-baseline space-x-8">
+                                <div className="flex items-baseline space-x-8">
                                     {primaryLinks.map((link) => (
                                         <Link 
                                             key={link.name}
@@ -92,6 +91,23 @@ export default function Header() {
                                             ${isScrolled
                                                 ? 'text-white hover:bg-white/10'
                                                 : 'text-gray-900 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    ))}
+                                </div>
+
+                                {/* Secondary links */}
+                                <div className="flex items-baseline space-x-6">
+                                    {secondaryLinks.map((link) => (
+                                        <Link
+                                            key={link.name}
+                                            href={link.href}
+                                            className={`text-sm font-medium transition-colors duration-300
+                                            ${isScrolled
+                                                ? 'text-white/90 hover:text-white'
+                                                : 'text-gray-700 hover:text-black'
                                             }`}
                                         >
                                             {link.name}
@@ -163,27 +179,6 @@ export default function Header() {
                             </div>
                         </div>
 
-                        {/* Secondary navigation - desktop */}
-                        <div className={`hidden lg:block border-t transition-all duration-300 ${isScrolled ? 'border-white/10' : 'border-gray-200'}`}>
-                            <div className="flex justify-center py-2">
-                                <div className="flex space-x-6">
-                                    {secondaryLinks.map((link) => (
-                                        <Link
-                                            key={link.name}
-                                            href={link.href}
-                                            className={`text-sm font-medium transition-colors duration-300
-                                            ${isScrolled
-                                                ? 'text-white/90 hover:text-white'
-                                                : 'text-gray-700 hover:text-black'
-                                            }`}
-                                        >
-                                            {link.name}
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Mobile menu, show/hide based on menu state */}
                         <div className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
                             <div className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 transition-colors duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-md' : 'bg-white'}`}>
@@ -249,7 +244,7 @@ export default function Header() {
             </header>
 
             {/* Push content down to account for fixed header */}
-            <div className="lg:h-24 md:h-18 sm:h-12"></div>
+            <div className="lg:h-23 md:h-18 sm:h-12"></div>
 
             {/* Modals */}
             <SignUpModal isOpen={isSignUpModalOpen} onClose={() => setIsSignUpModalOpen(false)} />

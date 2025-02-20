@@ -24,7 +24,7 @@ query WorksFilterQuery(
       }
       edges {
         node {
-          id
+          id    
           title
           image(includeAll: false) {
             resized(width: 445, version: ["larger", "large"]) {

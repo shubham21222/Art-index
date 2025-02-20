@@ -23,6 +23,7 @@ const page = () => {
    <>
    <Header/>
    <Carousel2 />
+   <div className='max-w-[1500px] mx-auto'>
    <GraffitiAndStreetArtCarousel />
    <PhotographyGalleriesCarousel />
    <ContemporaryDesign />
@@ -38,6 +39,7 @@ const page = () => {
     <OldMasters />
    <Ceramics />
    <NewMediaAndVideo />
+   </div>
    <Footer />
    </>
   )

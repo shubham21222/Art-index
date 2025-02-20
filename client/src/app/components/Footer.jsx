@@ -42,11 +42,11 @@ export default function Footer() {
             <h3 className="font-semibold text-lg">Partnerships</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
-                <a href="#" className="hover:text-gray-900 transition-colors">
-                  Art Index for Galleries
+                <a href="/partnerships" className="hover:text-gray-900 transition-colors">
+                Partnerships
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a href="#" className="hover:text-gray-900 transition-colors">
                   Art Index for Museums
                 </a>
@@ -60,7 +60,7 @@ export default function Footer() {
                 <a href="#" className="hover:text-gray-900 transition-colors">
                   Art Index for Fairs
                 </a>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -107,7 +107,7 @@ export default function Footer() {
             </div>
 
             {/* Social Media Icons */}
-            <div className="flex space-x-4">
+            {/* <div className="flex space-x-4">
               <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors">
                 <Twitter size={20} />
               </a>
@@ -123,7 +123,7 @@ export default function Footer() {
               <a href="#" className="text-gray-500 hover:text-gray-700 transition-colors">
                 <Music size={20} />
               </a>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
