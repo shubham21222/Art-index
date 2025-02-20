@@ -12,32 +12,26 @@ export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-    const [activeDropdown, setActiveDropdown] = useState(null);
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 50) {
-                setIsScrolled(true);
-            } else {
-                setIsScrolled(false);
-            }
+            setIsScrolled(window.scrollY > 0);
         };
 
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        handleResize();
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("resize", handleResize);
+        };
     }, []);
-
-    const toggleMobileMenu = () => {
-        setMobileMenuOpen(!isMobileMenuOpen);
-    };
-
-    const handleDropdown = (name) => {
-        if (activeDropdown === name) {
-            setActiveDropdown(null);
-        } else {
-            setActiveDropdown(name);
-        }
-    };
 
     const primaryLinks = [
         { name: "Buy", href: "/collect" },
@@ -57,200 +51,163 @@ export default function Header() {
     return (
         <>
             <header
-                className={`fixed  w-full  transition-all duration-500 z-50 
-                ${isScrolled 
-                    ? 'bg-black/60 backdrop-blur-xl shadow-xl w-[100%] mx-auto rounded-full' 
-                    : 'bg-white border-b'
-                }`}
-            >
-                {/* Dynamically adjust max-width */}
-                <div
-                    className={`mx-auto px-4 sm:px-6 lg:px-12 transition-all duration-500 ${
-                        isScrolled ? 'max-w-[1500px]' : 'max-w-[1500px]'
+                className={`fixed top-4 left-0 right-0 z-[9999] transition-all duration-300 w-full max-w-screen-2xl mx-auto
+                    ${isScrolled 
+                        ? "bg-white/5 shadow-lg rounded-2xl md:rounded-full border md:border-white/18 md:backdrop-blur-2xl"
+                        : "bg-white "
                     }`}
-                >
+                style={{
+                    padding: isScrolled
+                        ? isMobile
+                            ? "3px"
+                            : "18px"
+                        : isMobile
+                            ? "5px"
+                            : "20px",
+                    boxShadow: isScrolled ? "0 8px 32px 0 rgba(31, 38, 135, 0.37)" : "none",
+                    backdropFilter: isScrolled ? "blur(20px)" : "none",
+                    WebkitBackdropFilter: isScrolled ? "blur(20px)" : "none",
+                }}
+            >
+                <div className="container mx-auto px-6">
                     <nav className="flex flex-col">
-                        {/* Primary navigation */}
-                        <div className="flex items-center justify-between h-16">
+                        <div className="flex items-center justify-between">
                             {/* Logo */}
                             <div className="flex-shrink-0">
                                 <Link href="/" className="flex items-center">
                                     <Image
                                         src={logo}
-                                        alt="ArtIndex Logo"
+                                        alt="Logo"
                                         width={60}
                                         height={10}
-                                        className={`transition-all duration-300 ${isScrolled ? 'brightness-0 invert' : ''}`}
+                                        className="h-10 w-auto"
                                     />
                                 </Link>
                             </div>
 
-                            {/* Desktop navigation */}
-                            <div className="hidden lg:flex lg:items-center lg:space-x-8 lg:flex-1 lg:ml-10">
-                                {/* Primary links */}
+                            {/* Desktop Navigation */}
+                            <div className="hidden lg:flex lg:items-center lg:space-x-8 flex-1 ml-10">
+                                {/* Primary Links */}
                                 <div className="flex items-baseline space-x-8">
                                     {primaryLinks.map((link) => (
-                                        <Link 
+                                        <Link
                                             key={link.name}
                                             href={link.href}
-                                            className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-300
-                                            ${isScrolled
-                                                ? 'text-white hover:bg-white/10'
-                                                : 'text-gray-900 hover:bg-gray-100'
-                                            }`}
+                                            className={`text-sm font-medium transition-colors duration-300
+                                                ${isScrolled ? 'text-black' : 'text-gray-900'}`}
                                         >
                                             {link.name}
                                         </Link>
                                     ))}
                                 </div>
 
-                                {/* Secondary links */}
+                                {/* Secondary Links */}
                                 <div className="flex items-baseline space-x-6">
                                     {secondaryLinks.map((link) => (
                                         <Link
                                             key={link.name}
                                             href={link.href}
                                             className={`text-sm font-medium transition-colors duration-300
-                                            ${isScrolled
-                                                ? 'text-white/90 hover:text-white'
-                                                : 'text-gray-700 hover:text-black'
-                                            }`}
+                                                ${isScrolled ? 'text-black' : 'text-gray-700'}`}
                                         >
                                             {link.name}
                                         </Link>
                                     ))}
                                 </div>
 
-                                {/* Search bar */}
+                                {/* Search Bar */}
                                 <div className="flex-1 mx-8 relative">
-                                    <div className={`relative rounded-full overflow-hidden transition-all duration-300 ${isScrolled ? 'bg-white/20' : 'bg-gray-100'}`}>
+                                    <div className="relative rounded-full overflow-hidden bg-gray-100">
                                         <input
                                             type="text"
                                             placeholder="Search by artist, gallery, style, theme..."
-                                            className={`w-full border-none rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2
-                                            ${isScrolled 
-                                                ? 'bg-transparent placeholder-white/70 text-white focus:ring-white/50' 
-                                                : 'bg-transparent placeholder-gray-500 text-gray-900 focus:ring-black/30'
-                                            }`}
+                                            className="w-full border-none rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-transparent"
                                         />
-                                        <Search
-                                            className={`absolute top-1/2 right-3 transform -translate-y-1/2 
-                                            ${isScrolled ? 'text-white/70' : 'text-gray-500'}`}
-                                            size={16}
-                                        />
+                                        <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500" size={16} />
                                     </div>
                                 </div>
 
-                                {/* Auth buttons */}
+                                {/* Auth Buttons */}
                                 <div className="flex items-center space-x-3">
                                     <button
                                         onClick={() => setIsLoginModalOpen(true)}
-                                        className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-300
-                                        ${isScrolled
-                                            ? 'border border-white text-white hover:bg-white/10'
-                                            : 'border border-black text-black hover:bg-gray-100'
-                                        }`}
+                                        className="rounded-full px-4 py-2 text-sm font-medium border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors duration-300"
                                     >
                                         Log In
                                     </button>
                                     <button
                                         onClick={() => setIsSignUpModalOpen(true)}
-                                        className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-300
-                                        ${isScrolled
-                                            ? 'bg-white text-black hover:bg-white/90'
-                                            : 'bg-black text-white hover:bg-gray-800'
-                                        }`}
+                                        className="rounded-full px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
                                     >
                                         Sign Up
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Mobile menu button */}
+                            {/* Mobile Menu Button */}
                             <div className="lg:hidden">
-                                <button 
-                                    onClick={toggleMobileMenu}
-                                    className={`p-2 rounded-md transition-colors duration-300
-                                    ${isScrolled
-                                        ? 'text-white hover:bg-white/10'
-                                        : 'text-gray-900 hover:bg-gray-100'
-                                    }`}
+                                <button
+                                    onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+                                    className="p-2 rounded-md text-gray-900"
                                 >
                                     {isMobileMenuOpen ? (
-                                        <X className="block h-6 w-6" aria-hidden="true" />
+                                        <X className="h-6 w-6" />
                                     ) : (
-                                        <Menu className="block h-6 w-6" aria-hidden="true" />
+                                        <Menu className="h-6 w-6" />
                                     )}
                                 </button>
                             </div>
                         </div>
 
-                        {/* Mobile menu, show/hide based on menu state */}
-                        <div className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
-                            <div className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 transition-colors duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-md' : 'bg-white'}`}>
-                                {/* Mobile search */}
-                                <div className="relative rounded-md mb-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Search..."
-                                        className={`w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2
-                                        ${isScrolled
-                                            ? 'bg-white/10 border-white/20 placeholder-white/70 text-white focus:ring-white/50'
-                                            : 'bg-gray-100 border-gray-200 placeholder-gray-500 text-gray-900 focus:ring-black/30'
-                                        }`}
-                                    />
-                                    <Search
-                                        className={`absolute top-1/2 right-3 transform -translate-y-1/2 ${isScrolled ? 'text-white/70' : 'text-gray-500'}`}
-                                        size={16}
-                                    />
-                                </div>
-                                
-                                {/* Primary links + Secondary links */}
-                                {[...primaryLinks, ...secondaryLinks].map((link) => (
-                                    <Link
-                                        key={link.name}
-                                        href={link.href}
-                                        className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300
-                                        ${isScrolled
-                                            ? 'text-white hover:bg-white/10'
-                                            : 'text-gray-900 hover:bg-gray-100'
-                                        }`}
-                                    >
-                                        {link.name}
-                                    </Link>
-                                ))}
-                                
-                                {/* Mobile auth buttons */}
-                                <div className="pt-4 pb-3 space-y-2">
-                                    <button
-                                        onClick={() => setIsLoginModalOpen(true)}
-                                        className={`w-full rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300
-                                        ${isScrolled
-                                            ? 'border border-white text-white hover:bg-white/10'
-                                            : 'border border-black text-black hover:bg-gray-100'
-                                        }`}
-                                    >
-                                        Log In
-                                    </button>
-                                    <button
-                                        onClick={() => setIsSignUpModalOpen(true)}
-                                        className={`w-full rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300
-                                        ${isScrolled
-                                            ? 'bg-white text-black hover:bg-white/90'
-                                            : 'bg-black text-white hover:bg-gray-800'
-                                        }`}
-                                    >
-                                        Sign Up
-                                    </button>
+                        {/* Mobile Menu */}
+                        {isMobileMenuOpen && (
+                            <div className="lg:hidden mt-2 bg-white rounded-lg shadow-lg">
+                                <div className="px-4 pt-2 pb-3 space-y-1">
+                                    {/* Mobile Search */}
+                                    <div className="relative rounded-md mb-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Search..."
+                                            className="w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-100"
+                                        />
+                                        <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500" size={16} />
+                                    </div>
+
+                                    {/* Mobile Links */}
+                                    {[...primaryLinks, ...secondaryLinks].map((link) => (
+                                        <Link
+                                            key={link.name}
+                                            href={link.href}
+                                            className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-100"
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    ))}
+
+                                    {/* Mobile Auth Buttons */}
+                                    <div className="pt-4 space-y-2">
+                                        <button
+                                            onClick={() => setIsLoginModalOpen(true)}
+                                            className="w-full rounded-full px-4 py-2 text-sm font-medium border border-purple-600 text-purple-600 hover:bg-purple-50"
+                                        >
+                                            Log In
+                                        </button>
+                                        <button
+                                            onClick={() => setIsSignUpModalOpen(true)}
+                                            className="w-full rounded-full px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                                        >
+                                            Sign Up
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </nav>
                 </div>
             </header>
 
-            {/* Push content down to account for fixed header */}
-            <div className="lg:h-23 md:h-18 sm:h-12"></div>
+            {/* Push content down */}
+            <div className="h-24"></div>
 
             {/* Modals */}
             <SignUpModal isOpen={isSignUpModalOpen} onClose={() => setIsSignUpModalOpen(false)} />
