@@ -47,7 +47,7 @@ export default function Footer() {
           </div>
 
           {/* Support */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <a href="#" className="hover:text-gray-900 transition-colors">
@@ -60,7 +60,7 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
         </div>
       </div>
 

@@ -1,25 +1,26 @@
 import Image from "next/image";
+import PlaceHolder from "../../../public/placeholder.jpeg"
 
 const featuredArticles = [
   {
-    category: "Artsy Editorial",
+    category: "Art Index Editorial",
     title: "Moroccan Photographer Mous Lamrabat's Vibrant Images Bridge East and West",
-    image: "https://d7hftxdivxxvm.cloudfront.net?height=297&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FPTuFJyIa0p7AK_9V9f4LLQ%2Fmain.jpg&width=445",
+    image: PlaceHolder,
   },
   {
-    category: "Artsy Curatorial",
+    category: "Art Index Curatorial",
     title: "New This Week",
-    image: "https://d7hftxdivxxvm.cloudfront.net?height=297&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FG7xBub62DfiD_g2Es1I8CA%2Fmain.jpg&width=445",
+    image: PlaceHolder,
   },
   {
-    category: "Artsy Editorial",
+    category: "Art Index Editorial",
     title: "8 Artists to Follow If You Like David Lynch",
-    image: "https://d7hftxdivxxvm.cloudfront.net?height=297&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FBuixF13TUeGS52PGSdu1XA%2Fmain.jpg&width=445",
+    image: PlaceHolder,
   },
   {
-    category: "Artsy Curatorial",
+    category: "Art Index Curatorial",
     title: "Most Loved",
-    image: "https://d7hftxdivxxvm.cloudfront.net?height=297&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2Fe4ncoyhwKkCU-lKw-_hpFg%2Fmain.jpg&width=445",
+    image: PlaceHolder,
   },
 ];
 

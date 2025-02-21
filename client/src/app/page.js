@@ -18,9 +18,9 @@ export default function Home() {
     <ResponsiveCarousel />
     <FeaturedSection/>
     <CuratorsPicks />
-    <ArtsySection />
+    {/* <ArtsySection /> */}
     <AuctionCarousel/>
-    <FeaturedShows />
+    {/* <FeaturedShows /> */}
     <CurrentFairs />
     <FeaturedGalleries />
     <TrendingArtists />
