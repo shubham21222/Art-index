@@ -45,34 +45,37 @@ export default function Home() {
 
     return (
         <>
-        <Header />
-        <div className=" min-h-screen">
-            <header className="md:pt-6 pt-[90px] bg-gradient-to-b from-gray-600 to-gray-400 text-white py-6 text-center text-2xl font-semibold">
-                The Future of Art Collecting
-            </header>
+            <Header />
+            <div className=" min-h-screen">
+                <header className="md:pt-6 pt-[90px] bg-gradient-to-b from-gray-600 to-gray-400 text-white py-6 text-center text-2xl font-semibold">
+                    The Future of Art Collecting
+                </header>
 
-            <section className=" text-center py-10 px-4">
-                <h2 className="text-2xl font-semibold">Art Index is for art collecting.</h2>
-                <p className="text-gray-700 mt-2 max-w-2xl mx-auto">
-                    As the leading marketplace for art by the world&apos;s emerging and established artists, we&apos;ve made it easy for new and experienced collectors to discover and buy art — and so much more. Everything you&apos;ll ever need to collect art, you&apos;ll find on Artsy.
-                </p>
-            </section>
+                <section className=" text-center py-6 px-4">
+                    <h2 className="text-2xl font-semibold">Art Index is for art collecting.</h2>
+                    <p className="text-gray-700 mt-2 max-w-7xl mx-auto">
+                        Welcome to *ArtIndex.ai*, the ultimate marketplace for art dealers, artists, collectors, and enthusiasts. We created Art Index with a singular vision: to provide a seamless, AI-powered platform that connects the global art community. Whether you are searching for your next masterpiece, exploring renowned art museums worldwide, or diving into the rich history of art, Art Index is your trusted destination.
+                        Our platform leverages cutting-edge AI technology to enhance the art-buying experience, making it easier than ever to discover and acquire exceptional artworks. By bringing together artists and buyers in one dynamic space, we foster a thriving marketplace that celebrates creativity and innovation.
+                        Beyond commerce, Art Index is dedicated to education and accessibility. We believe that art should be explored, studied, and appreciated by all, which is why we provide resources to uncover the stories behind iconic works and movements throughout history. Our AI-driven search capabilities ensure that users can find what theyre looking for with ease—whether its a specific painting, a gallery exhibition, or an in-depth analysis of a historic masterpiece.
+                        At Art Index, we value our community and continuously strive to refine our platform based on user feedback. We are committed to making Art Index a space where art lovers of all backgrounds can connect, discover, and be inspired.
+                        Join us in shaping the future of the art world—one masterpiece at a time.           </p>
+                </section>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 md:px-12">
-                {artData.map((art, index) => (
-                    <div key={index} className="bg-white shadow-md rounded-lg overflow-hidden">
-                        <Image src={art.image} alt={art.title} width={500} height={300} className="w-full h-64 object-cover" />
-                        <div className="p-4">
-                            <h3 className="text-lg font-semibold">{art.title}</h3>
-                            <p className="text-gray-600 text-sm">{art.description}</p>
-                            <button className="mt-3 px-4 py-2 text-sm border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white transition">View</button>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 md:px-12">
+                    {artData.map((art, index) => (
+                        <div key={index} className="bg-white shadow-md rounded-lg overflow-hidden">
+                            <Image src={art.image} alt={art.title} width={500} height={300} className="w-full h-64 object-cover" />
+                            <div className="p-4">
+                                <h3 className="text-lg font-semibold">{art.title}</h3>
+                                <p className="text-gray-600 text-sm">{art.description}</p>
+                                <button className="mt-3 px-4 py-2 text-sm border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white transition">View</button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
-        </div>
-        <TrendingNow />
-        <Footer />
+            <TrendingNow />
+            <Footer />
         </>
     );
 }
