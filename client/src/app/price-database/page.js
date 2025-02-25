@@ -6,7 +6,7 @@ export default function ArtsyPage() {
     return (
         <>
             <Header />
-            <div className="max-w-[1500px] mx-auto md:mt-0 mt-8 min-h-screen bg-white text-black">
+            <div className="max-w-[1500px] mx-auto md:mt-0 mt-8 min-h-screen  text-black">
                 <div className="max-w-7xl mx-auto py-10 text-center">
                     <input
                         type="text"
