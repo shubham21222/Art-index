@@ -192,7 +192,7 @@ export default function ArtGallery() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className=" min-h-screen">
       <Header />
       <div className="max-w-[1500px] mx-auto px-4 mt-8 md:mt-0 sm:px-6 py-8">
         {/* Hero Section */}

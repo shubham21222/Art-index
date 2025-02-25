@@ -34,27 +34,28 @@ export default function Header() {
     }, []);
 
     const primaryLinks = [
-        { name: "Buy", href: "/collect" },
-        { name: "Price Database", href: "/price-database" },
+        { name: "Artists", href: "/artists" },
     ];
 
     const secondaryLinks = [
-        { name: "Artists", href: "/artists" },
-        { name: "Artworks", href: "/collect" },
-        { name: "Auctions", href: "/auctions" },
-        { name: "Galleries", href: "/galleries" },
         { name: "Fairs & Events", href: "/art-fairs" },
-        { name: "Shows", href: "/shows" },
         { name: "Museums", href: "/institutions" },
+        { name: "Auctions", href: "/auctions" },
+        { name: "Shows", href: "/shows" },
+        { name: "Buy", href: "/collect" },
+        { name: "Galleries", href: "/galleries" },
+        { name: "Artworks", href: "/collect" },
+        { name: "Price Database", href: "/price-database" },
+
     ];
 
     return (
         <>
             <header
-                className={`fixed top-4 left-0 right-0 z-[9999] transition-all duration-300 w-full max-w-screen-2xl mx-auto
+                className={`fixed top-2 left-0 right-0 z-[9999] transition-all duration-300 w-full max-w-screen-2xl mx-auto
                     ${isScrolled 
                         ? "bg-white/5 shadow-lg rounded-2xl md:rounded-full border md:border-white/18 md:backdrop-blur-2xl"
-                        : "bg-white"
+                        : ""
                     }`}
                 style={{
                     padding: isScrolled

@@ -116,12 +116,12 @@ export default function TrendingArtists() {
   }, []);
 
   return (
-    <section className="max-w-[1500px] mx-auto px-6 py-8 bg-gray-50">
+    <section className="max-w-[1500px] mx-auto px-6 py-8 ">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Trending Artists on Artsy</h2>
-          <p className="text-gray-500 text-lg mt-2">
+          <p className="text-gray-900 text-lg mt-2">
             Discover artists making waves in the art world.
           </p>
         </div>

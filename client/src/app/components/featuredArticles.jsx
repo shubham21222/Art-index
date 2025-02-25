@@ -26,8 +26,8 @@ const featuredArticles = [
 
 export default function FeaturedSection() {
   return (
-    <section className="max-w-[1500px]  mx-auto px-4 py-12 bg-gray-50">
-      <h2 className="text-3xl font-bold text-center mb-10 text-gray-800">
+    <section className="max-w-[1500px]  mx-auto px-4 py-12 ">
+      <h2 className="text-3xl font-bold text-center mb-10 text-black">
         Featured Articles
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

@@ -58,12 +58,12 @@ export default function CurrentFairs() {
   }, []);
 
   return (
-    <section className="max-w-[1500px] mx-auto px-6 py-8 bg-gray-50">
+    <section className="max-w-[1500px] mx-auto px-6 py-8 ">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Current Fairs & Events</h2>
-          <p className="text-gray-500 text-lg mt-2">
+          <p className="text-gray-900 text-lg mt-2">
             Discover the latest art fairs and events happening around the world.
           </p>
         </div>

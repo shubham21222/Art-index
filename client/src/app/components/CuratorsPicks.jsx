@@ -111,12 +111,12 @@
         }, []);
 
         return (
-            <div className="max-w-[1500px] mx-auto px-6 py-8 bg-gray-50">
+            <div className="max-w-[1500px] mx-auto px-6 py-8 ">
                 {/* Header Section */}
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h2 className="text-3xl font-bold text-gray-900">Curators Picks</h2>
-                        <p className="text-gray-500 text-lg mt-2">
+                        <p className="text-gray-900 text-lg mt-2">
                             The best works by rising talents on Artsy, all available now.
                         </p>
                     </div>
