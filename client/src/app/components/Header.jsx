@@ -35,183 +35,173 @@ export default function Header() {
 
     const primaryLinks = [
         { name: "Artists", href: "/artists" },
-    ];
-
-    const secondaryLinks = [
         { name: "Fairs & Events", href: "/art-fairs" },
         { name: "Museums", href: "/institutions" },
-        { name: "Auctions", href: "/auctions" },
+        
+    ];
+
+    // Main header secondary links (right side)
+    const mainSecondaryLinks = [
+
+        
+    ];
+
+    // Secondary header links
+    const subSecondaryLinks = [
         { name: "Shows", href: "/shows" },
         { name: "Buy", href: "/collect" },
         { name: "Galleries", href: "/galleries" },
         { name: "Artworks", href: "/collect" },
         { name: "Price Database", href: "/price-database" },
-
     ];
 
     return (
         <>
+            {/* Main Header */}
             <header
-                className={`fixed top-2 left-0 right-0 z-[9999] transition-all duration-300 w-full max-w-screen-2xl mx-auto
-                    ${isScrolled 
-                        ? "bg-white/5 shadow-lg rounded-2xl md:rounded-full border md:border-white/18 md:backdrop-blur-2xl"
-                        : ""
-                    }`}
-                style={{
-                    padding: isScrolled
-                        ? isMobile
-                            ? "3px"
-                            : "18px"
-                        : isMobile
-                            ? "5px"
-                            : "20px",
-                    boxShadow: isScrolled ? "0 8px 32px 0 rgba(31, 38, 135, 0.37)" : "none",
-                    backdropFilter: isScrolled ? "blur(20px)" : "none",
-                    WebkitBackdropFilter: isScrolled ? "blur(20px)" : "none",
-                }}
+                className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
+                    isScrolled 
+                        ? "bg-white/95 shadow-sm" 
+                        : "bg-transparent"
+                }`}
             >
-                <div className="container mx-auto px-6">
-                    <nav className="flex flex-col">
-                        <div className="flex items-center justify-between">
-                            {/* Empty div for mobile layout balance */}
-                            <div className="w-10 lg:hidden"></div>
-
-                            {/* Logo - Centered on mobile, left-aligned on desktop */}
-                            <div className="flex-1 lg:flex-initial flex justify-center lg:justify-start">
-                                <Link href="/" className="flex items-center">
-                                    <Image
-                                        src={logo}
-                                        alt="Logo"
-                                        width={60}
-                                        height={10}
-                                        className="h-10 w-auto"
-                                    />
-                                </Link>
-                            </div>
-
-                            {/* Desktop Navigation */}
-                            <div className="hidden lg:flex lg:items-center lg:space-x-8 flex-1 ml-10">
-                                {/* Primary Links */}
-                                <div className="flex items-baseline space-x-8">
-                                    {primaryLinks.map((link) => (
-                                        <Link
-                                            key={link.name}
-                                            href={link.href}
-                                            className={`text-sm font-medium transition-colors duration-300
-                                                ${isScrolled ? 'text-black' : 'text-gray-900'}`}
-                                        >
-                                            {link.name}
-                                        </Link>
-                                    ))}
-                                </div>
-
-                                {/* Secondary Links */}
-                                <div className="flex items-baseline space-x-6">
-                                    {secondaryLinks.map((link) => (
-                                        <Link
-                                            key={link.name}
-                                            href={link.href}
-                                            className={`text-sm font-medium transition-colors duration-300
-                                                ${isScrolled ? 'text-black' : 'text-gray-700'}`}
-                                        >
-                                            {link.name}
-                                        </Link>
-                                    ))}
-                                </div>
-
-                                {/* Search Bar */}
-                                <div className="flex-1 mx-8 relative">
-                                    <div className="relative rounded-full overflow-hidden bg-gray-100">
-                                        <input
-                                            type="text"
-                                            placeholder="Search by artist, gallery, style, theme..."
-                                            className="w-full border-none rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-transparent"
-                                        />
-                                        <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500" size={16} />
-                                    </div>
-                                </div>
-
-                                {/* Auth Buttons */}
-                                <div className="flex items-center space-x-3">
-                                    <button
-                                        onClick={() => setIsLoginModalOpen(true)}
-                                        className="rounded-full px-4 py-2 text-sm font-medium border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors duration-300"
-                                    >
-                                        Log In
-                                    </button>
-                                    <button
-                                        onClick={() => setIsSignUpModalOpen(true)}
-                                        className="rounded-full px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
-                                    >
-                                        Sign Up
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Mobile Menu Button (Right) */}
-                            <div className="lg:hidden">
-                                <button
-                                    onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-                                    className="p-2 rounded-md text-gray-900"
+                <div className="container mx-auto px-4 py-4">
+                    <nav className="flex items-center justify-between">
+                        {/* Left Navigation */}
+                        <div className="hidden md:flex items-center space-x-6">
+                            {primaryLinks.map((link) => (
+                                <Link
+                                    key={link.name}
+                                    href={link.href}
+                                    className="text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors"
                                 >
-                                    {isMobileMenuOpen ? (
-                                        <X className="h-6 w-6" />
-                                    ) : (
-                                        <Menu className="h-6 w-6" />
-                                    )}
-                                </button>
-                            </div>
+                                    {link.name}
+                                </Link>
+                            ))}
                         </div>
 
-                        {/* Mobile Menu */}
-                        {isMobileMenuOpen && (
-                            <div className="lg:hidden mt-2 bg-white rounded-lg shadow-lg">
-                                <div className="px-4 pt-2 pb-3 space-y-1">
-                                    {/* Mobile Search */}
-                                    <div className="relative rounded-md mb-4">
-                                        <input
-                                            type="text"
-                                            placeholder="Search..."
-                                            className="w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-100"
-                                        />
-                                        <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500" size={16} />
-                                    </div>
+                        {/* Centered Logo */}
+                        <div className="absolute left-1/2 transform -translate-x-1/2">
+                            <Link href="/">
+                                <Image
+                                    src={logo}
+                                    alt="Logo"
+                                    width={100}
+                                    height={40}
+                                    className="h-10 w-auto"
+                                />
+                            </Link>
+                        </div>
 
-                                    {/* Mobile Links */}
-                                    {[...primaryLinks, ...secondaryLinks].map((link) => (
-                                        <Link
-                                            key={link.name}
-                                            href={link.href}
-                                            className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-100"
-                                        >
-                                            {link.name}
-                                        </Link>
-                                    ))}
-
-                                    {/* Mobile Auth Buttons */}
-                                    <div className="pt-4 space-y-2">
-                                        <button
-                                            onClick={() => setIsLoginModalOpen(true)}
-                                            className="w-full rounded-full px-4 py-2 text-sm font-medium border border-purple-600 text-purple-600 hover:bg-purple-50"
-                                        >
-                                            Log In
-                                        </button>
-                                        <button
-                                            onClick={() => setIsSignUpModalOpen(true)}
-                                            className="w-full rounded-full px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
-                                        >
-                                            Sign Up
-                                        </button>
-                                    </div>
-                                </div>
+                        {/* Right Side - Main Secondary Links + Auth */}
+                        <div className="flex items-center space-x-4">
+                            <div className="hidden md:flex items-center space-x-6">
+                                {mainSecondaryLinks.map((link) => (
+                                    <Link
+                                        key={link.name}
+                                        href={link.href}
+                                        className="text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors"
+                                    >
+                                        {link.name}
+                                    </Link>
+                                ))}
                             </div>
-                        )}
+                            <button className="p-2 hidden md:block">
+                                <Search className="h-5 w-5 text-gray-900" />
+                            </button>
+                            <button 
+                                onClick={() => setIsLoginModalOpen(true)}
+                                className="hidden md:block text-sm font-medium text-gray-900 hover:text-gray-600"
+                            >
+                                Log In
+                            </button>
+                            <button
+                                onClick={() => setIsSignUpModalOpen(true)}
+                                className="hidden md:block text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-all"
+                            >
+                                Sign Up
+                            </button>
+                            <button
+                                onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+                                className="md:hidden p-2"
+                            >
+                                {isMobileMenuOpen ? (
+                                    <X className="h-6 w-6 text-gray-900" />
+                                ) : (
+                                    <Menu className="h-6 w-6 text-gray-900" />
+                                )}
+                            </button>
+                        </div>
                     </nav>
                 </div>
             </header>
 
+            {/* Secondary Header */}
+            <div
+                className={`fixed top-[69px] left-0 right-0 z-[9998] transition-all duration-300 ${
+                    isScrolled 
+                        ? "bg-gray-50/95 shadow-sm" 
+                        : "bg-gray-100/95"
+                }`}
+            >
+                <div className="container mx-auto px-4 py-2">
+                    <div className="hidden md:flex justify-center space-x-8">
+                        {subSecondaryLinks.map((link) => (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors py-2 relative group"
+                            >
+                                {link.name}
+                                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-900 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+                <div className="md:hidden fixed top-[72px] left-0 right-0 z-[9997] bg-white py-4 shadow-lg">
+                    <div className="container mx-auto px-4 space-y-4">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                className="w-full border rounded-md px-4 py-2 text-sm"
+                            />
+                            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
+                        </div>
+                        {[...primaryLinks, ...mainSecondaryLinks, ...subSecondaryLinks].map((link) => (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                className="block text-sm font-medium text-gray-900 hover:text-gray-600 py-2"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                {link.name}
+                            </Link>
+                        ))}
+                        <div className="space-y-2 pt-4">
+                            <button
+                                onClick={() => setIsLoginModalOpen(true)}
+                                className="w-full text-sm font-medium text-gray-900 py-2"
+                            >
+                                Log In
+                            </button>
+                            <button
+                                onClick={() => setIsSignUpModalOpen(true)}
+                                className="w-full text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md"
+                            >
+                                Sign Up
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Push content down */}
-            <div className="h-24"></div>
+            <div className="h-36 md:h-28"></div>
 
             {/* Modals */}
             <SignUpModal isOpen={isSignUpModalOpen} onClose={() => setIsSignUpModalOpen(false)} />
