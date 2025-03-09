@@ -49,7 +49,7 @@ const AUCTION_QUERY = `
 
 export default function AuctionCarousel() {
     const [auctionData, setAuctionData] = useState([]);
-    const [currentIndex, setCurrentIndex] = useState(0); // Track the center artwork
+    const [currentIndex, setCurrentIndex] = useState(null); // Initialize as null, set to middle after data loads
 
     // Fetch data from Artsy API
     useEffect(() => {
@@ -70,6 +70,8 @@ export default function AuctionCarousel() {
                     (edge) => edge.node
                 );
                 setAuctionData(artworks || []);
+                // Set initial index to the middle of the array
+                setCurrentIndex(Math.floor((artworks || []).length / 2));
             } catch (error) {
                 console.error("Error fetching data from Artsy API:", error);
             }
@@ -90,6 +92,17 @@ export default function AuctionCarousel() {
     // Calculate 3D positions for each slide
     const getSlideStyle = (index) => {
         const total = auctionData.length || 6; // Use 6 as fallback for skeletons
+        if (currentIndex === null) {
+            return {
+                opacity: 0, // Hide until data is loaded
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%) scale(0)", // Start from center, scaled down
+                transition: "all 0.8s ease",
+            };
+        }
+
         const angle = (360 / total) * (index - currentIndex); // Circular positioning
         const radius = 600; // Increased radius for wider slides
         const translateZ = -radius; // Depth of the 3D circle
@@ -145,8 +158,8 @@ export default function AuctionCarousel() {
                                         <Image
                                             src={item.image?.src || "/placeholder.svg"}
                                             alt={item.title}
-                                            width={350} // Increased width
-                                            height={item.image?.height || 240} // Dynamic height or fallback
+                                            width={350}
+                                            height={item.image?.height || 240}
                                             className="object-cover w-full h-full rounded-md shadow-md transition-transform duration-500 group-hover:scale-110"
                                         />
                                         {/* Gradient Overlay */}
@@ -198,65 +211,62 @@ export default function AuctionCarousel() {
                 </div>
 
                 {/* Navigation Buttons */}
-                <button
-                    onClick={handlePrev}
-                    className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
-                >
-                    <svg
-                        className="w-5 h-5 text-gray-700"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M15 19l-7-7 7-7"
-                        />
-                    </svg>
-                </button>
-                <button
-                    onClick={handleNext}
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
-                >
-                    <svg
-                        className="w-5 h-5 text-gray-700"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-                </button>
+                {currentIndex !== null && (
+                    <>
+                        <button
+                            onClick={handlePrev}
+                            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+                        >
+                            <svg
+                                className="w-5 h-5 text-gray-700"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M15 19l-7-7 7-7"
+                                />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={handleNext}
+                            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+                        >
+                            <svg
+                                className="w-5 h-5 text-gray-700"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M9 5l7 7-7 7"
+                                />
+                            </svg>
+                        </button>
+                    </>
+                )}
             </div>
 
             {/* Indicators */}
-            <div className="flex justify-center mt-6 space-x-2">
-                {auctionData.length > 0
-                    ? auctionData.map((_, index) => (
-                          <div
-                              key={index}
-                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                  index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
-                              }`}
-                              onClick={() => setCurrentIndex(index)}
-                          />
-                      ))
-                    : [0, 1].map((index) => (
-                          <div
-                              key={index}
-                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                  index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
-                              }`}
-                          />
-                      ))}
-            </div>
+            {currentIndex !== null && (
+                <div className="flex justify-center mt-6 space-x-2">
+                    {(auctionData.length > 0 ? auctionData : Array.from({ length: 6 })).map((_, index) => (
+                        <div
+                            key={index}
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
+                            }`}
+                            onClick={() => setCurrentIndex(index)}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

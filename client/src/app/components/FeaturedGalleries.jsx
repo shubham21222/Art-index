@@ -71,6 +71,7 @@ export default function FeaturedGalleries() {
               image: edge.node.owner.featuredShow?.coverImage?.resized?.src || "/placeholder.svg",
             })) || [];
         setGalleries(fetchedGalleries);
+        setCurrentIndex(Math.floor(fetchedGalleries.length / 2)); // Set initial index to the middle
       } catch (error) {
         console.error("Error fetching galleries:", error);
       }
@@ -173,7 +174,7 @@ export default function FeaturedGalleries() {
         {/* Navigation Buttons */}
         <button
           onClick={handlePrev}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+          className="absolute z-40 left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
         >
           <svg
             className="w-5 h-5 text-gray-700"
@@ -191,7 +192,7 @@ export default function FeaturedGalleries() {
         </button>
         <button
           onClick={handleNext}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+          className="absolute z-40 right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
         >
           <svg
             className="w-5 h-5 text-gray-700"
@@ -214,7 +215,7 @@ export default function FeaturedGalleries() {
         {galleries.map((_, index) => (
           <div
             key={index}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            className={`w-2 z-9999 h-2 rounded-full transition-all duration-300 ${
               index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
             }`}
             onClick={() => setCurrentIndex(index)}

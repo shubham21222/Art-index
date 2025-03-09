@@ -66,6 +66,7 @@ export default function TrendingArtists() {
               image: edge.node.coverArtwork?.image?.cropped?.src || "/placeholder.svg",
             })) || [];
         setArtists(fetchedArtists);
+        setCurrentIndex(Math.floor(fetchedArtists.length / 2)); // Set initial index to the middle
       } catch (error) {
         console.error("Error fetching artists:", error);
       }
