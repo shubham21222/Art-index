@@ -20,8 +20,10 @@ export default function Header() {
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 0);
         };
@@ -39,6 +41,11 @@ export default function Header() {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
+
+    // Don't render anything until the component is mounted on the client
+    if (!mounted) {
+        return null;
+    }
 
     const primaryLinks = [
         { name: "Artists", href: "/artists" },
