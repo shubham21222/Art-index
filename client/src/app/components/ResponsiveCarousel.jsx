@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -11,6 +11,26 @@ import 'swiper/css/effect-fade';
 
 const Carousel = () => {
   const [isHovering, setIsHovering] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    setMounted(true);
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const slides = [
     {
@@ -32,6 +52,10 @@ const Carousel = () => {
       buttonText: "Discover More",
     },
   ];
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div 
@@ -63,14 +87,14 @@ const Carousel = () => {
             key={i}
             className="absolute w-1 h-1 bg-white/20 rounded-full"
             initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * dimensions.width,
+              y: Math.random() * dimensions.height,
               scale: 0,
               opacity: 0,
             }}
             animate={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * dimensions.width,
+              y: Math.random() * dimensions.height,
               scale: [0, 1, 0],
               opacity: [0, 1, 0],
             }}
