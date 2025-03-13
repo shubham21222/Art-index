@@ -102,14 +102,14 @@ export default function TrendingArtists() {
       top: "50%", // Center vertically
       left: "50%", // Center horizontally
       transformOrigin: "center center",
-      zIndex: Math.round(100 - Math.abs(angle)), // Higher z-index for closer slides
+      zIndex: Math.round(10 - Math.abs(angle)), // Reduced from 100 to 10
       marginLeft: "-200px", // Half of slide width (400px / 2) to center it
       marginTop: "-200px", // Half of slide height (400px / 2) to center it
     };
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
+    <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
       {/* Header Section */}
       <div className="flex flex-col items-center justify-between w-full mb-6">
         <div className="text-center">
@@ -172,7 +172,7 @@ export default function TrendingArtists() {
         {/* Navigation Buttons */}
         <button
           onClick={handlePrev}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
         >
           <svg
             className="w-5 h-5 text-gray-700"
@@ -190,7 +190,7 @@ export default function TrendingArtists() {
         </button>
         <button
           onClick={handleNext}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
         >
           <svg
             className="w-5 h-5 text-gray-700"

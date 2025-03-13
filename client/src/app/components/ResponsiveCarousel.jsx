@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import 'swiper/css';
@@ -35,19 +35,54 @@ const Carousel = () => {
 
   return (
     <div 
-      className="min-h-screen bg-black relative overflow-hidden"
+      className="relative mt-2 w-full h-[60vh] sm:h-[50vh] md:h-[70vh] lg:h-[80vh] bg-black overflow-hidden"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      {/* Holographic Background */}
+      {/* Animated Background Gradient */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-blue-900/10 to-cyan-900/10 blur-3xl"
+        className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-cyan-900/20"
         animate={{
-          scale: [1, 1.1, 1],
-          opacity: [0.3, 0.5, 0.3],
+          background: [
+            "linear-gradient(45deg, rgba(147,51,234,0.2), rgba(59,130,246,0.2), rgba(6,182,212,0.2))",
+            "linear-gradient(45deg, rgba(6,182,212,0.2), rgba(147,51,234,0.2), rgba(59,130,246,0.2))",
+            "linear-gradient(45deg, rgba(59,130,246,0.2), rgba(6,182,212,0.2), rgba(147,51,234,0.2))",
+          ],
         }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "linear",
+        }}
       />
+
+      {/* Animated Particles */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-white/20 rounded-full"
+            initial={{
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight,
+              scale: 0,
+              opacity: 0,
+            }}
+            animate={{
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight,
+              scale: [0, 1, 0],
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: Math.random() * 5 + 5,
+              repeat: Infinity,
+              ease: "linear",
+              delay: Math.random() * 5,
+            }}
+          />
+        ))}
+      </div>
 
       {/* Carousel */}
       <Swiper
@@ -62,7 +97,7 @@ const Carousel = () => {
           disableOnInteraction: true,
           pauseOnMouseEnter: true,
         }}
-        className="h-screen w-full"
+        className="h-full w-full"
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
@@ -72,25 +107,41 @@ const Carousel = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8 }}
             >
-              {/* Image */}
-              <Image
-                src={slide.image}
-                alt={slide.title}
-                width={1270}
-                height={500}
-                className="object-cover w-full h-full"
-                priority={index === 0} // Priority for first slide only
-              />
+              {/* Image with Parallax Effect */}
+              <motion.div
+                className="absolute inset-0"
+                animate={{
+                  scale: isHovering ? 1.05 : 1,
+                }}
+                transition={{ duration: 0.5 }}
+              >
+                <Image
+                  src={slide.image}
+                  alt={slide.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+                  className="object-cover"
+                  priority={index === 0}
+                />
+              </motion.div>
 
               {/* Content Overlay */}
               <motion.div
-                className="absolute bottom-12 left-12 right-12 bg-black/70 backdrop-blur-md p-8 rounded-xl shadow-xl border border-white/10"
+                className="absolute bottom-4 md:bottom-12 left-4 md:left-12 right-4 md:right-12 bg-black/70 backdrop-blur-md p-4 md:p-8 rounded-xl shadow-xl border border-white/10"
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
+                whileHover={{ scale: 1.02 }}
               >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl"
+                  animate={{
+                    opacity: isHovering ? 1 : 0,
+                  }}
+                  transition={{ duration: 0.3 }}
+                />
                 <motion.h2
-                  className="text-4xl font-bold text-white mb-3 tracking-tight bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"
+                  className="text-2xl md:text-4xl font-bold text-white mb-2 md:mb-3 tracking-tight bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
@@ -98,7 +149,7 @@ const Carousel = () => {
                   {slide.title}
                 </motion.h2>
                 <motion.p
-                  className="text-lg text-gray-200 mb-4"
+                  className="text-sm md:text-lg text-gray-200 mb-3 md:mb-4"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.6 }}
@@ -106,14 +157,20 @@ const Carousel = () => {
                   {slide.description}
                 </motion.p>
                 <motion.button
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 text-white font-semibold rounded-full shadow-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-300"
+                  className="relative bg-gradient-to-r from-cyan-500 to-blue-500 px-4 md:px-6 py-2 text-white text-sm md:text-base font-semibold rounded-full shadow-lg overflow-hidden group"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.8 }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {slide.buttonText}
+                  <span className="relative z-10">{slide.buttonText}</span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
                 </motion.button>
               </motion.div>
             </motion.div>

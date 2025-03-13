@@ -1,138 +1,257 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { X, Apple, Facebook, CircleDot } from "lucide-react";
-import Image from "next/image"; // Import the Image component
-import logo from "../../../public/artindex2.png"; // Ensure this path is correct
+import { useDispatch } from "react-redux";
+import { register } from "@/redux/features/authSlice";
+import { toast } from "react-hot-toast";
+import { FaGoogle, FaFacebook } from "react-icons/fa";
+import Image from "next/image";
+import logo from "../../../public/artindex2.png";
 
-export default function SignUpModal({ isOpen, onClose }) {
-    const [step, setStep] = useState(1); // Step 1: Email, Step 2: Name & Password
-    const [email, setEmail] = useState("");
-    const [name, setName] = useState(""); // State for Name
-    const [password, setPassword] = useState("");
+export default function SignUpModal({ isOpen, onClose, onOpenLogin }) {
+    const dispatch = useDispatch();
+    const [step, setStep] = useState(1);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+    });
+    const [loading, setLoading] = useState(false);
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-    // Function to handle back button
-    const handleBack = () => {
-        if (step === 2) {
-            setStep(1); // Go back to the email step
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleNextStep = () => {
+        if (!formData.name || !formData.email) {
+            toast.error('Please fill in all fields');
+            return;
+        }
+        if (!formData.email.includes('@')) {
+            toast.error('Please enter a valid email address');
+            return;
+        }
+        setStep(2);
+    };
+
+    const handleSignUp = async (e) => {
+        e.preventDefault();
+        
+        if (!formData.password || !formData.confirmPassword) {
+            toast.error('Please fill in all fields');
+            return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            toast.error('Passwords do not match');
+            return;
+        }
+
+        if (formData.password.length < 6) {
+            toast.error('Password must be at least 6 characters long');
+            return;
+        }
+
+        if (!acceptedTerms) {
+            toast.error('Please accept the terms and conditions');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const result = await dispatch(register({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password
+            })).unwrap();
+            
+            toast.success(result.message || 'Registration successful!');
+            onClose();
+        } catch (error) {
+            toast.error(error.message || 'Registration failed');
+        } finally {
+            setLoading(false);
         }
     };
 
+    if (!isOpen) return null;
+
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            {/* Modal Content */}
-            <DialogContent className="max-w-md p-6 rounded-lg shadow-lg bg-white">
-                {/* Header with Logo */}
-                <div className="flex flex-col items-center justify-center mb-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-[420px] relative shadow-2xl">
+                <button
+                    onClick={onClose}
+                    className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <div className="flex flex-col items-center mb-8">
                     <Image
-                        src={logo} // Pass the imported logo
+                        src={logo}
                         alt="ArtIndex Logo"
-                        width={80}
-                        height={80}
-                        className=""
+                        width={60}
+                        height={60}
+                        className="mb-4"
                     />
-                    <DialogTitle className="text-lg font-semibold mt-3">
-                        {step === 1 ? "Sign up or log in" : "Create an account"}
-                    </DialogTitle>
+                    <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
+                    <p className="text-gray-500 text-sm mt-2">Join our art community today</p>
                 </div>
 
-                {/* Step 1: Email Input */}
-                {step === 1 && (
-                    <div className="mt-4">
-                        <Input
-                            type="email"
-                            placeholder="Email"
-                            className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-black"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                        <Button
-                            className="bg-black text-white rounded-full w-full mt-3 hover:bg-gray-800 transition-colors"
-                            onClick={() => setStep(2)} // Move to Step 2
+                {step === 1 ? (
+                    <div className="space-y-5">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                Full Name
+                            </label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                placeholder="Enter your full name"
+                                disabled={loading}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                Email
+                            </label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                placeholder="Enter your email"
+                                disabled={loading}
+                            />
+                        </div>
+
+                        <button
+                            onClick={handleNextStep}
+                            disabled={loading}
+                            className="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50 font-medium"
                         >
-                            Continue with Email
-                        </Button>
+                            Next
+                        </button>
+                    </div>
+                ) : (
+                    <div className="space-y-5">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                Password
+                            </label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                placeholder="Enter your password"
+                                disabled={loading}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                Confirm Password
+                            </label>
+                            <input
+                                type="password"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleInputChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                placeholder="Confirm your password"
+                                disabled={loading}
+                            />
+                        </div>
+
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="terms"
+                                checked={acceptedTerms}
+                                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                                className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
+                                disabled={loading}
+                            />
+                            <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+                                I agree to the <a href="#" className="text-black hover:underline">Terms and Conditions</a>
+                            </label>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setStep(1)}
+                                disabled={loading}
+                                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 font-medium"
+                            >
+                                Back
+                            </button>
+                            <button
+                                onClick={handleSignUp}
+                                disabled={loading}
+                                className="flex-1 bg-black text-white py-3 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50 font-medium"
+                            >
+                                {loading ? 'Creating Account...' : 'Create Account'}
+                            </button>
+                        </div>
                     </div>
                 )}
 
-                {/* Step 2: Name and Password Input */}
-                {step === 2 && (
-                    <div className="mt-4">
-                        <p className="text-md text-gray-700 mb-2">Welcome to Art Index — Create an account</p>
-                        <Input
-                            type="text"
-                            placeholder="Full Name"
-                            className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-black mb-2"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                        />
-                        <Input
-                            type="password"
-                            placeholder="Password"
-                            className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-black mb-2"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <p className="text-xs text-gray-500 mb-4">
-                            Password must be at least 8 characters and include a lowercase letter, uppercase letter, and digit.
-                        </p>
-                        <Button className="bg-black text-white rounded-full w-full mt-3 hover:bg-gray-800 transition-colors">
-                            Sign Up
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="w-full mt-3 hover:bg-gray-100 transition-colors"
-                            onClick={handleBack} // Go back to Step 1
+                <div className="mt-8">
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 grid grid-cols-2 gap-3">
+                        <button
+                            type="button"
+                            className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                         >
-                            Back
-                        </Button>
+                            <FaGoogle className="h-5 w-5 mr-2" />
+                            Google
+                        </button>
+                        <button
+                            type="button"
+                            className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                            <FaFacebook className="h-5 w-5 mr-2" />
+                            Facebook
+                        </button>
                     </div>
-                )}
+                </div>
 
-                {/* Divider */}
-                {step === 1 && (
-                    <div className="relative flex items-center my-4 text-center justify-center">
-                        <span className="mx-2 text-gray-500 text-sm text-center">Or continue with</span>
-                    </div>
-                )}
-
-                {/* Social Login Buttons */}
-                {step === 1 && (
-                    <div className="flex justify-center gap-3">
-                        <Button variant="outline" className="rounded-full p-2 hover:bg-gray-100 transition-colors">
-                            <Apple className="w-5 h-5" />
-                        </Button>
-                        <Button variant="outline" className="rounded-full p-2 hover:bg-gray-100 transition-colors">
-                            <CircleDot className="w-5 h-5" /> {/* Google */}
-                        </Button>
-                        <Button variant="outline" className="rounded-full p-2 hover:bg-gray-100 transition-colors">
-                            <Facebook className="w-5 h-5" />
-                        </Button>
-                    </div>
-                )}
-
-                {/* Terms & Privacy */}
-                <p className="text-xs text-gray-500 text-center mt-4">
-                    By clicking Sign Up or Continue with Email, Apple, Google, or Facebook, you agree to Artsy’s{" "}
-                    <a href="#" className="underline text-gray-700 hover:text-black">Terms and Conditions</a> and{" "}
-                    <a href="#" className="underline text-gray-700 hover:text-black">Privacy Policy</a>, and to receiving emails
-                    from Artsy.
+                <p className="mt-6 text-center text-sm text-gray-600">
+                    Already have an account?{' '}
+                    <button
+                        onClick={() => {
+                            onClose();
+                            onOpenLogin();
+                        }}
+                        className="text-black hover:underline font-medium"
+                    >
+                        Sign in
+                    </button>
                 </p>
-                <p className="text-xs text-gray-500 text-center mt-2">
-                    This site is protected by reCAPTCHA and the{" "}
-                    <a href="https://policies.google.com/privacy" className="underline text-gray-700 hover:text-black">
-                        Google Privacy Policy
-                    </a>{" "}
-                    and{" "}
-                    <a href="https://policies.google.com/terms" className="underline text-gray-700 hover:text-black">
-                        Terms of Service
-                    </a>{" "}
-                    apply.
-                </p>
-            </DialogContent>
-        </Dialog>
+            </div>
+        </div>
     );
 }

@@ -13,18 +13,22 @@ import Footer from "./components/Footer";
 
 export default function Home() {
   return (
-    <>
-    <Header />
-    <ResponsiveCarousel />
-    <FeaturedSection/>
-    <CuratorsPicks />
-    {/* <ArtsySection /> */}
-    <AuctionCarousel/>
-    {/* <FeaturedShows /> */}
-    <CurrentFairs />
-    <FeaturedGalleries />
-    <TrendingArtists />
-    <Footer />
-    </>
+    <div className="min-h-screen w-full overflow-x-hidden">
+      <Header />
+      <main className="w-full max-w-[1920px] mx-auto">
+        <ResponsiveCarousel />
+        <div className="">
+          <FeaturedSection/>
+          <CuratorsPicks />
+          {/* <ArtsySection /> */}
+          <AuctionCarousel/>
+          {/* <FeaturedShows /> */}
+          <CurrentFairs />
+          <FeaturedGalleries />
+          <TrendingArtists />
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 }

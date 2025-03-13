@@ -1,13 +1,20 @@
 'use client';
-import { Search, User, Menu, X, ChevronDown } from "lucide-react";
+import { Search, User, Menu, X, ChevronDown, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "../../../public/logo2.png";
 import SignUpModal from "./SignUpModal";
 import LoginModal from "./LoginModal";
+import { useDispatch, useSelector } from "react-redux";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { logout } from "@/redux/features/authSlice";
+import toast from 'react-hot-toast';
 
 export default function Header() {
+    const dispatch = useDispatch();
+    const { isAuthenticated, user } = useSelector((state) => state.auth);
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
@@ -37,16 +44,9 @@ export default function Header() {
         { name: "Artists", href: "/artists" },
         { name: "Fairs & Events", href: "/art-fairs" },
         { name: "Museums", href: "/institutions" },
-        
     ];
 
-    // Main header secondary links (right side)
-    const mainSecondaryLinks = [
-
-        
-    ];
-
-    // Secondary header links
+    const mainSecondaryLinks = [];
     const subSecondaryLinks = [
         { name: "Shows", href: "/shows" },
         { name: "Buy", href: "/collect" },
@@ -55,13 +55,22 @@ export default function Header() {
         { name: "Price Database", href: "/price-database" },
     ];
 
+    const handleLogout = async () => {
+        try {
+            await dispatch(logout()).unwrap();
+            toast.success('Logged out successfully');
+        } catch (error) {
+            toast.error(error.message || 'Logout failed');
+        }
+    };
+
     return (
         <>
             {/* Main Header */}
             <header
-                className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
+                className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
                     isScrolled 
-                        ? "bg-white/95 shadow-sm" 
+                        ? "bg-white shadow-md" 
                         : "bg-transparent"
                 }`}
             >
@@ -109,18 +118,37 @@ export default function Header() {
                             <button className="p-2 hidden md:block">
                                 <Search className="h-5 w-5 text-gray-900" />
                             </button>
-                            <button 
-                                onClick={() => setIsLoginModalOpen(true)}
-                                className="hidden md:block text-sm font-medium text-gray-900 hover:text-gray-600"
-                            >
-                                Log In
-                            </button>
-                            <button
-                                onClick={() => setIsSignUpModalOpen(true)}
-                                className="hidden md:block text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-all"
-                            >
-                                Sign Up
-                            </button>
+                            {isAuthenticated ? (
+                                <>
+                                    <div className="flex items-center space-x-2">
+                                        <User className="w-5 h-5" />
+                                        <span className="text-sm">{user?.name}</span>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        className="flex items-center space-x-2"
+                                        onClick={handleLogout}
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        <span>Logout</span>
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <button 
+                                        onClick={() => setIsLoginModalOpen(true)}
+                                        className="hidden md:block text-sm font-medium text-gray-900 hover:text-gray-600"
+                                    >
+                                        Log In
+                                    </button>
+                                    <button
+                                        onClick={() => setIsSignUpModalOpen(true)}
+                                        className="hidden md:block text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-all"
+                                    >
+                                        Sign Up
+                                    </button>
+                                </>
+                            )}
                             <button
                                 onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
                                 className="md:hidden p-2"
@@ -138,7 +166,7 @@ export default function Header() {
 
             {/* Secondary Header */}
             <div
-                className={`fixed top-[69px] left-0 right-0 z-[9998] transition-all duration-300 ${
+                className={`fixed top-[69px] left-0 right-0 z-30 transition-all duration-300 ${
                     isScrolled 
                         ? "bg-gray-50/95 shadow-sm" 
                         : "bg-gray-100/95"
@@ -162,7 +190,7 @@ export default function Header() {
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden fixed top-[72px] left-0 right-0 z-[9997] bg-white py-4 shadow-lg">
+                <div className="md:hidden fixed top-[72px] left-0 right-0 z-20 bg-white py-4 shadow-lg">
                     <div className="container mx-auto px-4 space-y-4">
                         <div className="relative">
                             <input
@@ -183,18 +211,35 @@ export default function Header() {
                             </Link>
                         ))}
                         <div className="space-y-2 pt-4">
-                            <button
-                                onClick={() => setIsLoginModalOpen(true)}
-                                className="w-full text-sm font-medium text-gray-900 py-2"
-                            >
-                                Log In
-                            </button>
-                            <button
-                                onClick={() => setIsSignUpModalOpen(true)}
-                                className="w-full text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md"
-                            >
-                                Sign Up
-                            </button>
+                            {isAuthenticated ? (
+                                <>
+                                    <div className="flex items-center space-x-2 py-2">
+                                        <User className="w-5 h-5" />
+                                        <span className="text-sm">{user?.name}</span>
+                                    </div>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md"
+                                    >
+                                        Logout
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => setIsLoginModalOpen(true)}
+                                        className="w-full text-sm font-medium text-gray-900 py-2"
+                                    >
+                                        Log In
+                                    </button>
+                                    <button
+                                        onClick={() => setIsSignUpModalOpen(true)}
+                                        className="w-full text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md"
+                                    >
+                                        Sign Up
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -204,8 +249,22 @@ export default function Header() {
             <div className="h-36 md:h-28"></div>
 
             {/* Modals */}
-            <SignUpModal isOpen={isSignUpModalOpen} onClose={() => setIsSignUpModalOpen(false)} />
-            <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+            <SignUpModal 
+                isOpen={isSignUpModalOpen} 
+                onClose={() => setIsSignUpModalOpen(false)}
+                onOpenLogin={() => {
+                    setIsSignUpModalOpen(false);
+                    setIsLoginModalOpen(true);
+                }}
+            />
+            <LoginModal 
+                isOpen={isLoginModalOpen} 
+                onClose={() => setIsLoginModalOpen(false)}
+                onOpenSignUp={() => {
+                    setIsLoginModalOpen(false);
+                    setIsSignUpModalOpen(true);
+                }}
+            />
         </>
     );
 }
