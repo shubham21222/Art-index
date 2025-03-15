@@ -4,74 +4,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
-
-const GALLERIES_QUERY = `
-  query partnersRoutes_GalleriesRouteQuery {
-    viewer {
-      orderedSet(id: "5638fdfb7261690296000031") {
-        orderedItemsConnection(first: 50) {
-          edges {
-            node {
-              __typename
-              ... on Profile {
-                internalID
-                href
-                owner {
-                  __typename
-                  ... on Partner {
-                    internalID
-                    href
-                    name
-                    featuredShow {
-                      name
-                      location {
-                        city
-                      }
-                      coverImage {
-                        resized(height: 500, version: ["main", "normalized", "larger", "large"]) {
-                          src
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+// Define the API endpoint
+const API_URL = "/api/galleries"; // Your new MongoDB API route
 
 export default function FeaturedGalleries() {
   const [galleries, setGalleries] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0); // Track the center gallery
 
-  // Fetch data from Artsy API
+  // Fetch data from MongoDB API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(ARTSY_API_URL, {
-          method: "POST",
+        const response = await fetch(API_URL, {
+          method: "GET",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: GALLERIES_QUERY }),
         });
 
-        const { data } = await response.json();
-        const fetchedGalleries =
-          data?.viewer?.orderedSet?.orderedItemsConnection?.edges
-            ?.filter((edge) => edge.node.__typename === "Profile")
-            .map((edge) => ({
-              id: edge.node.internalID,
-              href: edge.node.href,
-              name: edge.node.owner.name,
-              location: edge.node.owner.featuredShow?.location?.city || "N/A",
-              image: edge.node.owner.featuredShow?.coverImage?.resized?.src || "/placeholder.svg",
-            })) || [];
-        setGalleries(fetchedGalleries);
-        setCurrentIndex(Math.floor(fetchedGalleries.length / 2)); // Set initial index to the middle
+        const { galleries: fetchedGalleries } = await response.json();
+        setGalleries(fetchedGalleries || []);
+        setCurrentIndex(Math.floor((fetchedGalleries || []).length / 2)); // Set initial index to the middle
       } catch (error) {
         console.error("Error fetching galleries:", error);
       }
@@ -91,7 +42,7 @@ export default function FeaturedGalleries() {
 
   // Calculate 3D positions for each slide
   const getSlideStyle = (index) => {
-    const total = galleries.length;
+    const total = galleries.length || 6; // Fallback to 6 for skeletons
     const angle = (360 / total) * (index - currentIndex); // Circular positioning
     const radius = 700; // Larger radius for wider spacing
     const translateZ = -radius; // Depth of the 3D circle
@@ -107,7 +58,7 @@ export default function FeaturedGalleries() {
       top: "50%", // Center vertically
       left: "50%", // Center horizontally
       transformOrigin: "center center",
-      zIndex: Math.round(10 - Math.abs(angle)), // Reduced from 100 to 10
+      zIndex: Math.round(10 - Math.abs(angle)),
       marginLeft: "-200px", // Half of slide width (400px / 2) to center it
       marginTop: "-200px", // Half of slide height (400px / 2) to center it
     };
@@ -167,7 +118,15 @@ export default function FeaturedGalleries() {
               </div>
             ))
           ) : (
-            <Skeleton className="w-[400px] h-[400px] rounded-lg" />
+            Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                style={getSlideStyle(index)}
+                className="w-[400px] h-[400px] rounded-lg overflow-hidden"
+              >
+                <Skeleton className="w-full h-full rounded-lg" />
+              </div>
+            ))
           )}
         </div>
 
@@ -211,17 +170,19 @@ export default function FeaturedGalleries() {
       </div>
 
       {/* Indicators */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {galleries.map((_, index) => (
-          <div
-            key={index}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
-            }`}
-            onClick={() => setCurrentIndex(index)}
-          />
-        ))}
-      </div>
+      {galleries.length > 0 && (
+        <div className="flex justify-center mt-6 space-x-2">
+          {galleries.map((_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
+              }`}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

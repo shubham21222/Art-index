@@ -4,76 +4,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
-
-const AUCTION_QUERY = `
-  query HomeAuctionLotsRailQuery {
-    viewer {
-      artworksConnection(forSale: true, first: 20, geneIDs: "our-top-auction-lots") {
-        edges {
-          node {
-            internalID
-            href
-            slug
-            title
-            artistNames
-            image {
-              src: url(version: ["larger", "large"])
-              width
-              height
-            }
-            sale {
-              endAt
-              isClosed
-            }
-            saleArtwork {
-              highestBid {
-                display
-              }
-              openingBid {
-                display
-              }
-            }
-            collectorSignals {
-              auction {
-                lotClosesAt
-                registrationEndsAt
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+// Define your API endpoint (adjust the path if needed)
+const API_URL = "/api/auction_lots"; // Assuming this is your API route
 
 export default function AuctionCarousel() {
     const [auctionData, setAuctionData] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(null); // Initialize as null, set to middle after data loads
 
-    // Fetch data from Artsy API
+    // Fetch data from your MongoDB API
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(ARTSY_API_URL, {
-                    method: "POST",
+                const response = await fetch(API_URL, {
+                    method: "GET", // Your API uses GET by default
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({
-                        query: AUCTION_QUERY,
-                    }),
                 });
 
-                const { data } = await response.json();
-                const artworks = data?.viewer?.artworksConnection?.edges.map(
-                    (edge) => edge.node
-                );
-                setAuctionData(artworks || []);
+                const { auctionLots } = await response.json();
+                setAuctionData(auctionLots || []);
                 // Set initial index to the middle of the array
-                setCurrentIndex(Math.floor((artworks || []).length / 2));
+                setCurrentIndex(Math.floor((auctionLots || []).length / 2));
             } catch (error) {
-                console.error("Error fetching data from Artsy API:", error);
+                console.error("Error fetching data from MongoDB API:", error);
             }
         };
 
@@ -118,7 +72,7 @@ export default function AuctionCarousel() {
             top: "50%", // Center vertically
             left: "50%", // Center horizontally
             transformOrigin: "center center",
-            zIndex: Math.round(10 - Math.abs(angle)), // Reduced from 100 to 10
+            zIndex: Math.round(10 - Math.abs(angle)),
             marginLeft: "-175px", // Half of slide width (350px / 2) to center it
             marginTop: "-150px", // Half of slide height (300px / 2) to center it
         };

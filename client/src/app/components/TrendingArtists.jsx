@@ -4,69 +4,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const ARTSY_API_URL = "https://metaphysics-cdn.artsy.net/v2";
-
-const ARTISTS_QUERY = `
-  query HomeTrendingArtistsRailQuery {
-    viewer {
-      curatedTrendingArtists(first: 20) {
-        edges {
-          node {
-            internalID
-            slug
-            name
-            href
-            initials
-            formattedNationalityAndBirthday
-            counts {
-              artworks
-              forSaleArtworks
-            }
-            coverArtwork {
-              image {
-                cropped(width: 445, height: 334, version: ["larger", "large"]) {
-                  src
-                  srcSet
-                }
-              }
-              id
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+// Define the API endpoint
+const API_URL = "/api/trending-artists"; // Your new MongoDB API route
 
 export default function TrendingArtists() {
   const [artists, setArtists] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0); // Track the center artist
 
-  // Fetch data from Artsy API
+  // Fetch data from MongoDB API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(ARTSY_API_URL, {
-          method: "POST",
+        const response = await fetch(API_URL, {
+          method: "GET",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: ARTISTS_QUERY }),
         });
 
-        const { data } = await response.json();
-        const fetchedArtists =
-          data?.viewer?.curatedTrendingArtists?.edges
-            ?.map((edge) => ({
-              id: edge.node.internalID,
-              slug: edge.node.slug,
-              name: edge.node.name,
-              href: edge.node.href,
-              nationalityAndBirthday: edge.node.formattedNationalityAndBirthday,
-              artworkCount: edge.node.counts.artworks,
-              forSaleArtworkCount: edge.node.counts.forSaleArtworks,
-              image: edge.node.coverArtwork?.image?.cropped?.src || "/placeholder.svg",
-            })) || [];
-        setArtists(fetchedArtists);
-        setCurrentIndex(Math.floor(fetchedArtists.length / 2)); // Set initial index to the middle
+        const { artists: fetchedArtists } = await response.json();
+        setArtists(fetchedArtists || []);
+        setCurrentIndex(Math.floor((fetchedArtists || []).length / 2)); // Set initial index to the middle
       } catch (error) {
         console.error("Error fetching artists:", error);
       }
@@ -86,7 +42,7 @@ export default function TrendingArtists() {
 
   // Calculate 3D positions for each slide
   const getSlideStyle = (index) => {
-    const total = artists.length;
+    const total = artists.length || 6; // Fallback to 6 for skeletons
     const angle = (360 / total) * (index - currentIndex); // Circular positioning
     const radius = 700; // Larger radius for wider spacing
     const translateZ = -radius; // Depth of the 3D circle
@@ -102,7 +58,7 @@ export default function TrendingArtists() {
       top: "50%", // Center vertically
       left: "50%", // Center horizontally
       transformOrigin: "center center",
-      zIndex: Math.round(10 - Math.abs(angle)), // Reduced from 100 to 10
+      zIndex: Math.round(10 - Math.abs(angle)),
       marginLeft: "-200px", // Half of slide width (400px / 2) to center it
       marginTop: "-200px", // Half of slide height (400px / 2) to center it
     };
@@ -165,7 +121,15 @@ export default function TrendingArtists() {
               </div>
             ))
           ) : (
-            <Skeleton className="w-[400px] h-[400px] rounded-lg" />
+            Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                style={getSlideStyle(index)}
+                className="w-[400px] h-[400px] rounded-lg overflow-hidden"
+              >
+                <Skeleton className="w-full h-full rounded-lg" />
+              </div>
+            ))
           )}
         </div>
 
@@ -209,17 +173,19 @@ export default function TrendingArtists() {
       </div>
 
       {/* Indicators */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {artists.map((_, index) => (
-          <div
-            key={index}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
-            }`}
-            onClick={() => setCurrentIndex(index)}
-          />
-        ))}
-      </div>
+      {artists.length > 0 && (
+        <div className="flex justify-center mt-6 space-x-2">
+          {artists.map((_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
+              }`}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
