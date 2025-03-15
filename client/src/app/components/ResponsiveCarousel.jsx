@@ -59,7 +59,7 @@ const Carousel = () => {
 
   return (
     <div 
-      className="relative mt-2 w-full h-[60vh] sm:h-[50vh] md:h-[70vh] lg:h-[80vh] bg-black overflow-hidden"
+      className="relative  w-full h-[60vh] sm:h-[50vh] md:h-[70vh] lg:h-[80vh] bg-black overflow-hidden"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >

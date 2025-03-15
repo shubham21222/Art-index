@@ -23,7 +23,7 @@ export default function Home() {
           {/* <ArtsySection /> */}
           <AuctionCarousel/>
           {/* <FeaturedShows /> */}
-          <CurrentFairs />
+          {/* <CurrentFairs /> */}
           <FeaturedGalleries />
           <TrendingArtists />
         </div>

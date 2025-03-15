@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logout } from "@/redux/features/authSlice";
 import toast from 'react-hot-toast';
+import "../globals.css";
 
 export default function Header() {
     const dispatch = useDispatch();
@@ -49,7 +50,7 @@ export default function Header() {
 
     const primaryLinks = [
         { name: "Artists", href: "/artists" },
-        { name: "Fairs & Events", href: "/art-fairs" },
+        // { name: "Fairs & Events", href: "/art-fairs" },
         { name: "Museums", href: "/institutions" },
     ];
 
@@ -58,8 +59,8 @@ export default function Header() {
         { name: "Shows", href: "/shows" },
         { name: "Buy", href: "/collect" },
         { name: "Galleries", href: "/galleries" },
-        { name: "Artworks", href: "/collect" },
-        { name: "Price Database", href: "/price-database" },
+        // { name: "Artworks", href: "/collect" },
+        { name: "Art Database", href: "/price-database" },
     ];
 
     const handleLogout = async () => {
@@ -77,27 +78,14 @@ export default function Header() {
             <header
                 className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
                     isScrolled 
-                        ? "bg-white shadow-md" 
+                        ? "bg-white/30 backdrop-blur-md border-b border-gray-200/20 shadow-sm" 
                         : "bg-transparent"
                 }`}
             >
                 <div className="container mx-auto px-4 py-4">
                     <nav className="flex items-center justify-between">
-                        {/* Left Navigation */}
-                        <div className="hidden md:flex items-center space-x-6">
-                            {primaryLinks.map((link) => (
-                                <Link
-                                    key={link.name}
-                                    href={link.href}
-                                    className="text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors"
-                                >
-                                    {link.name}
-                                </Link>
-                            ))}
-                        </div>
-
-                        {/* Centered Logo */}
-                        <div className="absolute left-1/2 transform -translate-x-1/2">
+                        {/* Logo */}
+                        <div className="flex items-center">
                             <Link href="/">
                                 <Image
                                     src={logo}
@@ -109,31 +97,34 @@ export default function Header() {
                             </Link>
                         </div>
 
-                        {/* Right Side - Main Secondary Links + Auth */}
+                        {/* Center Navigation */}
+                        <div className="hidden md:flex items-center space-x-6">
+                            {[...primaryLinks, ...subSecondaryLinks].map((link) => (
+                                <Link
+                                    key={link.name}
+                                    href={link.href}
+                                    className="text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors relative group"
+                                >
+                                    {link.name}
+                                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-900 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                                </Link>
+                            ))}
+                        </div>
+
+                        {/* Right Side - Search + Auth */}
                         <div className="flex items-center space-x-4">
-                            <div className="hidden md:flex items-center space-x-6">
-                                {mainSecondaryLinks.map((link) => (
-                                    <Link
-                                        key={link.name}
-                                        href={link.href}
-                                        className="text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                ))}
-                            </div>
-                            <button className="p-2 hidden md:block">
+                            <button className="p-2 hidden md:block hover:bg-gray-100/50 rounded-full transition-colors">
                                 <Search className="h-5 w-5 text-gray-900" />
                             </button>
                             {isAuthenticated ? (
                                 <>
-                                    <div className="flex items-center space-x-2">
+                                    <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-100/50">
                                         <User className="w-5 h-5" />
                                         <span className="text-sm">{user?.name}</span>
                                     </div>
                                     <Button
                                         variant="outline"
-                                        className="flex items-center space-x-2"
+                                        className="flex items-center space-x-2 hover:bg-gray-100/50"
                                         onClick={handleLogout}
                                     >
                                         <LogOut className="w-4 h-4" />
@@ -144,13 +135,13 @@ export default function Header() {
                                 <>
                                     <button 
                                         onClick={() => setIsLoginModalOpen(true)}
-                                        className="hidden md:block text-sm font-medium text-gray-900 hover:text-gray-600"
+                                        className="hidden md:block text-sm font-medium text-gray-900 hover:text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-100/50 transition-all"
                                     >
                                         Log In
                                     </button>
                                     <button
                                         onClick={() => setIsSignUpModalOpen(true)}
-                                        className="hidden md:block text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-all"
+                                        className="hidden md:block text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-all"
                                     >
                                         Sign Up
                                     </button>
@@ -158,7 +149,7 @@ export default function Header() {
                             )}
                             <button
                                 onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-                                className="md:hidden p-2"
+                                className="md:hidden p-2 hover:bg-gray-100/50 rounded-full transition-colors"
                             >
                                 {isMobileMenuOpen ? (
                                     <X className="h-6 w-6 text-gray-900" />
@@ -171,39 +162,15 @@ export default function Header() {
                 </div>
             </header>
 
-            {/* Secondary Header */}
-            <div
-                className={`fixed top-[69px] left-0 right-0 z-30 transition-all duration-300 ${
-                    isScrolled 
-                        ? "bg-gray-50/95 shadow-sm" 
-                        : "bg-gray-100/95"
-                }`}
-            >
-                <div className="container mx-auto px-4 py-2">
-                    <div className="hidden md:flex justify-center space-x-8">
-                        {subSecondaryLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                href={link.href}
-                                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors py-2 relative group"
-                            >
-                                {link.name}
-                                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-900 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden fixed top-[72px] left-0 right-0 z-20 bg-white py-4 shadow-lg">
+                <div className="md:hidden fixed top-[72px] left-0 right-0 z-20 bg-white/80 backdrop-blur-md py-4 shadow-lg">
                     <div className="container mx-auto px-4 space-y-4">
                         <div className="relative">
                             <input
                                 type="text"
                                 placeholder="Search..."
-                                className="w-full border rounded-md px-4 py-2 text-sm"
+                                className="w-full border rounded-full px-4 py-2 text-sm bg-white/50 backdrop-blur-sm"
                             />
                             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
                         </div>
@@ -226,7 +193,7 @@ export default function Header() {
                                     </div>
                                     <button
                                         onClick={handleLogout}
-                                        className="w-full text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md"
+                                        className="w-full text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full"
                                     >
                                         Logout
                                     </button>
@@ -241,7 +208,7 @@ export default function Header() {
                                     </button>
                                     <button
                                         onClick={() => setIsSignUpModalOpen(true)}
-                                        className="w-full text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-md"
+                                        className="w-full text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full"
                                     >
                                         Sign Up
                                     </button>
@@ -253,7 +220,7 @@ export default function Header() {
             )}
 
             {/* Push content down */}
-            <div className="h-36 md:h-28"></div>
+            <div className="h-20"></div>
 
             {/* Modals */}
             <SignUpModal 
