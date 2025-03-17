@@ -1,29 +1,30 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
-import Masonry from 'react-masonry-css';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+"use client";
+import { useState, useEffect } from "react";
+import Masonry from "react-masonry-css";
+import Image from "next/image";
+import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+} from "@/components/ui/select";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+
+// Define the API endpoint
+const API_URL = "/api/filtered-artworks"; // Your new MongoDB API route
 
 const categories = [
-  { name: 'Contemporary Art', image: '/images/contemporary.jpg' },
-  { name: 'Painting', image: '/images/painting.jpg' },
-  { name: 'Street Art', image: '/images/street.jpg' },
-  { name: 'Photography', image: '/images/photo.jpg' },
-  { name: 'Emerging Art', image: '/images/emerging.jpg' },
-  { name: '20th-Century Art', image: '/images/century.jpg' },
+  { name: "Contemporary Art", image: "/images/contemporary.jpg" },
+  { name: "Painting", image: "/images/painting.jpg" },
+  { name: "Street Art", image: "/images/street.jpg" },
+  { name: "Photography", image: "/images/photo.jpg" },
+  { name: "Emerging Art", image: "/images/emerging.jpg" },
+  { name: "20th-Century Art", image: "/images/century.jpg" },
 ];
 
 const ArtworkCard = ({ artwork }) => (
@@ -78,102 +79,36 @@ const LoadingSkeleton = () => (
 );
 
 export default function ArtGallery() {
-  const [sort, setSort] = useState('Recommended');
+  const [sort, setSort] = useState("Recommended");
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [endCursor, setEndCursor] = useState(null);
   const [hasNextPage, setHasNextPage] = useState(false);
 
-  const client = new ApolloClient({
-    uri: 'https://metaphysics-cdn.artsy.net/v2',
-    cache: new InMemoryCache(),
-  });
-
   const fetchArtworks = async (afterCursor = null) => {
     try {
       setLoading(afterCursor ? false : true);
       setLoadingMore(!!afterCursor);
 
-      const { data } = await client.query({
-        query: gql`
-          query CollectArtworkFilterQuery($input: FilterArtworksInput!) {
-            viewer {
-              filtered_artworks: artworksConnection(input: $input) {
-                pageInfo {
-                  hasNextPage
-                  endCursor
-                }
-                edges {
-                  node {
-                    id
-                    slug
-                    href
-                    internalID
-                    title
-                    date
-                    saleMessage
-                    image(includeAll: false) {
-                      url(version: "large")
-                      aspectRatio
-                    }
-                    artist(shallow: true) {
-                      name
-                    }
-                    partner(shallow: true) {
-                      name
-                    }
-                    collectorSignals {
-                      primaryLabel
-                      auction {
-                        lotClosesAt
-                        registrationEndsAt
-                        onlineBiddingExtended
-                      }
-                      partnerOffer {
-                        priceWithDiscount {
-                          display
-                        }
-                      }
-                    }
-                    marketPriceInsights {
-                      demandRank
-                    }
-                  }
-                }
-              }
-            }
-          }
-        `,
-        variables: {
-          input: {
-            after: afterCursor,
-            first: 50,
-          },
-        },
+      const url = new URL(API_URL, window.location.origin);
+      if (afterCursor) url.searchParams.append("after", afterCursor);
+      url.searchParams.append("first", "50");
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       });
 
-      const fetchedArtworks = data?.viewer?.filtered_artworks?.edges.map(
-        (edge) => ({
-          id: edge.node.id,
-          slug: edge.node.slug,
-          image: edge.node.image?.url || '/images/placeholder.jpg',
-          title: edge.node.title,
-          artist: edge.node.artist?.name,
-          gallery: edge.node.partner?.name,
-          price: edge.node.saleMessage || 'Price on request',
-          primaryLabel: edge.node.collectorSignals?.primaryLabel || 'Available',
-          demandRank: edge.node.marketPriceInsights?.demandRank || 'N/A',
-        })
-      );
+      const { artworks: fetchedArtworks, pageInfo } = await response.json();
 
       setArtworks((prevArtworks) =>
         afterCursor ? [...prevArtworks, ...fetchedArtworks] : fetchedArtworks
       );
-      setEndCursor(data?.viewer?.filtered_artworks?.pageInfo?.endCursor);
-      setHasNextPage(data?.viewer?.filtered_artworks?.pageInfo?.hasNextPage);
+      setEndCursor(pageInfo?.endCursor);
+      setHasNextPage(pageInfo?.hasNextPage);
     } catch (error) {
-      console.error('Error fetching artworks:', error);
+      console.error("Error fetching artworks:", error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -192,7 +127,7 @@ export default function ArtGallery() {
   };
 
   return (
-    <div className=" min-h-screen">
+    <div className="min-h-screen">
       <Header />
       <div className="max-w-[1500px] mx-auto px-4 mt-8 md:mt-0 sm:px-6 py-8">
         {/* Hero Section */}
@@ -265,7 +200,7 @@ export default function ArtGallery() {
               disabled={loadingMore}
               className="w-full sm:w-auto"
             >
-              {loadingMore ? 'Loading...' : 'Load More Artworks'}
+              {loadingMore ? "Loading..." : "Load More Artworks"}
             </Button>
           </div>
         )}

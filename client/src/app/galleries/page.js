@@ -26,10 +26,10 @@ const page = () => {
    <div className='max-w-[1500px] mx-auto'>
    <GraffitiAndStreetArtCarousel />
    <PhotographyGalleriesCarousel />
-   <ContemporaryDesign />
+   {/* <ContemporaryDesign /> */}
    <Modern />
    <MiddleEasternArt />
-   <EmergingArt />
+   <EmergingArt />  
    <Drawings />
    <SouthAsianAndSoutheastAsianArt />
    <EasternEuropeanArt />

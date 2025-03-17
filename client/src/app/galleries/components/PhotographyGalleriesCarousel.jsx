@@ -2,220 +2,194 @@
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ApolloClient, gql, InMemoryCache, useQuery } from "@apollo/client";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
-
-
-
-// Define the GraphQL query
-const PARTNERS_RAIL_QUERY = gql`
-  query PartnersRailQuery($id: String!, $category: [String], $type: [PartnerClassification!]!) {
-    partnerCategory(id: $id) {
-      name
-      primary: partners(
-        defaultProfilePublic: true
-        eligibleForListing: true
-        eligibleForPrimaryBucket: true
-        partnerCategories: $category
-        sort: RANDOM_SCORE_DESC
-        type: $type
-      ) {
-        internalID
-        slug
-        name
-        href
-        locationsConnection(first: 60) {
-          edges {
-            node {
-              city
-              id
-            }
-          }
-        }
-        profile {
-          image {
-            cropped(width: 445, height: 334, version: ["wide", "large", "featured", "larger"]) {
-              src
-              srcSet
-            }
-          }
-          id
-        }
-      }
-      id
-    }
-  }
-`;
-
-// Initialize Apollo Client outside the component
-const client = new ApolloClient({
-    uri: "https://metaphysics-cdn.artsy.net/v2",
-    cache: new InMemoryCache(),
-});
+// Define the API endpoint
+const API_URL = "/api/photography-galleries";
 
 export default function PhotographyGalleriesCarousel() {
-    const carouselRef = useRef(null);
-    const [activeIndex, setActiveIndex] = useState(0);
+  const [partners, setPartners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0); // Center item index
 
-    // Fetch data using the query
-    const { loading, error, data } = useQuery(PARTNERS_RAIL_QUERY, {
-        variables: {
-            id: "photography",
-            category: "GALLERY",
-            type: "GALLERY",
-        },
-        client,
-    });
+  // Fetch data from MongoDB API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(API_URL, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
 
-    // Extract partner data
-    const partners = data?.partnerCategory?.primary || [];
-
-    // Scroll handlers
-    const scrollLeft = () => {
-        if (carouselRef.current) {
-            carouselRef.current.scrollBy({ left: -220, behavior: "smooth" });
-        }
+        const { galleries } = await response.json();
+        setPartners(galleries || []);
+        setCurrentIndex(Math.floor((galleries || []).length / 2)); // Start at middle
+      } catch (error) {
+        console.error("Error fetching photography galleries:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const scrollRight = () => {
-        if (carouselRef.current) {
-            carouselRef.current.scrollBy({ left: 220, behavior: "smooth" });
-        }
+    fetchData();
+  }, []);
+
+  // Navigation handlers
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? partners.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === partners.length - 1 ? 0 : prev + 1));
+  };
+
+  // Calculate 3D slide styles
+  const getSlideStyle = (index) => {
+    const total = partners.length || 5; // Fallback for skeletons
+    const angle = (360 / total) * (index - currentIndex); // Circular positioning
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const radius = isMobile ? 300 : 600; // Smaller radius on mobile
+    const translateZ = -radius; // Depth of the 3D circle
+    const rotateY = angle; // Rotation around Y-axis
+    const opacity = Math.abs(angle) > 90 ? 0 : 1 - Math.abs(angle) / 120; // Fade distant slides
+    const scale = 1 - Math.abs(angle) / 180; // Scale down distant slides
+
+    return {
+      transform: `rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
+      opacity,
+      transition: "transform 0.8s ease, opacity 0.8s ease",
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transformOrigin: "center center",
+      zIndex: Math.round(10 - Math.abs(angle)),
+      width: isMobile ? "200px" : "325px", // Smaller width on mobile
+      height: isMobile ? "300px" : "400px", // Adjusted height on mobile
+      marginLeft: isMobile ? "-100px" : "-162.5px", // Center based on width
+      marginTop: isMobile ? "-150px" : "-200px", // Center based on height
     };
+  };
 
-    // Add scroll event listener
-    useEffect(() => {
-        const handleScroll = () => {
-            if (carouselRef.current) {
-                const scrollPosition = carouselRef.current.scrollLeft;
-                const totalWidth = carouselRef.current.scrollWidth;
-                const visibleWidth = carouselRef.current.clientWidth;
-                const index = scrollPosition > totalWidth / 2 - visibleWidth ? 1 : 0;
-                setActiveIndex(index);
-            }
-        };
-
-        const carouselElement = carouselRef.current;
-        if (carouselElement) {
-            carouselElement.addEventListener("scroll", handleScroll);
-        }
-
-        return () => {
-            if (carouselElement) {
-                carouselElement.removeEventListener("scroll", handleScroll);
-            }
-        };
-    }, []); // Empty dependency array ensures this runs only once
-
-    // Conditional rendering for loading, error, and empty states
-    if (loading) {
-        return <p>Loading...</p>;
+  // Deduplicate and truncate cities
+  const deduplicateAndTruncateCities = (cities, maxCitiesToShow = 3) => {
+    const uniqueCities = Array.from(new Set(cities));
+    if (uniqueCities.length > maxCitiesToShow) {
+      return uniqueCities.slice(0, maxCitiesToShow).join(", ") + ", ...";
     }
+    return uniqueCities.join(", ");
+  };
 
-    if (error) {
-        return <p>Error: {error.message}</p>;
-    }
-
-    if (partners.length === 0) {
-        return <p>No photography galleries available for this category.</p>;
-    }
-
-    function deduplicateAndTruncateCities(cities, maxCitiesToShow = 3) {
-        // Step 1: Deduplicate the cities
-        const uniqueCities = Array.from(new Set(cities));
-
-        // Step 2: Truncate the list if it exceeds the maximum number of cities to show
-        if (uniqueCities.length > maxCitiesToShow) {
-            return uniqueCities.slice(0, maxCitiesToShow).join(", ") + ", ...";
-        }
-
-        // Step 3: Return the full list if it's within the limit
-        return uniqueCities.join(", ");
-    }
-    return (
-        <div className="px-6 py-8">
-            {/* Header Section */}
-            <div className="flex justify-between items-center mb-4">
-                <div>
-                    <h2 className="text-2xl">Photography Galleries</h2>
-                    <p className="text-gray-500 text-2xl">Explore galleries specializing in photography</p>
-                </div>
-                <a href="#" className="text-black text-sm font-medium hover:underline">
-                    View All Galleries
-                </a>
-            </div>
-
-            {/* Carousel with Buttons */}
-            <div className="relative">
-                {/* Left Button */}
-                <button
-                    onClick={scrollLeft}
-                    className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full hidden md:flex"
-                >
-                    <ChevronLeft className="w-5 h-5" />
-                </button>
-
-                {/* Partners Carousel */}
-                <div
-                    ref={carouselRef}
-                    className="overflow-x-auto scrollbar-hide pt-8 flex space-x-4 scroll-smooth px-2"
-                >
-                    {partners.map((partner) => (
-                        <Link
-                        key={partner.internalID}
-                        href={`/visit-gallery/${partner.slug}`} >
-                        <div key={partner.internalID} className="group flex-shrink-0 flex flex-col justify-end min-w-[220px] p-2 rounded-md">
-                            {/* Image */}
-                            <div className="rounded-md overflow-hidden">
-                                {partner.profile?.image?.cropped?.src ? (
-                                    <Image
-                                        src={partner.profile.image.cropped.src}
-                                        alt={partner.name}
-                                        width={220}
-                                        height={240}
-                                        className="object-cover transition-transform duration-300 transform group-hover:scale-105"
-                                    />
-                                ) : (
-                                    <div className="w-full h-[240px] bg-gray-200 flex items-center justify-center text-gray-500">
-                                        No Image Available
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Partner Name and Location */}
-                            <div className="mt-2">
-                                <h3 className="text-sm font-semibold">{partner.name}</h3>
-                                <p className="text-gray-500 italic text-xs">
-                                    {deduplicateAndTruncateCities(
-                                        partner.locationsConnection.edges.map(({ node }) => node.city)
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-                        </Link>
-                    ))}
-                </div>
-
-                {/* Right Button */}
-                <button
-                    onClick={scrollRight}
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full hidden md:flex"
-                >
-                    <ChevronRight className="w-5 h-5" />
-                </button>
-            </div>
-
-            {/* Line Indicators */}
-            <div className="flex justify-center mt-4 space-x-2">
-                {[0, 1].map((index) => (
-                    <div
-                        key={index}
-                        className={`h-[1px] w-[300px] rounded-full transition-colors duration-300 ${index === activeIndex ? "bg-black" : "bg-gray-300"
-                            }`}
-                    />
-                ))}
-            </div>
+  return (
+    <section className="px-6 py-8 max-w-[1500px] mx-auto">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+        <div className="text-center sm:text-left">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Photography Galleries
+          </h2>
+          <p className="text-gray-500 text-sm md:text-base">
+            Explore galleries specializing in photography
+          </p>
         </div>
-    );
+        <Link
+          href="#"
+          className="text-sm font-medium text-black underline hover:text-gray-700 mt-2 sm:mt-0"
+        >
+          View All Galleries
+        </Link>
+      </div>
+
+      {/* 3D Carousel */}
+      <div className="relative h-[500px] w-full perspective-[1200px] overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
+          {loading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+              <div
+                key={index}
+                style={getSlideStyle(index)}
+                className="rounded-lg overflow-hidden"
+              >
+                <Skeleton className="w-full h-[80%] rounded-t-md" />
+                <div className="p-2 space-y-2">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              </div>
+            ))
+          ) : partners.length > 0 ? (
+            partners.map((partner, index) => (
+              <div
+                key={partner.internalID}
+                style={getSlideStyle(index)}
+                className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+              >
+                <Link href={`/visit-gallery/${partner.slug}`} className="block h-full">
+                  {/* Image */}
+                  <div className="relative w-full h-[80%]">
+                    <Image
+                      src={partner.image}
+                      alt={partner.name}
+                      fill
+                      className="object-cover rounded-t-md transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
+                  </div>
+                  {/* Details */}
+                  <div className="p-2 text-white bg-gray-900 bg-opacity-80">
+                    <h3 className="text-base md:text-lg font-semibold line-clamp-1">
+                      {partner.name}
+                    </h3>
+                    <p className="text-xs md:text-sm italic">
+                      {deduplicateAndTruncateCities(
+                        partner.locations.map((loc) => loc.city)
+                      ) || "N/A"}
+                    </p>
+                  </div>
+                </Link>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-center">No photography galleries found.</p>
+          )}
+        </div>
+
+        {/* Navigation Buttons */}
+        {!loading && partners.length > 0 && (
+          <>
+            <button
+              onClick={handlePrev}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+              disabled={loading}
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
+            </button>
+            <button
+              onClick={handleNext}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+              disabled={loading}
+            >
+              <ChevronRight className="w-5 h-5 text-gray-700" />
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Indicators */}
+      {!loading && partners.length > 0 && (
+        <div className="flex justify-center mt-6 space-x-2">
+          {partners.map((_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
+              }`}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
 }

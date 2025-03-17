@@ -1,0 +1,50 @@
+import { MongoClient } from "mongodb";
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default async function handler(req, res) {
+  const uri = process.env.MONGODB_URI;
+  const dbName = process.env.MONGODB_DB;
+
+  if (!uri || !dbName) {
+    return res.status(500).json({ error: "Missing MongoDB configuration" });
+  }
+
+  let client;
+
+  try {
+    client = new MongoClient(uri);
+    await client.connect();
+    const db = client.db("estates_db");
+    const collection = db.collection("artist_estates");
+
+    const estates = await collection.find({}).toArray();
+
+    const formattedEstates = estates.map((estate) => ({
+      internalID: estate.internalID,
+      slug: estate.slug,
+      name: estate.name,
+      href: estate.href,
+      initials: estate.initials,
+      locations: estate.locationsConnection?.edges.map(edge => ({
+        city: edge.node.city,
+        id: edge.node.id
+      })) || [],
+      categories: estate.categories || [],
+      image: estate.profile?.image?.cropped?.src || "/placeholder.svg",
+    }));
+
+    res.status(200).json({ estates: formattedEstates });
+  } catch (error) {
+    console.error("Error fetching artist estates from MongoDB:", error);
+    res.status(500).json({ error: "Failed to fetch estates" });
+  } finally {
+    if (client) {
+      await client.close();
+    }
+  }
+}
