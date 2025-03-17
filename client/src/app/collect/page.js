@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/select";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import ContactModal from '@/app/components/ContactModal';
+import { Info } from 'lucide-react';
 
 // Define the API endpoint
 const API_URL = "/api/filtered-artworks"; // Your new MongoDB API route
@@ -27,40 +29,69 @@ const categories = [
   { name: "20th-Century Art", image: "/images/century.jpg" },
 ];
 
-const ArtworkCard = ({ artwork }) => (
-  <Link href={`/artwork/${artwork.slug}`} className="block mb-4 group">
-    <div className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-      <div className="relative aspect-[3/4]">
-        <Image
-          src={artwork.image}
-          alt={artwork.title}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <span className="inline-block px-3 py-1 bg-white/90 rounded-full text-sm font-medium text-gray-900 mb-2">
-            {artwork.primaryLabel}
-          </span>
+const ArtworkCard = ({ artwork }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Calculate 10% higher price
+  const originalPrice = parseFloat(artwork.price.replace(/[^0-9.-]+/g, ''));
+  const adjustedPrice = originalPrice * 1.1;
+
+  return (
+    <>
+      <div className="block mb-4 group">
+        <div className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <Link href={`/artwork/${artwork.slug}`} className="block">
+            <div className="relative aspect-[3/4]">
+              <Image
+                src={artwork.image}
+                alt={artwork.title}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <span className="inline-block px-3 py-1 bg-white/90 rounded-full text-sm font-medium text-gray-900 mb-2">
+                  {artwork.primaryLabel}
+                </span>
+              </div>
+            </div>
+          </Link>
+          <div className="p-4 space-y-2">
+            <h2 className="font-semibold text-lg text-gray-900 line-clamp-1">
+              {artwork.title}
+            </h2>
+            <p className="text-gray-600 font-medium">{artwork.artist}</p>
+            <div className="flex justify-between items-center pt-2 border-t">
+              <div className="flex items-center gap-2">
+                <Info className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-500">Contact for pricing</span>
+              </div>
+              <span className="text-sm text-gray-500">
+                Demand: {artwork.demandRank}
+              </span>
+            </div>
+            <Button 
+              onClick={() => setIsModalOpen(true)}
+              className="w-full mt-2"
+              variant="outline"
+            >
+              Inquire About Price
+            </Button>
+          </div>
         </div>
       </div>
-      <div className="p-4 space-y-2">
-        <h2 className="font-semibold text-lg text-gray-900 line-clamp-1">
-          {artwork.title}
-        </h2>
-        <p className="text-gray-600 font-medium">{artwork.artist}</p>
-        <p className="text-sm text-gray-500">{artwork.gallery}</p>
-        <div className="flex justify-between items-center pt-2 border-t">
-          <span className="font-bold text-gray-900">{artwork.price}</span>
-          <span className="text-sm text-gray-500">
-            Demand: {artwork.demandRank}
-          </span>
-        </div>
-      </div>
-    </div>
-  </Link>
-);
+      <ContactModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        artwork={{
+          ...artwork,
+          price: `$${adjustedPrice.toLocaleString()}`
+        }}
+      />
+    </>
+  );
+};
 
 const LoadingSkeleton = () => (
   <div className="mb-4">
