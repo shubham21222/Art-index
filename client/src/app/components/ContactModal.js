@@ -15,17 +15,42 @@ export default function ContactModal({ isOpen, onClose, artwork }) {
     phone: '',
     message: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
-      // Here you would typically send the form data to your backend
-      console.log('Form submitted:', { ...formData, artwork });
-      toast.success("Inquiry sent successfully!");
-      onClose();
-      setFormData({ name: '', email: '', phone: '', message: '' });
+      const response = await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          artwork: {
+            title: artwork?.title,
+            artistNames: artwork?.artistNames,
+            price: artwork?.price,
+            id: artwork?.id,
+          },
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success("Inquiry sent successfully! We'll get back to you soon.");
+        onClose();
+        setFormData({ name: '', email: '', phone: '', message: '' });
+      } else {
+        throw new Error(data.message || 'Failed to send inquiry');
+      }
     } catch (error) {
-      toast.error("Failed to send inquiry. Please try again.");
+      toast.error(error.message || "Failed to send inquiry. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -46,6 +71,7 @@ export default function ContactModal({ isOpen, onClose, artwork }) {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
+              disabled={isSubmitting}
             />
           </div>
           <div className="space-y-2">
@@ -56,6 +82,7 @@ export default function ContactModal({ isOpen, onClose, artwork }) {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
+              disabled={isSubmitting}
             />
           </div>
           <div className="space-y-2">
@@ -65,6 +92,7 @@ export default function ContactModal({ isOpen, onClose, artwork }) {
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              disabled={isSubmitting}
             />
           </div>
           <div className="space-y-2">
@@ -74,10 +102,11 @@ export default function ContactModal({ isOpen, onClose, artwork }) {
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
               required
+              disabled={isSubmitting}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Send Inquiry
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Sending...' : 'Send Inquiry'}
           </Button>
         </form>
       </DialogContent>

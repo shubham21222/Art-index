@@ -3,13 +3,17 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import ContactModal from '@/app/components/ContactModal';
 
 const API_URL = "/api/graffiti-street-art";
 
 export default function GraffitiAndStreetArtCarousel() {
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(null); // Match AuctionCarousel
+  const [currentIndex, setCurrentIndex] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedGallery, setSelectedGallery] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,8 +43,14 @@ export default function GraffitiAndStreetArtCarousel() {
     setCurrentIndex((prev) => (prev === partners.length - 1 ? 0 : prev + 1));
   };
 
+  const handleContactClick = (e, gallery) => {
+    e.preventDefault(); // Prevent Link navigation
+    setSelectedGallery(gallery);
+    setIsModalOpen(true);
+  };
+
   const getSlideStyle = (index) => {
-    const total = partners.length || 8; // Match AuctionCarousel fallback
+    const total = partners.length || 8;
     if (currentIndex === null) {
       return {
         opacity: 0,
@@ -53,7 +63,7 @@ export default function GraffitiAndStreetArtCarousel() {
     }
 
     const angle = (360 / total) * (index - currentIndex);
-    const radius = 600; // Match AuctionCarousel
+    const radius = 600;
     const translateZ = -radius;
     const rotateY = angle;
     const opacity = Math.abs(angle) > 90 ? 0 : 1 - Math.abs(angle) / 120;
@@ -61,15 +71,15 @@ export default function GraffitiAndStreetArtCarousel() {
 
     return {
       transform: `rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
-      opacity,
+        opacity,
       transition: "transform 0.8s ease, opacity 0.8s ease",
       position: "absolute",
       top: "50%",
       left: "50%",
       transformOrigin: "center center",
       zIndex: Math.round(10 - Math.abs(angle)),
-      marginLeft: "-175px", // Match AuctionCarousel (350px / 2)
-      marginTop: "-150px", // Match AuctionCarousel (300px / 2)
+      marginLeft: "-175px",
+      marginTop: "-150px",
     };
   };
 
@@ -109,23 +119,43 @@ export default function GraffitiAndStreetArtCarousel() {
                 style={getSlideStyle(index)}
                 className="group w-[350px] h-[300px] rounded-md overflow-hidden transition-all duration-300 hover:shadow-xl"
               >
-                <Link href={`/visit-gallery/${partner.slug}`} className="block h-full">
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={partner.image}
-                      alt={partner.name}
-                      fill
-                      className="object-cover w-full h-full rounded-md shadow-md transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
+                <div className="relative w-full h-full">
+                  <Image
+                    src={partner.image}
+                    alt={partner.name}
+                    fill
+                    className="object-cover w-full h-full rounded-md shadow-md transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10">
+                  {/* <h3 className="text-sm font-semibold drop-shadow-md mb-1">{partner.name}</h3>
+                  <p className="text-xs italic drop-shadow-md mb-2">
+                    {partner.locations.map((loc) => loc.city).join(", ") || "N/A"}
+                  </p> */}
+                  <div className="flex gap-2">
+                    <Link 
+                      href={`/visit-gallery/${partner.slug}`}
+                      className="flex-1"
+                    >
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        className="w-full text-xs bg-white/90 hover:bg-white text-black"
+                      >
+                        View Gallery
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      className="text-xs bg-white/90 hover:bg-white text-black"
+                      onClick={(e) => handleContactClick(e, partner)}
+                    >
+                      Contact for Pricing
+                    </Button>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10">
-                    <h3 className="text-sm font-semibold drop-shadow-md mb-1">{partner.name}</h3>
-                    <p className="text-xs italic drop-shadow-md">
-                      {partner.locations.map((loc) => loc.city).join(", ") || "N/A"}
-                    </p>
-                  </div>
-                </Link>
+                </div>
               </div>
             ))
           ) : (
@@ -170,6 +200,21 @@ export default function GraffitiAndStreetArtCarousel() {
           ))}
         </div>
       )}
+
+      {/* Contact Modal */}
+      <ContactModal 
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedGallery(null);
+        }}
+        artwork={selectedGallery ? {
+          title: selectedGallery.name,
+          artistNames: selectedGallery.locations.map(loc => loc.city).join(", "),
+          price: "Contact for pricing",
+          id: selectedGallery.internalID
+        } : null}
+      />
     </div>
   );
 }

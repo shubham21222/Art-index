@@ -4,6 +4,8 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import ContactModal from '@/app/components/ContactModal';
 
 // Define the API endpoint
 const API_URL = "/api/south-asian-southeast-asian-art";
@@ -12,6 +14,8 @@ export default function SouthAsianAndSoutheastAsianArt() {
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0); // Center item index
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedGallery, setSelectedGallery] = useState(null);
 
   // Fetch data from MongoDB API
   useEffect(() => {
@@ -43,6 +47,12 @@ export default function SouthAsianAndSoutheastAsianArt() {
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === partners.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleContactClick = (e, gallery) => {
+    e.preventDefault();
+    setSelectedGallery(gallery);
+    setIsModalOpen(true);
   };
 
   // Calculate 3D slide styles
@@ -112,20 +122,22 @@ export default function SouthAsianAndSoutheastAsianArt() {
                 style={getSlideStyle(index)}
                 className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
               >
-                <Link href={`/visit-gallery/${partner.slug}`} className="block h-full">
-                  {/* Image */}
-                  <div className="relative w-full h-[80%]">
-                    <Image
-                      src={partner.image}
-                      alt={partner.name}
-                      fill
-                      className="object-cover rounded-t-md transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
-                  </div>
+                <div className="h-full">
+                  <Link href={`/visit-gallery/${partner.slug}`} className="block h-[80%]">
+                    {/* Image */}
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={partner.image}
+                        alt={partner.name}
+                        fill
+                        className="object-cover rounded-t-md transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
+                    </div>
+                  </Link>
                   {/* Details */}
                   <div className="p-2 text-white bg-gray-900 bg-opacity-80">
-                    <h3 className="text-base md:text-lg font-semibold line-clamp-1">
+                    {/* <h3 className="text-base md:text-lg font-semibold line-clamp-1">
                       {partner.name}
                     </h3>
                     <p className="text-xs md:text-sm">
@@ -133,9 +145,31 @@ export default function SouthAsianAndSoutheastAsianArt() {
                     </p>
                     <p className="text-xs md:text-sm text-gray-300">
                       {partner.categories.map((cat) => cat.name).join(", ") || "N/A"}
-                    </p>
+                    </p> */}
+                    <div className="flex gap-2 mt-2">
+                      <Link 
+                        href={`/visit-gallery/${partner.slug}`}
+                        className="flex-1"
+                      >
+                        <Button 
+                          variant="secondary" 
+                          size="sm"
+                          className="w-full text-xs bg-white/90 hover:bg-white text-black"
+                        >
+                          View Gallery
+                        </Button>
+                      </Link>
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        className="text-xs bg-white/90 hover:bg-white text-black"
+                        onClick={(e) => handleContactClick(e, partner)}
+                      >
+                        Contact for Pricing
+                      </Button>
+                    </div>
                   </div>
-                </Link>
+                </div>
               </div>
             ))
           ) : (
@@ -178,6 +212,21 @@ export default function SouthAsianAndSoutheastAsianArt() {
           ))}
         </div>
       )}
+
+      {/* Contact Modal */}
+      <ContactModal 
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedGallery(null);
+        }}
+        artwork={selectedGallery ? {
+          title: selectedGallery.name,
+          artistNames: selectedGallery.locations[0]?.city || "N/A",
+          price: "Contact for pricing",
+          id: selectedGallery.internalID
+        } : null}
+      />
     </section>
   );
 }

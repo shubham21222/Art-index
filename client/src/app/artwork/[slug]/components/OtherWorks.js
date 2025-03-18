@@ -236,9 +236,9 @@ export default function OtherWorks({ slug }) {
   return (
     <section className="max-w-[1500px] mx-auto mt-16 px-6">
       <CardHeader className="px-0">
-        <CardTitle className="text-3xl font-bold tracking-tight">
+        {/* <CardTitle className="text-3xl font-bold tracking-tight">
           {gridTitle}
-        </CardTitle>
+        </CardTitle> */}
       </CardHeader>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">

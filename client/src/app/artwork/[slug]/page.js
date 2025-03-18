@@ -7,10 +7,15 @@ import Footer from '@/app/components/Footer';
 import OtherWorks from './components/OtherWorks';
 import { Skeleton } from '@/components/ui/skeleton'; // Import shadcn/ui Skeleton
 import ArtistInfo from './components/ArtistInfo';
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { GalleryVertical, ArrowRight, ArrowLeft } from "lucide-react";
+import ContactModal from "@/app/components/ContactModal";
 
 export default function ArtworkPage() {
     const params = useParams();
     const slug = params?.slug;
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [artwork, setArtwork] = useState(null);
     const [artist, setArtist] = useState(null);
@@ -135,6 +140,11 @@ export default function ArtworkPage() {
         fetchData();
     }, [slug]);
 
+    const handleContactClick = (e) => {
+        e.preventDefault();
+        setIsModalOpen(true);
+    };
+
     // Fallback UI for Loading State
     if (loading) {
         return (
@@ -202,90 +212,134 @@ export default function ArtworkPage() {
     return (
         <>
             <Header />
-            <div className="max-w-[1500px]  mx-auto px-6 py-8">
-                {/* Header */}
-                <h1 className="text-3xl md:mt-6 mt-[80px] font-bold mb-4">{artist.name}</h1>
-
-                {/* Two-Column Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Left Column: Carousel */}
-                    <div className="w-full h-[50vh] md:h-[70vh]">
-                        <ArtistCarousel slug={artist.slug} />
+            <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+                <div className="max-w-[1500px] mx-auto px-6 py-12">
+                    {/* Header Section */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+                        <div>
+                            {/* <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+                                {artist.name}
+                            </h1>
+                            <p className="text-gray-600 text-lg">{artist.formattedNationalityAndBirthday || "N/A"}</p> */}
+                        </div>
+                       
                     </div>
 
-                    {/* Right Column: Content */}
-                    <div className="space-y-4">
-                        {/* Artist Section */}
-                        <div>
-                            <h2 className="text-xl font-semibold">Artist</h2>
-                            <p className="text-gray-700">{artist.name}</p>
-                            <p className="text-gray-500">{artist.formattedNationalityAndBirthday || "N/A"}</p>
-                            <div
-                                dangerouslySetInnerHTML={{
-                                    __html: artist.biographyBlurb?.text || "<p>No biography available.</p>",
-                                }}
-                                className="text-gray-600 mt-2"
-                            />
-                        </div>
+                    {/* Two-Column Layout */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        {/* Left Column: Carousel */}
+                        <motion.div 
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="w-full h-[50vh] md:h-[70vh] bg-white rounded-xl shadow-lg overflow-hidden"
+                        >
+                            <ArtistCarousel slug={artist.slug} />
+                        </motion.div>
 
-                        {/* Artwork Details */}
-                        <div>
-                            <h2 className="text-xl font-semibold">About the Work</h2>
-                            <div
-                                dangerouslySetInnerHTML={{
-                                    __html: artwork.description || "<p>No description available.</p>",
-                                }}
-                                className="text-gray-700 mt-2"
-                            />
-                            <p className="text-gray-500 mt-2">
-                                <strong>Category:</strong> {artwork.category || "N/A"}
-                            </p>
-                            <p className="text-gray-500">
-                                <strong>Medium:</strong> {artwork.medium || "N/A"}
-                            </p>
-                            <p className="text-gray-500">
-                                <strong>Dimensions:</strong>{" "}
-                                {artwork.dimensions ? `${artwork.dimensions.in} / ${artwork.dimensions.cm}` : "N/A"}
-                            </p>
-                        </div>
+                        {/* Right Column: Content */}
+                        <motion.div 
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="space-y-8"
+                        >
+                            {/* Artist Section */}
+                            <div className="bg-white p-6 rounded-xl shadow-lg">
+                                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Artist</h2>
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: artist.biographyBlurb?.text || "<p>No biography available.</p>",
+                                    }}
+                                    className="text-gray-600 prose max-w-none"
+                                />
+                            </div>
 
-                        {/* Additional Information */}
-                        <div>
-                            <h2 className="text-xl font-semibold">Additional Information</h2>
-                            <p className="text-gray-700">
-                                <strong>Publisher:</strong> {artwork.publisher || "N/A"}
-                            </p>
-                            <p className="text-gray-700">
-                                <strong>Image Rights:</strong> {artwork.image_rights || "N/A"}
-                            </p>
-                        </div>
+                            {/* Artwork Details */}
+                            <div className="bg-white p-6 rounded-xl shadow-lg">
+                                <h2 className="text-2xl font-semibold text-gray-900 mb-4">About the Work</h2>
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: artwork.description || "<p>No description available.</p>",
+                                    }}
+                                    className="text-gray-700 prose max-w-none mb-6"
+                                />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-500">Category</p>
+                                        <p className="font-medium">{artwork.category || "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Medium</p>
+                                        <p className="font-medium">{artwork.medium || "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Dimensions</p>
+                                        <p className="font-medium">
+                                            {artwork.dimensions ? `${artwork.dimensions.in} / ${artwork.dimensions.cm}` : "N/A"}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Publisher</p>
+                                        <p className="font-medium">{artwork.publisher || "N/A"}</p>
+                                    </div>
+                                </div>
+                            </div>
 
-                        {/* Articles */}
-                        <div>
-                            <h2 className="text-xl font-semibold">Related Articles</h2>
-                            {artwork.articles.length > 0 ? (
-                                <ul>
-                                    {artwork.articles.map((article) => (
-                                        <li key={article.id}>
-                                            <a
-                                                href={`/articles/${article.slug}`}
-                                                className="text-blue-500 hover:underline"
-                                            >
-                                                {article.slug}
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p>No related articles available.</p>
-                            )}
+                            {/* Additional Information */}
+                            <div className="bg-white p-6 rounded-xl shadow-lg">
+                                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Additional Information</h2>
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="text-sm text-gray-500">Image Rights</p>
+                                        <p className="font-medium">{artwork.image_rights || "N/A"}</p>
+                                    </div>
+                                    {artwork.articles.length > 0 && (
+                                        <div>
+                                            <p className="text-sm text-gray-500 mb-2">Related Articles</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {artwork.articles.map((article) => (
+                                                    <a
+                                                        key={article.id}
+                                                        href={`/articles/${article.slug}`}
+                                                        className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors duration-300"
+                                                    >
+                                                        {article.slug}
+                                                        <ArrowRight className="w-4 h-4 ml-2" />
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                             <div className="mt-4 md:mt-0">
+                            <Button 
+                                onClick={handleContactClick}
+                                className="bg-black text-white hover:bg-gray-800 transition-colors duration-300 px-8 py-6 text-lg"
+                            >
+                                Contact for Pricing
+                            </Button>
                         </div>
+                        </motion.div>
                     </div>
                 </div>
             </div>
-            <ArtistInfo  slug={artist.slug}/>
+            {/* <ArtistInfo slug={artist.slug} /> */}
             <OtherWorks slug={slug} />
             <Footer />
+
+            {/* Contact Modal */}
+            <ContactModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                artwork={artwork ? {
+                    title: artwork.title,
+                    artistNames: artist.name,
+                    price: "Contact for pricing",
+                    id: artwork.id
+                } : null}
+            />
         </>
     );
 }

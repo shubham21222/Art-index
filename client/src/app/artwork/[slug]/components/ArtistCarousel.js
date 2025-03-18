@@ -1,16 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/autoplay';
 
 export default function ArtistCarousel({ slug }) {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null); // Track the main image
 
     useEffect(() => {
         if (!slug) {
@@ -23,7 +18,6 @@ export default function ArtistCarousel({ slug }) {
                 setLoading(true);
                 setError(null);
 
-                // Fetch Artist Details
                 const artistResponse = await fetch("https://metaphysics-cdn.artsy.net/v2", {
                     method: "POST",
                     headers: {
@@ -56,11 +50,12 @@ export default function ArtistCarousel({ slug }) {
                     return;
                 }
 
-                // Extract all artwork images
                 const artworkImages = artistResult.data.artist.artworks_connection.edges.map(
                     (edge) => edge.node.image.large
                 );
-                setImages(artworkImages.filter(Boolean)); // Remove undefined/null values
+                const filteredImages = artworkImages.filter(Boolean);
+                setImages(filteredImages);
+                setSelectedImage(filteredImages[0]); // Set the first image as default
             } catch (error) {
                 console.error("Error fetching data:", error);
                 setError("An unexpected error occurred while fetching data.");
@@ -85,29 +80,36 @@ export default function ArtistCarousel({ slug }) {
     }
 
     return (
-        <div className="w-full h-full">
-            <Swiper
-                modules={[Navigation, Pagination, Autoplay]}
-                spaceBetween={30}
-                slidesPerView={1}
-                navigation
-                pagination={{ clickable: true }}
-                autoplay={{ delay: 3000 }}
-                loop={true}
-                className="rounded-lg shadow-lg h-full"
-            >
+        <div className="w-full h-full flex flex-col md:flex-row gap-4 p-4">
+            {/* Thumbnail Column (Left Side) */}
+            <div className="flex flex-col gap-2 w-full md:w-1/4 max-h-[600px] overflow-y-auto">
                 {images.map((image, index) => (
-                    <SwiperSlide key={index}>
-                        <div className="flex justify-center items-center h-full bg-gray-100">
-                            <img
-                                src={image}
-                                alt={`Slide ${index + 1}`}
-                                className="object-cover w-full h-full rounded-lg"
-                            />
-                        </div>
-                    </SwiperSlide>
+                    <div
+                        key={index}
+                        className={`relative w-full h-24 cursor-pointer rounded-lg overflow-hidden border-2 ${
+                            selectedImage === image ? 'border-blue-500' : 'border-transparent'
+                        }`}
+                        onClick={() => setSelectedImage(image)}
+                    >
+                        <img
+                            src={image}
+                            alt={`Thumbnail ${index + 1}`}
+                            className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
+                        />
+                    </div>
                 ))}
-            </Swiper>
+            </div>
+
+            {/* Main Image (Right Side) */}
+            <div className="w-full md:w-3/4 h-[400px] md:h-[600px] bg-gray-100 rounded-lg shadow-lg overflow-hidden">
+                {selectedImage && (
+                    <img
+                        src={selectedImage}
+                        alt="Selected Artwork"
+                        className="object-cover w-full h-full"
+                    />
+                )}
+            </div>
         </div>
     );
 }
