@@ -100,7 +100,7 @@ export default function CuratorsPicks() {
     <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
       <div className="flex flex-col items-center justify-between w-full mb-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Curators Picks</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Modern Paintings</h2>
           <p className="text-gray-900 text-lg mt-2">
             The best works by rising talents on Art Index, all available now.
           </p>
