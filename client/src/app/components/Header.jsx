@@ -56,7 +56,7 @@ export default function Header() {
 
     const mainSecondaryLinks = [];
     const subSecondaryLinks = [
-        { name: "Shows", href: "/shows" },
+        // { name: "Shows", href: "/shows" },
         { name: "Buy", href: "/collect" },
         { name: "Galleries", href: "/galleries" },
         // { name: "Artworks", href: "/collect" },

@@ -69,17 +69,17 @@ export default function TrendingArtists() {
       {/* Header Section */}
       <div className="flex flex-col items-center justify-between w-full mb-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Trending Artists on Artsy</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Trending Art on Art Index</h2>
           <p className="text-gray-900 text-lg mt-2">
             Discover artists making waves in the art world.
           </p>
         </div>
-        <a
-          href="#"
+        <Link
+          href="/artists"
           className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
           View All Artists
-        </a>
+        </Link>
       </div>
 
       {/* 3D Carousel */}
@@ -113,9 +113,9 @@ export default function TrendingArtists() {
                     <p className="text-xs drop-shadow-md">
                       Artworks: {artist.artworkCount}, For Sale: {artist.forSaleArtworkCount}
                     </p>
-                    <button className="mt-2 bg-white text-gray-900 px-4 py-1 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-gray-200">
+                    {/* <button className="mt-2 bg-white text-gray-900 px-4 py-1 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-gray-200">
                       Follow
-                    </button>
+                    </button> */}
                   </div>
                 </Link>
               </div>

@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import ContactModal from '@/app/components/ContactModal';
 
 // Define your API endpoint (adjust the path if needed)
 const API_URL = "/api/auction_lots"; // Assuming this is your API route
@@ -10,6 +12,8 @@ const API_URL = "/api/auction_lots"; // Assuming this is your API route
 export default function AuctionCarousel() {
     const [auctionData, setAuctionData] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(null); // Initialize as null, set to middle after data loads
+    const [selectedArtwork, setSelectedArtwork] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Fetch data from your MongoDB API
     useEffect(() => {
@@ -78,6 +82,22 @@ export default function AuctionCarousel() {
         };
     };
 
+    const handleContactClick = (e, artwork) => {
+        e.preventDefault(); // Prevent the Link navigation
+        setSelectedArtwork(artwork);
+        setIsModalOpen(true);
+    };
+
+    // Calculate adjusted price (10% higher)
+    const getAdjustedPrice = (artwork) => {
+        const originalPrice = artwork.saleArtwork?.highestBid?.display || 
+                            artwork.saleArtwork?.openingBid?.display;
+        if (!originalPrice) return null;
+
+        const numericPrice = parseFloat(originalPrice.replace(/[^0-9.-]+/g, ''));
+        return numericPrice ? `$${(numericPrice * 1.1).toLocaleString()}` : null;
+    };
+
     return (
         <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
             {/* Header Section */}
@@ -88,12 +108,12 @@ export default function AuctionCarousel() {
                         Discover top picks from ongoing auctions.
                     </p>
                 </div>
-                <a
-                    href="#"
+                <Link
+                    href="/collect"
                     className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
                 >
                     View All Auctions
-                </a>
+                </Link>
             </div>
 
             {/* 3D Carousel */}
@@ -121,31 +141,32 @@ export default function AuctionCarousel() {
                                     </div>
 
                                     {/* Artwork Details */}
-                                    <div className="absolute bottom-0 left-0 right-0 p-2 text-center text-white z-10">
-                                        <h3 className="text-sm font-semibold drop-shadow-md">
+                                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10">
+                                        <h3 className="text-sm font-semibold drop-shadow-md mb-1">
                                             {item.artistNames}
                                         </h3>
-                                        <p className="text-xs italic drop-shadow-md">{item.title}</p>
-                                        {item.sale && (
-                                            <p className="text-xs drop-shadow-md">
-                                                Ends at{" "}
-                                                {new Date(item.sale.endAt).toLocaleDateString()}
-                                            </p>
-                                        )}
-                                        <div className="flex justify-between items-center mt-2 px-2">
-                                            <p className="text-white font-medium text-xs">
-                                                {item.saleArtwork?.highestBid?.display ||
-                                                    item.saleArtwork?.openingBid?.display ||
-                                                    "N/A"}
-                                            </p>
-                                            {item.collectorSignals?.auction?.registrationEndsAt && (
-                                                <p className="text-xs text-gray-400 drop-shadow-md">
-                                                    Register by{" "}
-                                                    {new Date(
-                                                        item.collectorSignals.auction.registrationEndsAt
-                                                    ).toLocaleDateString()}
+                                        <p className="text-xs italic drop-shadow-md mb-2">{item.title}</p>
+                                        
+                                        <div className="flex flex-col gap-2">
+                                            {item.sale && (
+                                                <p className="text-xs drop-shadow-md">
+                                                    Ends at {new Date(item.sale.endAt).toLocaleDateString()}
                                                 </p>
                                             )}
+                                            
+                                            <div className="flex items-center justify-between">
+                                                <Button 
+                                                    variant="secondary" 
+                                                    size="sm"
+                                                    className="text-xs bg-white/90 hover:bg-white text-black w-full"
+                                                    onClick={(e) => handleContactClick(e, {
+                                                        ...item,
+                                                        price: getAdjustedPrice(item)
+                                                    })}
+                                                >
+                                                    Contact for Price
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
                                 </Link>
@@ -221,6 +242,16 @@ export default function AuctionCarousel() {
                     ))}
                 </div>
             )}
+
+            {/* Contact Modal */}
+            <ContactModal 
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedArtwork(null);
+                }}
+                artwork={selectedArtwork}
+            />
         </div>
     );
 }

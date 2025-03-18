@@ -6,66 +6,108 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ExternalLink, Clock, DollarSign } from "lucide-react";
+import ContactModal from '@/app/components/ContactModal';
 
-const ArtworkCard = ({ artwork }) => (
-  <Card className="group overflow-hidden bg-white transition-all duration-300 hover:shadow-lg">
-    <Link href={artwork.href} className="block relative aspect-square overflow-hidden">
-      <Image
-        src={artwork.image?.resized?.src || "/placeholder-image.jpg"}
-        alt={artwork.title || "Untitled Artwork"}
-        fill
-        className="object-cover transition-transform duration-500 group-hover:scale-110"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-      />
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-    </Link>
+const ArtworkCard = ({ artwork }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
 
-    <CardContent className="p-4 space-y-3">
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <Link 
-            href={artwork.href}
-            className="font-medium text-lg text-gray-900 hover:text-blue-600 transition-colors duration-200 line-clamp-1"
-          >
-            {artwork.title || "Untitled"}
-          </Link>
-          <p className="text-sm text-gray-600">{artwork.artistNames || "Unknown Artist"}</p>
-        </div>
-        <Link 
-          href={artwork.href}
-          className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-        >
-          <ExternalLink className="w-4 h-4" />
+  const handleContactClick = (e) => {
+    e.preventDefault();
+    const adjustedPrice = getAdjustedPrice(artwork);
+    setSelectedArtwork({
+      ...artwork,
+      price: adjustedPrice
+    });
+    setIsModalOpen(true);
+  };
+
+  // Calculate adjusted price (10% higher)
+  const getAdjustedPrice = (artwork) => {
+    if (!artwork.sale_message) return null;
+    const priceMatch = artwork.sale_message.match(/\$[\d,]+/);
+    if (!priceMatch) return null;
+    
+    const originalPrice = parseFloat(priceMatch[0].replace(/[$,]/g, ''));
+    return originalPrice ? `$${(originalPrice * 1.1).toLocaleString()}` : null;
+  };
+
+  return (
+    <>
+      <Card className="group overflow-hidden bg-white transition-all duration-300 hover:shadow-lg">
+        <Link href={artwork.href} className="block relative aspect-square overflow-hidden">
+          <Image
+            src={artwork.image?.resized?.src || "/placeholder-image.jpg"}
+            alt={artwork.title || "Untitled Artwork"}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
         </Link>
-      </div>
 
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Clock className="w-4 h-4" />
-        <span>{artwork.date || "Date unknown"}</span>
-      </div>
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-start justify-between">
+            <div className="space-y-1">
+              <Link 
+                href={artwork.href}
+                className="font-medium text-lg text-gray-900 hover:text-blue-600 transition-colors duration-200 line-clamp-1"
+              >
+                {artwork.title || "Untitled"}
+              </Link>
+              <p className="text-sm text-gray-600">{artwork.artistNames || "Unknown Artist"}</p>
+            </div>
+            <Link 
+              href={artwork.href}
+              className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </Link>
+          </div>
 
-      <div className="pt-3 border-t border-gray-100">
-        <div className="flex items-center gap-2 mb-2">
-          <DollarSign className="w-4 h-4 text-gray-600" />
-          <span className="font-medium text-gray-900">
-            {artwork.sale_message || "Price on request"}
-          </span>
-        </div>
-        
-        {artwork.partner?.name && (
-          <Link 
-            href={artwork.partner.href}
-            className="inline-flex items-center text-sm text-gray-500 hover:text-blue-600 transition-colors duration-200"
-          >
-            <Badge variant="secondary" className="mr-2">Gallery</Badge>
-            {artwork.partner.name}
-          </Link>
-        )}
-      </div>
-    </CardContent>
-  </Card>
-);
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Clock className="w-4 h-4" />
+            <span>{artwork.date || "Date unknown"}</span>
+          </div>
+
+          <div className="pt-3 border-t border-gray-100">
+            <div className="flex flex-col gap-2">
+              <Button 
+                variant="secondary"
+                size="sm"
+                onClick={handleContactClick}
+                className="w-full text-sm"
+              >
+                Contact for Price
+              </Button>
+              
+              {artwork.partner?.name && (
+                <Link 
+                  href={artwork.partner.href}
+                  className="inline-flex items-center text-sm text-gray-500 hover:text-blue-600 transition-colors duration-200"
+                >
+                  <Badge variant="secondary" className="mr-2">Gallery</Badge>
+                  {artwork.partner.name}
+                </Link>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <ContactModal 
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedArtwork(null);
+        }}
+        artwork={selectedArtwork}
+      />
+    </>
+  );
+};
 
 const LoadingSkeleton = () => (
   <Card className="overflow-hidden">

@@ -13,7 +13,7 @@ const articles = [
     {
         category: "Art",
         title: "5 Artists on Our Radar This February",
-        author: "Artsy Editorial",
+        author: "Art Index Editorial",
         date: "Feb 5, 2025",
         image: "https://d7hftxdivxxvm.cloudfront.net?height=334&quality=80&resize_to=fill&src=https%3A%2F%2Fartsy-media-uploads.s3.amazonaws.com%2FmNddEk6KwoghL_O9U5n6AQ%252FAOOR%2BFEB25%2BMAG.jpeg&width=445",
     },

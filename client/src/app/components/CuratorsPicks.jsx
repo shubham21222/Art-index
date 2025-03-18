@@ -2,10 +2,14 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import ContactModal from '@/app/components/ContactModal';
 
 export default function CuratorsPicks() {
   const [artworks, setArtworks] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(null);
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,6 +40,26 @@ export default function CuratorsPicks() {
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === artworks.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleContactClick = (e, artwork) => {
+    e.preventDefault(); // Prevent the Link navigation
+    const adjustedPrice = getAdjustedPrice(artwork);
+    setSelectedArtwork({
+      ...artwork,
+      price: adjustedPrice
+    });
+    setIsModalOpen(true);
+  };
+
+  // Calculate adjusted price (10% higher)
+  const getAdjustedPrice = (artwork) => {
+    if (!artwork.saleMessage) return null;
+    const priceMatch = artwork.saleMessage.match(/\$[\d,]+/);
+    if (!priceMatch) return null;
+    
+    const originalPrice = parseFloat(priceMatch[0].replace(/[$,]/g, ''));
+    return originalPrice ? `$${(originalPrice * 1.1).toLocaleString()}` : null;
   };
 
   const getSlideStyle = (index) => {
@@ -78,15 +102,15 @@ export default function CuratorsPicks() {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">Curators Picks</h2>
           <p className="text-gray-900 text-lg mt-2">
-            The best works by rising talents on Artsy, all available now.
+            The best works by rising talents on Art Index, all available now.
           </p>
         </div>
-        <a
-          href="#"
+        <Link
+          href="/collect"
           className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
           View All Works
-        </a>
+        </Link>
       </div>
 
       <div className="relative h-[400px] w-full perspective-[1000px] overflow-hidden">
@@ -100,27 +124,42 @@ export default function CuratorsPicks() {
                 style={getSlideStyle(index)}
                 className="group w-[350px] h-[300px] rounded-md overflow-hidden transition-all duration-300 hover:shadow-xl"
               >
-                <Link href={`/artwork/${art.slug}`} className="block h-full">
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={art.image.resized.src}
-                      alt={art.title}
-                      width={350}
-                      height={art.image.resized.height}
-                      className="object-cover w-full h-full rounded-md shadow-md transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-2 text-center text-white z-10">
-                    <h3 className="text-sm font-semibold drop-shadow-md">
+                <div className="relative w-full h-full">
+                  <Image
+                    src={art.image.resized.src}
+                    alt={art.title}
+                    width={350}
+                    height={art.image.resized.height}
+                    className="object-cover w-full h-full rounded-md shadow-md transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                  
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10">
+                    <h3 className="text-sm font-semibold drop-shadow-md mb-1">
                       {art.artistNames}
                     </h3>
-                    <p className="text-xs italic drop-shadow-md">
-                      {art.title}, {art.saleMessage}
+                    <p className="text-xs italic drop-shadow-md mb-2">
+                      {art.title}
                     </p>
-                    <p className="text-xs drop-shadow-md">{art.partner.name}</p>
+                    <div className="flex justify-between items-center gap-2">
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        className="text-xs bg-white/90 hover:bg-white text-black w-full"
+                        onClick={(e) => handleContactClick(e, art)}
+                      >
+                        Contact for Price
+                      </Button>
+                      <Link 
+                      
+                        href={`/artwork/${art.slug}`}
+                        className="text-xs bg-black/40 hover:bg-black/60 px-3 py-1.5 rounded-md transition-colors duration-200"
+                      >
+                        View
+                      </Link>
+                    </div>
                   </div>
-                </Link>
+                </div>
               </div>
             ))
           )}
@@ -181,6 +220,16 @@ export default function CuratorsPicks() {
           ))}
         </div>
       )}
+
+      {/* Contact Modal */}
+      <ContactModal 
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedArtwork(null);
+        }}
+        artwork={selectedArtwork}
+      />
     </div>
   );
 }

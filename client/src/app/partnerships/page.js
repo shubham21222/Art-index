@@ -62,7 +62,7 @@ const PartnershipForm = () => {
                             </SelectContent>
                         </Select>
 
-                        <Label className="text-sm pt-4">Why do you want to partner with Artsy?</Label>
+                        <Label className="text-sm pt-4">Why do you want to partner with Art Index?</Label>
                         <Select onValueChange={(value) => setSelectedPartnership(value)}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select..." />

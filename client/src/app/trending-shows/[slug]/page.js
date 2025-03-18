@@ -289,7 +289,7 @@ export default function ArtistPage() {
                 href={artist.href} 
                 className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
               >
-                View Artist Profile on Artsy
+                View Artist Profile on Art Index
               </a>
             </div>
           )}

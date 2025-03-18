@@ -69,7 +69,7 @@ export default function ArtsyPage() {
                     <div className="flex flex-col md:flex-row-reverse gap-6 py-6">
                         <div className="md:w-1/2">
                             <h2 className="text-2xl font-bold">Search for free</h2>
-                            <p>The Artsy Price Database is for every collector—no subscriptions, no limits.</p>
+                            <p>The Art Index Price Database is for every collector—no subscriptions, no limits.</p>
                         </div>
                         <div className="md:w-1/2 relative" style={{ height: '600px' }}> {/* Set a fixed height */}
                             <Image
@@ -85,7 +85,7 @@ export default function ArtsyPage() {
                     <div className="flex flex-col md:flex-row gap-6 py-6">
                         <div className="md:w-1/2">
                             <h2 className="text-2xl font-bold">Track artists and their markets</h2>
-                            <p>Get insights into artists you follow with a personalized feed in the Artsy app.</p>
+                            <p>Get insights into artists you follow with a personalized feed in the Art Index app.</p>
                         </div>
                         <div className="md:w-1/2 relative" style={{ height: '600px' }}> {/* Set a fixed height */}
                             <Image

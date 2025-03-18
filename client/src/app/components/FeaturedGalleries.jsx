@@ -69,17 +69,17 @@ export default function FeaturedGalleries() {
       {/* Header Section */}
       <div className="flex flex-col items-center justify-between w-full mb-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Featured Galleries</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Sculptures</h2>
           <p className="text-gray-900 text-lg mt-2">
             Explore top galleries showcasing exceptional works.
           </p>
         </div>
-        <a
-          href="#"
+        <Link
+          href="/galleries"
           className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
           View All Galleries
-        </a>
+        </Link>
       </div>
 
       {/* 3D Carousel */}
@@ -110,9 +110,9 @@ export default function FeaturedGalleries() {
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-center text-white z-10">
                     <h3 className="text-lg font-semibold drop-shadow-md">{gallery.name}</h3>
                     <p className="text-sm drop-shadow-md">{gallery.location}</p>
-                    <button className="mt-2 bg-white text-gray-900 px-4 py-1 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-gray-200">
+                    {/* <button className="mt-2 bg-white text-gray-900 px-4 py-1 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-gray-200">
                       Follow
-                    </button>
+                    </button> */}
                   </div>
                 </Link>
               </div>

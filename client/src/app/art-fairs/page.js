@@ -35,7 +35,7 @@ const events = [
     image: 'https://d7hftxdivxxvm.cloudfront.net?height=790&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FHU3X9nlyctBdmGvyHhJq6w%2Fwide.jpg&width=1840',
   },
   {
-    title: 'The Artsy Edition Shop',
+    title: 'The Art Index Edition Shop',
     date: 'November 1, 2024 - January 1, 2025',
     image: 'https://d7hftxdivxxvm.cloudfront.net?height=790&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2F8otsAbQggIlEf6TdqD_r5g%2Fwide.jpg&width=1840',
   },
