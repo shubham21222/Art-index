@@ -61,7 +61,7 @@ export default function FeaturedGalleries() {
       zIndex: Math.round(10 - Math.abs(angle)),
       marginLeft: "-200px", // Half of slide width (400px / 2) to center it
       marginTop: "-200px", // Half of slide height (400px / 2) to center it
-    };
+    };  
   };
 
   return (
@@ -108,14 +108,14 @@ export default function FeaturedGalleries() {
 
                   {/* Gallery Details */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-center text-white z-10">
-                    <h3 className="text-lg font-semibold drop-shadow-md">{gallery.name}</h3>
-                    <p className="text-sm drop-shadow-md">{gallery.location}</p>
+                    {/* <h3 className="text-lg font-semibold drop-shadow-md">{gallery.name}</h3> */}
+                    {/* <p className="text-sm drop-shadow-md">{gallery.location}</p> */}
                     {/* <button className="mt-2 bg-white text-gray-900 px-4 py-1 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-gray-200">
                       Follow
                     </button> */}
                   </div>
                 </Link>
-              </div>
+              </div>  
             ))
           ) : (
             Array.from({ length: 6 }).map((_, index) => (
