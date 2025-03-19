@@ -18,7 +18,7 @@ export default function Home() {
       <main className="w-full max-w-[1920px] mx-auto">
         <ResponsiveCarousel />
         <div className="">
-          <FeaturedSection/>
+          {/* <FeaturedSection/> */}
           <CuratorsPicks />
           {/* <ArtsySection /> */}
           <AuctionCarousel/>

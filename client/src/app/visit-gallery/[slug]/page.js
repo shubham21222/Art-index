@@ -111,13 +111,13 @@ export default function PartnerPage() {
     // Update the getPriceDisplay function to handle string price
     const getPriceDisplay = (artwork) => {
         if (!artwork.price) {
-            return artwork.saleMessage || "Contact for pricing";
+            return artwork.saleMessage || "I’m Interested";
         }
         
         // Extract numeric value from price string (assuming format like "$1,000" or "£500")
         const numericPrice = parseFloat(artwork.price.replace(/[^0-9.-]+/g, ""));
         if (isNaN(numericPrice)) {
-            return artwork.saleMessage || "Contact for pricing";
+            return artwork.saleMessage || "I’m Interested";
         }
         
         const minPrice = Math.floor(numericPrice * 0.9);
@@ -245,7 +245,7 @@ export default function PartnerPage() {
                                     className="w-full bg-black text-white hover:bg-gray-800 transition-colors duration-300"
                                     onClick={(e) => handleContactClick(e, node)}
                                 >
-                                    Contact for Pricing
+                                    I’m Interested
                                 </Button>
                             </div>
                         </motion.div>

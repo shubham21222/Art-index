@@ -36,7 +36,7 @@ const ArtworkCard = ({ artwork }) => {
 
   return (
     <>
-      <Card className="group overflow-hidden bg-white transition-all duration-300 hover:shadow-lg">
+      <Card className="group mb-8 overflow-hidden bg-white transition-all duration-300 hover:shadow-lg">
         <Link href={artwork.href} className="block relative aspect-square overflow-hidden">
           <Image
             src={artwork.image?.resized?.src || "/placeholder-image.jpg"}
@@ -80,10 +80,10 @@ const ArtworkCard = ({ artwork }) => {
                 onClick={handleContactClick}
                 className="w-full text-sm"
               >
-                Contact for Price
+                I’m Interested
               </Button>
               
-              {artwork.partner?.name && (
+              {/* {artwork.partner?.name && (
                 <Link 
                   href={artwork.partner.href}
                   className="inline-flex items-center text-sm text-gray-500 hover:text-blue-600 transition-colors duration-200"
@@ -91,7 +91,7 @@ const ArtworkCard = ({ artwork }) => {
                   <Badge variant="secondary" className="mr-2">Gallery</Badge>
                   {artwork.partner.name}
                 </Link>
-              )}
+              )} */}
             </div>
           </div>
         </CardContent>

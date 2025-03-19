@@ -32,6 +32,11 @@ export default function Footer() {
                 </a>
               </li>
               <li>
+                <a href="/art-news" className="hover:text-gray-900 transition-colors">
+                  Art News
+                </a>
+              </li>
+              <li>
                 <a href="#" className="hover:text-gray-900 transition-colors">
                   Contact
                 </a>
@@ -46,6 +51,7 @@ export default function Footer() {
                   Partnerships
                 </a>
               </li>
+             
             </ul>
           </div>
 

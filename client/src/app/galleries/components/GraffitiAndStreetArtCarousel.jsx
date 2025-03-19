@@ -152,7 +152,7 @@ export default function GraffitiAndStreetArtCarousel() {
                       className="text-xs bg-white/90 hover:bg-white text-black"
                       onClick={(e) => handleContactClick(e, partner)}
                     >
-                      Contact for Pricing
+                      I’m Interested
                     </Button>
                   </div>
                 </div>
@@ -211,7 +211,7 @@ export default function GraffitiAndStreetArtCarousel() {
         artwork={selectedGallery ? {
           title: selectedGallery.name,
           artistNames: selectedGallery.locations.map(loc => loc.city).join(", "),
-          price: "Contact for pricing",
+          price: "I’m Interested",
           id: selectedGallery.internalID
         } : null}
       />

@@ -148,7 +148,7 @@ export default function CuratorsPicks() {
                         className="text-xs bg-white/90 hover:bg-white text-black w-full"
                         onClick={(e) => handleContactClick(e, art)}
                       >
-                        Contact for Price
+                        I’m Interested
                       </Button>
                       <Link 
                       

@@ -157,7 +157,7 @@ export default function OldMasters() {
                       className="text-xs bg-white/90 hover:bg-white text-black"
                       onClick={(e) => handleContactClick(e, partner)}
                     >
-                      Contact for Pricing
+                      I’m Interested
                     </Button>
                   </div>
                 </div>
@@ -216,7 +216,7 @@ export default function OldMasters() {
         artwork={selectedGallery ? {
           title: selectedGallery.name,
           artistNames: selectedGallery.locations[0]?.city || "N/A",
-          price: "Contact for pricing",
+          price: "I’m Interested",
           id: selectedGallery.internalID
         } : null}
       />

@@ -164,7 +164,7 @@ export default function AuctionCarousel() {
                                                         price: getAdjustedPrice(item)
                                                     })}
                                                 >
-                                                    Contact for Price
+                                                    I’m Interested
                                                 </Button>
                                             </div>
                                         </div>

@@ -65,7 +65,7 @@ const ArtworkCard = ({ artwork }) => {
             <div className="flex justify-between items-center pt-2 border-t">
               <div className="flex items-center gap-2">
                 <Info className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-500">Contact for pricing</span>
+                <span className="text-sm text-gray-500">I’m Interested</span>
               </div>
               <span className="text-sm text-gray-500">
                 Demand: {artwork.demandRank}

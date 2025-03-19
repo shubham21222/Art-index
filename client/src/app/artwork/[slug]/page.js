@@ -213,7 +213,7 @@ export default function ArtworkPage() {
         <>
             <Header />
             <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-                <div className="max-w-[1500px] mx-auto px-6 py-12">
+                <div className="max-w-[1500px] mx-auto px-6 py-8">
                     {/* Header Section */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
                         <div>
@@ -287,7 +287,7 @@ export default function ArtworkPage() {
                             </div>
 
                             {/* Additional Information */}
-                            <div className="bg-white p-6 rounded-xl shadow-lg">
+                            {/* <div className="bg-white p-6 rounded-xl shadow-lg">
                                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Additional Information</h2>
                                 <div className="space-y-4">
                                     <div>
@@ -312,13 +312,13 @@ export default function ArtworkPage() {
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </div> */}
                              <div className="mt-4 md:mt-0">
                             <Button 
                                 onClick={handleContactClick}
                                 className="bg-black text-white hover:bg-gray-800 transition-colors duration-300 px-8 py-6 text-lg"
                             >
-                                Contact for Pricing
+                                I’m Interested
                             </Button>
                         </div>
                         </motion.div>
@@ -336,7 +336,7 @@ export default function ArtworkPage() {
                 artwork={artwork ? {
                     title: artwork.title,
                     artistNames: artist.name,
-                    price: "Contact for pricing",
+                    price: "I’m Interested",
                     id: artwork.id
                 } : null}
             />
