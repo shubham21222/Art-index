@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion'; // Import Framer Motion
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -14,45 +13,45 @@ import Header from '../components/Header';
 const PartnershipForm = () => {
     const [selectedPartnership, setSelectedPartnership] = useState('');
 
-    const headingVariants = {
-        hidden: { opacity: 0, y: -50 }, // Start off-screen and invisible
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 1, ease: 'easeOut' } // Smooth transition
-        },
-    };
-
     return (
-        <>
+        <div className="min-h-screen bg-gray-50">
             <Header />
 
-            {/* Animated Heading Section */}
-            <motion.div
-                className="flex justify-center items-center min-h-[30vh] bg-gradient-to-r from-blue-600 to-purple-600 text-white md:pt-4 pt-8"
-                variants={headingVariants} // Apply animation variants
-                initial="hidden" // Start in the hidden state
-                animate="visible" // Animate to the visible state
-            >
-                <motion.h1
-                    className="text-xl md:text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 drop-shadow-lg"
-                    variants={headingVariants}
-                >
-                    Join the leading global platform for buying and selling art.
-                </motion.h1>
-            </motion.div>
-
             {/* Form Section */}
-            <div className="flex justify-center items-center  bg-gray-100 p-4">
-                <Card className="w-full max-w-md p-6 shadow-lg">
-                    <CardContent className="space-y-4">
-                        <Input type="text" placeholder="First Name" className="w-full" />
-                        <Input type="text" placeholder="Last Name" className="w-full" />
-                        <Input type="email" placeholder="Email Address" className="w-full" />
-                        <Input type="tel" placeholder="Phone Number" className="w-full" />
+            <div className="flex items-center justify-center min-h-[calc(100vh-200px)] py-12 px-4">
+                <Card className="w-full max-w-2xl p-8 shadow-2xl border border-gray-200">
+                    <CardContent className="space-y-6">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Partner with Us</h2>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <Input 
+                                    type="text" 
+                                    placeholder="First Name" 
+                                    className="w-full bg-white border-gray-200 focus:border-gray-900" 
+                                />
+                                <Input 
+                                    type="text" 
+                                    placeholder="Last Name" 
+                                    className="w-full bg-white border-gray-200 focus:border-gray-900" 
+                                />
+                            </div>
+                            <div className="space-y-4">
+                                <Input 
+                                    type="email" 
+                                    placeholder="Email Address" 
+                                    className="w-full bg-white border-gray-200 focus:border-gray-900" 
+                                />
+                                <Input 
+                                    type="tel" 
+                                    placeholder="Phone Number" 
+                                    className="w-full bg-white border-gray-200 focus:border-gray-900" 
+                                />
+                            </div>
+                        </div>
 
                         <Select>
-                            <SelectTrigger>
+                            <SelectTrigger className="bg-white border-gray-200 focus:border-gray-900">
                                 <SelectValue placeholder="Location (Select...)" />
                             </SelectTrigger>
                             <SelectContent>
@@ -62,40 +61,44 @@ const PartnershipForm = () => {
                             </SelectContent>
                         </Select>
 
-                        <Label className="text-sm pt-4">Why do you want to partner with Art Index?</Label>
-                        <Select onValueChange={(value) => setSelectedPartnership(value)}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="auctions">For Auctions</SelectItem>
-                                <SelectItem value="fairs">For Fairs</SelectItem>
-                                <SelectItem value="museums">For Museums</SelectItem>
-                                <SelectItem value="galleries">For Galleries</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-900">Why do you want to partner with Art Index?</Label>
+                            <Select onValueChange={(value) => setSelectedPartnership(value)}>
+                                <SelectTrigger className="bg-white border-gray-200 focus:border-gray-900">
+                                    <SelectValue placeholder="Select..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="auctions">For Auctions</SelectItem>
+                                    <SelectItem value="fairs">For Fairs</SelectItem>
+                                    <SelectItem value="museums">For Museums</SelectItem>
+                                    <SelectItem value="galleries">For Galleries</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                        <div className="flex items-center space-x-2">
-                            <Checkbox id="terms" />
-                            <Label htmlFor="terms" className="text-sm">
+                        <div className="flex items-start space-x-2 pt-4">
+                            <Checkbox id="terms" className="mt-1" />
+                            <Label htmlFor="terms" className="text-sm text-gray-600">
                                 I agree to Art Index{' '}
-                                <a href="#" className="text-blue-500 underline">
+                                <a href="#" className="text-gray-900 underline hover:text-gray-700">
                                     Terms of Use
                                 </a>{' '}
                                 and{' '}
-                                <a href="#" className="text-blue-500 underline">
+                                <a href="#" className="text-gray-900 underline hover:text-gray-700">
                                     Privacy Policy
                                 </a>
                                 , and to receive emails from Artsy.
                             </Label>
                         </div>
 
-                        <Button className="w-full">Request a Quote</Button>
+                        <Button className="w-full bg-black hover:bg-gray-900 text-white py-6 text-lg">
+                            Request a Quote
+                        </Button>
                     </CardContent>
                 </Card>
             </div>
             <Footer />
-        </>
+        </div>
     );
 };
 
