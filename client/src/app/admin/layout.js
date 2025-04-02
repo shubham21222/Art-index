@@ -48,10 +48,10 @@ export default function AdminLayout({ children }) {
 
   const menuItems = [
     { title: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-    { title: "Analytics", path: "/admin/analytics", icon: BarChart3 },
-    { title: "Users", path: "/admin/users", icon: Users },
-    { title: "Content", path: "/admin/content", icon: FileText },
-    { title: "Settings", path: "/admin/settings", icon: Settings },
+    { title: "Artworks", path: "/admin/artworks", icon: FileText },
+    { title: "Galleries", path: "/admin/galleries", icon: Users },
+    // { title: "Analytics", path: "/admin/analytics", icon: BarChart3 },
+    // { title: "Settings", path: "/admin/settings", icon: Settings },
   ];
 
   const handleLogout = async () => {
@@ -65,25 +65,32 @@ export default function AdminLayout({ children }) {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-zinc-950">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 fixed h-full">
-        <div className="p-6">
-          <h1 className="text-2xl font-bold text-gray-800">Art Index</h1>
-          <p className="text-sm text-gray-500">Admin Panel</p>
+      <aside className="w-64 bg-black border-r border-zinc-800 fixed h-full">
+        <div className="p-6 border-b border-zinc-800">
+          <h1 className="text-2xl font-bold text-white">Art Index</h1>
+          <p className="text-sm text-zinc-400">Admin Panel</p>
         </div>
 
         {/* Navigation */}
-        <nav className="px-4 space-y-1">
+        <nav className="px-4 py-4 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isActive = pathname === item.path;
             return (
               <Link
                 key={item.path}
                 href={item.path}
-                className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors group"
+                className={`flex items-center px-4 py-3 rounded-lg transition-colors group ${
+                  isActive 
+                    ? 'bg-white text-black' 
+                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
+                }`}
               >
-                <Icon className="w-5 h-5 mr-3 text-gray-500 group-hover:text-blue-500" />
+                <Icon className={`w-5 h-5 mr-3 ${
+                  isActive ? 'text-black' : 'text-zinc-400 group-hover:text-white'
+                }`} />
                 <span className="font-medium">{item.title}</span>
               </Link>
             );
@@ -91,27 +98,27 @@ export default function AdminLayout({ children }) {
         </nav>
 
         {/* Bottom Section */}
-        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">
+        <div className="absolute bottom-0 w-full p-4 border-t border-zinc-800 bg-black">
           <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+            {/* <div className="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center">
               <Bell className="w-4 h-4 text-white" />
-            </div>
+            </div> */}
             <div className="flex-1">
-              <p className="text-sm font-medium">{user?.name || "Admin User"}</p>
-              <p className="text-xs text-gray-500">{user?.email || "admin@artindex.com"}</p>
+              <p className="text-sm font-medium text-white">{user?.name || "Admin User"}</p>
+              <p className="text-xs text-zinc-400">{user?.email || "admin@artindex.com"}</p>
             </div>
             <button 
               onClick={handleLogout}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+              className="p-2 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors"
             >
-              <LogOut className="w-5 h-5 text-gray-500" />
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 overflow-y-auto">
+      <main className="flex-1 ml-64 overflow-y-auto bg-zinc-950">
         <div className="p-8">{children}</div>
       </main>
     </div>
