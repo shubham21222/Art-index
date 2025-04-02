@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { BASE_URL } from '@/config/baseUrl';
+import Cookies from 'js-cookie';
 
 const initialState = {
   user: null,
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
+  token: typeof window !== 'undefined' ? Cookies.get('token') : null,
   isAuthenticated: false,
   loading: false,
   error: null,
@@ -34,7 +35,9 @@ export const login = createAsyncThunk(
       
       if (response.data.status && response.data.items.token) {
         const token = response.data.items.token;
+        // Store token in both localStorage and cookies
         localStorage.setItem('token', token);
+        Cookies.set('token', token, { expires: 7 }); // Expires in 7 days
         
         // Verify user after successful login
         const verifyResponse = await dispatch(verifyUser(token)).unwrap();
@@ -64,10 +67,14 @@ export const register = createAsyncThunk(
       });
       
       if (response.data.success && response.data.token) {
-        localStorage.setItem('token', response.data.token);
+        const token = response.data.token;
+        // Store token in both localStorage and cookies
+        localStorage.setItem('token', token);
+        Cookies.set('token', token, { expires: 7 }); // Expires in 7 days
+        
         return {
           user: response.data.user,
-          token: response.data.token,
+          token: token,
           message: 'Registration successful!'
         };
       }
@@ -91,7 +98,10 @@ export const logout = createAsyncThunk(
         }
       });
       
+      // Remove token from both localStorage and cookies
       localStorage.removeItem('token');
+      Cookies.remove('token');
+      
       return true;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Logout failed' });
@@ -106,7 +116,7 @@ export const getCurrentUser = createAsyncThunk(
       const token = localStorage.getItem('token');
       if (!token) return null;
       
-      const response = await axios.get('/api/v1/auth/me', {
+      const response = await axios.get(`${BASE_URL}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
@@ -150,6 +160,7 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         localStorage.removeItem('token');
+        Cookies.remove('token');
       })
       // Login
       .addCase(login.pending, (state) => {
@@ -205,6 +216,7 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         localStorage.removeItem('token');
+        Cookies.remove('token');
       });
   },
 });

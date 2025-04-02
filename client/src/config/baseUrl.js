@@ -1,1 +1,1 @@
-export const BASE_URL = 'http://localhost:5000/v1/api';
+export const BASE_URL = 'https://artindex.ai/v1/api';
