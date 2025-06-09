@@ -8,7 +8,7 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = process.env.MONGODB_DB;
+  const dbName = 'test';
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
@@ -19,29 +19,36 @@ export default async function handler(req, res) {
   try {
     client = new MongoClient(uri);
     await client.connect();
-    const db = client.db("estates_db");
+    const db = client.db(dbName);
     const collection = db.collection("artist_estates");
 
-    const estates = await collection.find({}).toArray();
+    const institutions = await collection.find({}).toArray();
 
-    const formattedEstates = estates.map((estate) => ({
-      internalID: estate.internalID,
-      slug: estate.slug,
-      name: estate.name,
-      href: estate.href,
-      initials: estate.initials,
-      locations: estate.locationsConnection?.edges.map(edge => ({
-        city: edge.node.city,
-        id: edge.node.id
-      })) || [],
-      categories: estate.categories || [],
-      image: estate.profile?.image?.cropped?.src || "/placeholder.svg",
+    const formattedInstitutions = institutions.map((institution) => ({
+      internalID: institution.internalID,
+      slug: institution.slug,
+      name: institution.name,
+      href: institution.href,
+      initials: institution.initials,
+      locations: institution.locations || [],
+      categories: institution.categories || [],
+      image: {
+        src: institution.profile?.image?.src || "/placeholder.svg",
+        srcSet: institution.profile?.image?.srcSet,
+        width: 445,
+        height: 334,
+      },
+      profile: {
+        avatar: institution.profile?.avatar,
+        icon: institution.profile?.icon,
+      },
+      type: institution.type,
     }));
 
-    res.status(200).json({ estates: formattedEstates });
+    res.status(200).json({ institutions: formattedInstitutions });
   } catch (error) {
-    console.error("Error fetching artist estates from MongoDB:", error);
-    res.status(500).json({ error: "Failed to fetch estates" });
+    console.error("Error fetching artist estates institutions from MongoDB:", error);
+    res.status(500).json({ error: "Failed to fetch institutions" });
   } finally {
     if (client) {
       await client.close();

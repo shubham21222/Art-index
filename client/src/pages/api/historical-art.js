@@ -8,7 +8,7 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = process.env.MONGODB_DB;
+  const dbName = 'test';
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
@@ -19,8 +19,8 @@ export default async function handler(req, res) {
   try {
     client = new MongoClient(uri);
     await client.connect();
-    const db = client.db("historical_art_db");
-    const collection = db.collection("historical_art");
+    const db = client.db(dbName);
+    const collection = db.collection("historical_art_institutions");
 
     const institutions = await collection.find({}).toArray();
 
@@ -30,17 +30,24 @@ export default async function handler(req, res) {
       name: institution.name,
       href: institution.href,
       initials: institution.initials,
-      locations: institution.locationsConnection?.edges.map(edge => ({
-        city: edge.node.city,
-        id: edge.node.id
-      })) || [],
+      locations: institution.locations || [],
       categories: institution.categories || [],
-      image: institution.profile?.image?.cropped?.src || "/placeholder.svg",
+      image: {
+        src: institution.profile?.image?.src || "/placeholder.svg",
+        srcSet: institution.profile?.image?.srcSet,
+        width: 445,
+        height: 334,
+      },
+      profile: {
+        avatar: institution.profile?.avatar,
+        icon: institution.profile?.icon,
+      },
+      type: institution.type,
     }));
 
     res.status(200).json({ institutions: formattedInstitutions });
   } catch (error) {
-    console.error("Error fetching historical art from MongoDB:", error);
+    console.error("Error fetching historical art institutions from MongoDB:", error);
     res.status(500).json({ error: "Failed to fetch institutions" });
   } finally {
     if (client) {

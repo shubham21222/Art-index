@@ -10,7 +10,7 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = process.env.MONGODB_DB;
+  const dbName = 'test';
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     // Connect to MongoDB
     client = new MongoClient(uri);
     await client.connect();
-    const db = client.db("galleries_db"); // Use the database from your Python script
+    const db = client.db(dbName); // Use the database from your Python script
     const collection = db.collection("galleries");
 
     // Fetch up to 50 galleries (matching the original query limit)

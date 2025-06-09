@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import ContactModal from '@/app/components/ContactModal';
 
 // Define the API endpoint
 const API_URL = "/api/trending-artists"; // Your new MongoDB API route
@@ -10,6 +12,8 @@ const API_URL = "/api/trending-artists"; // Your new MongoDB API route
 export default function TrendingArtists() {
   const [artists, setArtists] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0); // Track the center artist
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch data from MongoDB API
   useEffect(() => {
@@ -38,6 +42,12 @@ export default function TrendingArtists() {
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === artists.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleContactClick = (e, artist) => {
+    e.preventDefault();
+    setSelectedArtist(artist);
+    setIsModalOpen(true);
   };
 
   // Calculate 3D positions for each slide
@@ -113,9 +123,14 @@ export default function TrendingArtists() {
                     <p className="text-xs drop-shadow-md">
                       Artworks: {artist.artworkCount}, For Sale: {artist.forSaleArtworkCount}
                     </p>
-                    {/* <button className="mt-2 bg-white text-gray-900 px-4 py-1 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-gray-200">
-                      Follow
-                    </button> */}
+                    <Button 
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => handleContactClick(e, artist)}
+                      className="mt-2 bg-white/90 hover:bg-white text-black w-full"
+                    >
+                      I&apos;m Interested
+                    </Button>
                   </div>
                 </Link>
               </div>
@@ -170,6 +185,21 @@ export default function TrendingArtists() {
             />
           </svg>
         </button>
+
+        {/* Contact Modal */}
+        <ContactModal 
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedArtist(null);
+          }}
+          artwork={selectedArtist ? {
+            title: selectedArtist.name,
+            artistNames: selectedArtist.name,
+            price: "I&apos;m Interested",
+            id: selectedArtist.id
+          } : null}
+        />
       </div>
 
       {/* Indicators */}

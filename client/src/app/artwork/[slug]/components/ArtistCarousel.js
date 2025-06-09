@@ -18,7 +18,7 @@ export default function ArtistCarousel({ slug }) {
                 setLoading(true);
                 setError(null);
 
-                const artistResponse = await fetch("https://metaphysics-cdn.artsy.net/v2", {
+                const artistResponse = await fetch("/api/artwork", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

@@ -34,7 +34,7 @@ export default function ArtworkPage() {
                 setError(null);
 
                 // Fetch Artwork Details
-                const artworkResponse = await fetch("https://metaphysics-cdn.artsy.net/v2", {
+                const artworkResponse = await fetch("/api/artwork", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -86,7 +86,7 @@ export default function ArtworkPage() {
 
                 // Fetch Artist Details
                 const artistID = artworkResult.data.artwork.artist.internalID;
-                const artistResponse = await fetch("https://metaphysics-cdn.artsy.net/v2", {
+                const artistResponse = await fetch("/api/artwork", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -318,7 +318,7 @@ export default function ArtworkPage() {
                                 onClick={handleContactClick}
                                 className="bg-black text-white hover:bg-gray-800 transition-colors duration-300 px-8 py-6 text-lg"
                             >
-                                I’m Interested
+                                I&apos;m Interested
                             </Button>
                         </div>
                         </motion.div>
@@ -336,7 +336,7 @@ export default function ArtworkPage() {
                 artwork={artwork ? {
                     title: artwork.title,
                     artistNames: artist.name,
-                    price: "I’m Interested",
+                    price: "I'm Interested",
                     id: artwork.id
                 } : null}
             />

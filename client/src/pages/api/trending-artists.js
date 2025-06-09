@@ -10,7 +10,7 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = process.env.MONGODB_DB;
+  const dbName = 'test';
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
@@ -22,8 +22,8 @@ export default async function handler(req, res) {
     // Connect to MongoDB
     client = new MongoClient(uri);
     await client.connect();
-    const db = client.db("artists_db"); // Use the database from the Python script
-    const collection = db.collection("trending_artists");
+    const db = client.db(dbName); // Use the database from the Python script
+    const collection = db.collection("artists");
 
     // Fetch up to 20 artists to match the component's original limit
     const artists = await collection.find({}).limit(20).toArray();

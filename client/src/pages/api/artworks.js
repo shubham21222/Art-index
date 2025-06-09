@@ -9,7 +9,7 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = process.env.MONGODB_DB;
+  const dbName = 'test';
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
@@ -26,27 +26,37 @@ export default async function handler(req, res) {
 
     // Fetch up to 20 artworks to match your component's original limit
     const artworks = await collection.find({}).limit(20).toArray();
+    
+    // Log the first artwork to see its structure
+    console.log("Sample artwork data:", JSON.stringify(artworks[0], null, 2));
 
     // Map data to ensure compatibility with CuratorsPicks component
-    const formattedArtworks = artworks.map((artwork) => ({
-      internalID: artwork.internalID,
-      slug: artwork.slug,
-      href: artwork.href,
-      title: artwork.title,
-      artistNames: artwork.artistNames,
-      image: {
-        resized: {
-          src: artwork.image.resized.src,
-          width: artwork.image.resized.width,
-          height: artwork.image.resized.height,
+    const formattedArtworks = artworks.map((artwork) => {
+      // Calculate dimensions based on aspect ratio if available
+      const aspectRatio = artwork.image?.aspectRatio || 0.75;
+      const width = 350; // Fixed width
+      const height = Math.round(width / aspectRatio);
+      
+      return {
+        internalID: artwork.internalID || artwork._id?.toString(),
+        slug: artwork.slug || '',
+        href: artwork.href || '',
+        title: artwork.title || 'Untitled',
+        artistNames: artwork.artist?.name || 'Unknown Artist',
+        image: {
+          resized: {
+            src: artwork.image?.url || 'https://placehold.co/350x467?text=Artwork+Image',
+            width: width,
+            height: height,
+          },
         },
-      },
-      saleMessage: artwork.saleMessage,
-      partner: {
-        name: artwork.partner.name,
-      },
-      priceCurrency: artwork.priceCurrency,
-    }));
+        saleMessage: artwork.saleMessage || 'Price on request',
+        partner: {
+          name: artwork.partner?.name || 'Unknown Gallery',
+        },
+        priceCurrency: artwork.priceCurrency || 'USD',
+      };
+    });
 
     // Send formatted data as JSON
     res.status(200).json({ artworks: formattedArtworks });

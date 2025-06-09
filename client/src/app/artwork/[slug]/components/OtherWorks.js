@@ -80,7 +80,7 @@ const ArtworkCard = ({ artwork }) => {
                 onClick={handleContactClick}
                 className="w-full text-sm"
               >
-                I’m Interested
+                I'm Interested
               </Button>
               
               {/* {artwork.partner?.name && (
@@ -143,7 +143,7 @@ export default function OtherWorks({ slug }) {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("https://metaphysics-cdn.artsy.net/v2", {
+        const response = await fetch("/api/artwork", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

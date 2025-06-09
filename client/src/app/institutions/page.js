@@ -18,7 +18,7 @@ const page = () => {
     <Carousel3 /> 
     <div className="max-w-[1500px] mx-auto">
     <UniversityMuseums />
-    <NonprofitOrganizations />
+    {/* <NonprofitOrganizations /> */}
     <ArtistEstates />
     <ModernAndContemporaryArt />
     <Museums />

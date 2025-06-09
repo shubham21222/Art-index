@@ -9,7 +9,7 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = "auction_lots_db";
+  const dbName = "test";
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     client = new MongoClient(uri);
     await client.connect();
     const db = client.db(dbName);
-    const collection = db.collection("auction_lots");
+    const collection = db.collection("auctions");
 
     // Fetch up to 20 auction lots
     const auctionLots = await collection.find({}).limit(20).toArray();

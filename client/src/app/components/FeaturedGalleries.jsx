@@ -3,6 +3,8 @@ import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import ContactModal from '@/app/components/ContactModal';
 
 // Define the API endpoint
 const API_URL = "/api/galleries"; // Your new MongoDB API route
@@ -10,6 +12,8 @@ const API_URL = "/api/galleries"; // Your new MongoDB API route
 export default function FeaturedGalleries() {
   const [galleries, setGalleries] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0); // Track the center gallery
+  const [selectedGallery, setSelectedGallery] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch data from MongoDB API
   useEffect(() => {
@@ -64,6 +68,12 @@ export default function FeaturedGalleries() {
     };  
   };
 
+  const handleContactClick = (e, gallery) => {
+    e.preventDefault();
+    setSelectedGallery(gallery);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
       {/* Header Section */}
@@ -108,11 +118,16 @@ export default function FeaturedGalleries() {
 
                   {/* Gallery Details */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-center text-white z-10">
-                    {/* <h3 className="text-lg font-semibold drop-shadow-md">{gallery.name}</h3> */}
-                    {/* <p className="text-sm drop-shadow-md">{gallery.location}</p> */}
-                    {/* <button className="mt-2 bg-white text-gray-900 px-4 py-1 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-gray-200">
-                      Follow
-                    </button> */}
+                    <h3 className="text-lg font-semibold drop-shadow-md">{gallery.name}</h3>
+                    <p className="text-sm drop-shadow-md">{gallery.location}</p>
+                    <Button 
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => handleContactClick(e, gallery)}
+                      className="mt-2 bg-white/90 hover:bg-white text-black w-full"
+                    >
+                      I&apos;m Interested
+                    </Button>
                   </div>
                 </Link>
               </div>  
@@ -167,6 +182,21 @@ export default function FeaturedGalleries() {
             />
           </svg>
         </button>
+
+        {/* Contact Modal */}
+        <ContactModal 
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedGallery(null);
+          }}
+          artwork={selectedGallery ? {
+            title: selectedGallery.name,
+            artistNames: selectedGallery.name,
+            price: "I&apos;m Interested",
+            id: selectedGallery.id
+          } : null}
+        />
       </div>
 
       {/* Indicators */}

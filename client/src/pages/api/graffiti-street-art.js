@@ -8,7 +8,7 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = process.env.MONGODB_DB;
+  const dbName = 'test';
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
@@ -19,24 +19,32 @@ export default async function handler(req, res) {
   try {
     client = new MongoClient(uri);
     await client.connect();
-    const db = client.db("graffiti_street_art_db");
-    const collection = db.collection("graffiti_street_art");
+    const db = client.db(dbName);
+    const collection = db.collection("graffiti_street_art_artworks");
 
-    const galleries = await collection.find({}).toArray();
+    const artworks = await collection.find({}).limit(30).toArray();
 
-    const formattedGalleries = galleries.map((gallery) => ({
-      internalID: gallery.internalID,
-      slug: gallery.slug,
-      name: gallery.name,
-      href: gallery.href,
-      locations: gallery.locationsConnection?.edges.map(edge => ({
-        city: edge.node.city,
-        id: edge.node.id
-      })) || [],
-      image: gallery.profile?.image?.cropped?.src || "/placeholder.svg",
+    const formattedArtworks = artworks.map((artwork) => ({
+      internalID: artwork.internalID,
+      slug: artwork.slug,
+      title: artwork.title,
+      date: artwork.date,
+      artistNames: artwork.artistNames,
+      image: {
+        src: artwork.image?.src || 'https://placehold.co/445x440?text=Street+Art',
+        width: artwork.image?.width || 445,
+        height: artwork.image?.height || 440,
+      },
+      partner: {
+        name: artwork.partner?.name || 'Unknown Gallery',
+        href: artwork.partner?.href || '#',
+      },
+      saleMessage: artwork.saleMessage || 'Price on request',
+      culturalMaker: artwork.culturalMaker,
+      collectingInstitution: artwork.collectingInstitution,
     }));
 
-    res.status(200).json({ galleries: formattedGalleries });
+    res.status(200).json({ galleries: formattedArtworks });
   } catch (error) {
     console.error("Error fetching graffiti and street art from MongoDB:", error);
     res.status(500).json({ error: "Failed to fetch galleries" });

@@ -10,13 +10,12 @@ import ContactModal from '@/app/components/ContactModal';
 const API_URL = "/api/pop-art";
 
 export default function PopArt() {
-  const [partners, setPartners] = useState([]);
+  const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedGallery, setSelectedGallery] = useState(null);
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
 
-  // Fetch data from MongoDB API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -27,10 +26,10 @@ export default function PopArt() {
         });
 
         const { galleries } = await response.json();
-        setPartners(galleries || []);
+        setArtworks(galleries || []);
         setCurrentIndex(Math.floor((galleries || []).length / 2));
       } catch (error) {
-        console.error("Error fetching pop art galleries:", error);
+        console.error("Error fetching Pop Art artworks:", error);
       } finally {
         setLoading(false);
       }
@@ -39,27 +38,24 @@ export default function PopArt() {
     fetchData();
   }, []);
 
-  // Navigation handlers
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? partners.length - 1 : prev - 1));
+    setCurrentIndex((prev) => (prev === 0 ? artworks.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev === partners.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) => (prev === artworks.length - 1 ? 0 : prev + 1));
   };
 
-  const handleContactClick = (e, gallery) => {
+  const handleContactClick = (e, artwork) => {
     e.preventDefault();
-    setSelectedGallery(gallery);
+    setSelectedArtwork(artwork);
     setIsModalOpen(true);
   };
 
-  // Calculate 3D slide styles
   const getSlideStyle = (index) => {
-    const total = partners.length || 5;
+    const total = artworks.length || 6;
     const angle = (360 / total) * (index - currentIndex);
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    const radius = isMobile ? 300 : 600;
+    const radius = 700;
     const translateZ = -radius;
     const rotateY = angle;
     const opacity = Math.abs(angle) > 90 ? 0 : 1 - Math.abs(angle) / 120;
@@ -74,10 +70,8 @@ export default function PopArt() {
       left: "50%",
       transformOrigin: "center center",
       zIndex: Math.round(10 - Math.abs(angle)),
-      width: isMobile ? "200px" : "325px",
-      height: isMobile ? "300px" : "400px",
-      marginLeft: isMobile ? "-100px" : "-162.5px",
-      marginTop: isMobile ? "-150px" : "-200px",
+      marginLeft: "-200px",
+      marginTop: "-200px",
     };
   };
 
@@ -90,101 +84,111 @@ export default function PopArt() {
           <p className="text-gray-900 text-lg mt-2">Discover contemporary pop art</p>
         </div>
         <Link
-          href="#"
-          className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4"
+          href="/pop-art"
+          className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
-          View All Galleries
+          View All Artworks
         </Link>
       </div>
 
       {/* 3D Carousel */}
-      <div className="relative h-[400px] w-full perspective-[1200px] overflow-hidden">
+      <div className="relative h-[500px] w-full perspective-[1200px] overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
           {loading ? (
-            Array.from({ length: 5 }).map((_, index) => (
+            Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
                 style={getSlideStyle(index)}
-                className="rounded-lg overflow-hidden"
+                className="w-[400px] h-[400px] rounded-lg overflow-hidden"
               >
-                <Skeleton className="w-full h-[100%] rounded-t-md" />
-                <div className="p-2 space-y-2">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
+                <Skeleton className="w-full h-full rounded-lg" />
               </div>
             ))
-          ) : partners.length > 0 ? (
-            partners.map((partner, index) => (
+          ) : artworks.length > 0 ? (
+            artworks.map((artwork, index) => (
               <div
-                key={partner.internalID}
+                key={artwork.internalID}
                 style={getSlideStyle(index)}
-                className="group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
+                className="group w-[400px] h-[400px] rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl"
               >
-                <div className="relative w-full h-[70%]">
-                  <Image
-                    src={partner.image}
-                    alt={partner.name}
-                    fill
-                    className="object-cover rounded-t-md transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
-                </div>
-                <div className="p-2 text-white bg-gray-900 bg-opacity-80">
-                  {/* <h3 className="text-base md:text-lg font-semibold line-clamp-1">
-                    {partner.name}
-                  </h3>
-                  <p className="text-xs md:text-sm italic mb-2">
-                    {partner.locations[0]?.city || "N/A"}
-                  </p> */}
-                  <div className="flex gap-2">
-                    <Link 
-                      href={`/visit-gallery/${partner.slug}`}
-                      className="flex-1"
-                    >
+                <Link href={`/artwork/${artwork.slug}`} className="block h-full">
+                  {/* Image */}
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={artwork.image.src}
+                      alt={artwork.title}
+                      width={400}
+                      height={400}
+                      className="object-cover w-full h-full rounded-lg shadow-md transition-transform duration-500 group-hover:scale-110"
+                    />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                  </div>
+
+                  {/* Artwork Details */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-center text-white z-10">
+                    <h3 className="text-lg font-semibold drop-shadow-md">{artwork.title}</h3>
+                    <p className="text-sm drop-shadow-md">{artwork.artistNames}</p>
+                    <p className="text-xs drop-shadow-md">{artwork.date}</p>
+                    <div className="flex justify-center gap-2 mt-2">
                       <Button 
                         variant="secondary" 
                         size="sm"
-                        className="w-full text-xs bg-white/90 hover:bg-white text-black"
+                        className="text-xs bg-white/90 hover:bg-white text-black"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleContactClick(e, artwork);
+                        }}
                       >
-                        View Gallery
+                        I'm Interested
                       </Button>
-                    </Link>
-                    <Button 
-                      variant="secondary" 
-                      size="sm"
-                      className="text-xs bg-white/90 hover:bg-white text-black"
-                      onClick={(e) => handleContactClick(e, partner)}
-                    >
-                      I’m Interested
-                    </Button>
+                    </div>
                   </div>
-                </div>
+                </Link>
               </div>
             ))
           ) : (
-            <p className="text-gray-500 text-center">No galleries found.</p>
+            <p className="text-gray-500 text-center">No artworks found.</p>
           )}
         </div>
 
         {/* Navigation Buttons */}
-        {currentIndex !== null && (
+        {currentIndex !== null && artworks.length > 0 && (
           <>
             <button
               onClick={handlePrev}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
             >
-              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-5 h-5 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
             <button
               onClick={handleNext}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
             >
-              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+              <svg
+                className="w-5 h-5 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </>
@@ -192,9 +196,9 @@ export default function PopArt() {
       </div>
 
       {/* Indicators */}
-      {currentIndex !== null && (
+      {currentIndex !== null && artworks.length > 0 && (
         <div className="flex justify-center mt-6 space-x-2">
-          {(partners.length > 0 ? partners : Array.from({ length: 5 })).map((_, index) => (
+          {artworks.map((_, index) => (
             <div
               key={index}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
@@ -211,13 +215,13 @@ export default function PopArt() {
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          setSelectedGallery(null);
+          setSelectedArtwork(null);
         }}
-        artwork={selectedGallery ? {
-          title: selectedGallery.name,
-          artistNames: selectedGallery.locations[0]?.city || "N/A",
-          price: "I’m Interested",
-          id: selectedGallery.internalID
+        artwork={selectedArtwork ? {
+          title: selectedArtwork.title,
+          artistNames: selectedArtwork.artistNames,
+          price: selectedArtwork.saleMessage || "Price on request",
+          id: selectedArtwork.internalID
         } : null}
       />
     </div>

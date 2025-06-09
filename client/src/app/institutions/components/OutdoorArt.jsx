@@ -1,19 +1,17 @@
 "use client";
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Define the API endpoint
 const API_URL = "/api/outdoor-art";
 
 export default function OutdoorArt() {
-  const [partners, setPartners] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0); // Center item index
+  const [currentIndex, setCurrentIndex] = useState(null);
 
-  // Fetch data from MongoDB API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -24,10 +22,10 @@ export default function OutdoorArt() {
         });
 
         const { institutions } = await response.json();
-        setPartners(institutions || []);
-        setCurrentIndex(Math.floor((institutions || []).length / 2)); // Start at middle
+        setInstitutions(institutions || []);
+        setCurrentIndex(Math.floor((institutions || []).length / 2));
       } catch (error) {
-        console.error("Error fetching outdoor art:", error);
+        console.error("Error fetching outdoor art institutions:", error);
       } finally {
         setLoading(false);
       }
@@ -36,25 +34,22 @@ export default function OutdoorArt() {
     fetchData();
   }, []);
 
-  // Navigation handlers
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? partners.length - 1 : prev - 1));
+    setCurrentIndex((prev) => (prev === 0 ? institutions.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev === partners.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) => (prev === institutions.length - 1 ? 0 : prev + 1));
   };
 
-  // Calculate 3D slide styles
   const getSlideStyle = (index) => {
-    const total = partners.length || 5; // Fallback for skeletons
-    const angle = (360 / total) * (index - currentIndex); // Circular positioning
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    const radius = isMobile ? 300 : 600; // Smaller radius on mobile
-    const translateZ = -radius; // Depth of the 3D circle
-    const rotateY = angle; // Rotation around Y-axis
-    const opacity = Math.abs(angle) > 90 ? 0 : 1 - Math.abs(angle) / 120; // Fade distant slides
-    const scale = 1 - Math.abs(angle) / 180; // Scale down distant slides
+    const total = institutions.length || 6;
+    const angle = (360 / total) * (index - currentIndex);
+    const radius = 700;
+    const translateZ = -radius;
+    const rotateY = angle;
+    const opacity = Math.abs(angle) > 90 ? 0 : 1 - Math.abs(angle) / 120;
+    const scale = 1 - Math.abs(angle) / 180;
 
     return {
       transform: `rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
@@ -65,25 +60,24 @@ export default function OutdoorArt() {
       left: "50%",
       transformOrigin: "center center",
       zIndex: Math.round(10 - Math.abs(angle)),
-      width: isMobile ? "200px" : "325px", // Smaller width on mobile
-      height: isMobile ? "300px" : "400px", // Adjusted height on mobile
-      marginLeft: isMobile ? "-100px" : "-162.5px", // Center based on width
-      marginTop: isMobile ? "-150px" : "-200px", // Center based on height
+      marginLeft: "-200px",
+      marginTop: "-200px",
     };
   };
 
   return (
-    <section className="px-6 py-8 max-w-[1500px] mx-auto">
+    <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center sm:text-left">
-          Outdoor Art
-        </h2>
+      <div className="flex flex-col items-center justify-between w-full mb-6">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900">Outdoor Art</h2>
+          <p className="text-gray-900 text-lg mt-2">Discover leading art institutions</p>
+        </div>
         <Link
-          href="#"
-          className="text-sm font-medium text-black underline hover:text-gray-700 mt-2 sm:mt-0"
+          href="/institutions/outdoor-art"
+          className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
-          Explore All Institutions
+          View All Institutions
         </Link>
       </div>
 
@@ -91,48 +85,42 @@ export default function OutdoorArt() {
       <div className="relative h-[500px] w-full perspective-[1200px] overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
           {loading ? (
-            Array.from({ length: 5 }).map((_, index) => (
+            Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
                 style={getSlideStyle(index)}
-                className="rounded-lg overflow-hidden"
+                className="w-[400px] h-[400px] rounded-lg overflow-hidden"
               >
-                <Skeleton className="w-full h-[80%] rounded-t-md" />
-                <div className="p-2 space-y-2">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
+                <Skeleton className="w-full h-full rounded-lg" />
               </div>
             ))
-          ) : partners.length > 0 ? (
-            partners.map((partner, index) => (
+          ) : institutions.length > 0 ? (
+            institutions.map((institution, index) => (
               <div
-                key={partner.internalID}
+                key={institution.internalID}
                 style={getSlideStyle(index)}
-                className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+                className="group w-[400px] h-[400px] rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl"
               >
-                <Link href={`/institution/${partner.slug}`} className="block h-full">
+                <Link href={`/institution/${institution.slug}`} className="block h-full">
                   {/* Image */}
-                  <div className="relative w-full h-[80%]">
+                  <div className="relative w-full h-full">
                     <Image
-                      src={partner.image}
-                      alt={partner.name}
-                      fill
-                      className="object-cover rounded-t-md transition-transform duration-500 group-hover:scale-110"
+                      src={institution.image.src}
+                      alt={institution.name}
+                      width={400}
+                      height={400}
+                      className="object-cover w-full h-full rounded-lg shadow-md transition-transform duration-500 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
                   </div>
-                  {/* Details */}
-                  <div className="p-2 text-white bg-gray-900 bg-opacity-80">
-                    <h3 className="text-base md:text-lg font-semibold line-clamp-1">
-                      {partner.name}
-                    </h3>
-                    <p className="text-xs md:text-sm">
-                      {partner.locations[0]?.city || "N/A"}
-                    </p>
-                    <p className="text-xs md:text-sm text-gray-300">
-                      {partner.categories.map((cat) => cat.name).join(", ") || "N/A"}
+
+                  {/* Institution Details */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-center text-white z-10">
+                    <h3 className="text-lg font-semibold drop-shadow-md">{institution.name}</h3>
+                    <p className="text-sm drop-shadow-md">{institution.locations[0]?.city || "N/A"}</p>
+                    <p className="text-xs drop-shadow-md">
+                      {institution.categories.map(cat => cat.name).join(", ") || "N/A"}
                     </p>
                   </div>
                 </Link>
@@ -144,30 +132,52 @@ export default function OutdoorArt() {
         </div>
 
         {/* Navigation Buttons */}
-        {!loading && partners.length > 0 && (
+        {currentIndex !== null && institutions.length > 0 && (
           <>
             <button
               onClick={handlePrev}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
-              disabled={loading}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-700" />
+              <svg
+                className="w-5 h-5 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
             </button>
             <button
               onClick={handleNext}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-20 transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
-              disabled={loading}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
             >
-              <ChevronRight className="w-5 h-5 text-gray-700" />
+              <svg
+                className="w-5 h-5 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
             </button>
           </>
         )}
       </div>
 
       {/* Indicators */}
-      {!loading && partners.length > 0 && (
+      {currentIndex !== null && institutions.length > 0 && (
         <div className="flex justify-center mt-6 space-x-2">
-          {partners.map((_, index) => (
+          {institutions.map((_, index) => (
             <div
               key={index}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
@@ -178,6 +188,6 @@ export default function OutdoorArt() {
           ))}
         </div>
       )}
-    </section>
+    </div>
   );
 }

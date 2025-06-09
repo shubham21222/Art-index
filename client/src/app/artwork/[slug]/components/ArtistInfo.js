@@ -19,7 +19,7 @@ export default function ArtistInfo({ slug }) {
                 setError(null);
 
                 // Fetch Artist Details
-                const response = await fetch("https://metaphysics-cdn.artsy.net/v2", {
+                const response = await fetch("/api/artwork", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

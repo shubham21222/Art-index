@@ -8,7 +8,7 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = process.env.MONGODB_DB;
+  const dbName = 'test';
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
@@ -19,29 +19,36 @@ export default async function handler(req, res) {
   try {
     client = new MongoClient(uri);
     await client.connect();
-    const db = client.db("museums_db");
+    const db = client.db(dbName);
     const collection = db.collection("museums");
 
-    const museums = await collection.find({}).toArray();
+    const institutions = await collection.find({}).toArray();
 
-    const formattedMuseums = museums.map((museum) => ({
-      internalID: museum.internalID,
-      slug: museum.slug,
-      name: museum.name,
-      href: museum.href,
-      initials: museum.initials,
-      locations: museum.locationsConnection?.edges.map(edge => ({
-        city: edge.node.city,
-        id: edge.node.id
-      })) || [],
-      categories: museum.categories || [],
-      image: museum.profile?.image?.cropped?.src || "/placeholder.svg",
+    const formattedInstitutions = institutions.map((institution) => ({
+      internalID: institution.internalID,
+      slug: institution.slug,
+      name: institution.name,
+      href: institution.href,
+      initials: institution.initials,
+      locations: institution.locations || [],
+      categories: institution.categories || [],
+      image: {
+        src: institution.profile?.image?.src || "/placeholder.svg",
+        srcSet: institution.profile?.image?.srcSet,
+        width: 445,
+        height: 334,
+      },
+      profile: {
+        avatar: institution.profile?.avatar,
+        icon: institution.profile?.icon,
+      },
+      type: institution.type,
     }));
 
-    res.status(200).json({ museums: formattedMuseums });
+    res.status(200).json({ institutions: formattedInstitutions });
   } catch (error) {
-    console.error("Error fetching museums from MongoDB:", error);
-    res.status(500).json({ error: "Failed to fetch museums" });
+    console.error("Error fetching museums institutions from MongoDB:", error);
+    res.status(500).json({ error: "Failed to fetch institutions" });
   } finally {
     if (client) {
       await client.close();

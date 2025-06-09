@@ -8,7 +8,7 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = process.env.MONGODB_DB;
+  const dbName = 'test';
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
@@ -19,29 +19,37 @@ export default async function handler(req, res) {
   try {
     client = new MongoClient(uri);
     await client.connect();
-    const db = client.db("indian_art_db");
-    const collection = db.collection("indian_art");
+    const db = client.db(dbName);
+    const collection = db.collection("indian_art_artworks");
 
-    const galleries = await collection.find({}).toArray();
+    const artworks = await collection.find({}).limit(30).toArray();
 
-    const formattedGalleries = galleries.map((gallery) => ({
-      internalID: gallery.internalID,
-      slug: gallery.slug,
-      name: gallery.name,
-      href: gallery.href,
-      initials: gallery.initials,
-      locations: gallery.locationsConnection?.edges.map(edge => ({
-        city: edge.node.city,
-        id: edge.node.id
-      })) || [],
-      categories: gallery.categories || [],
-      image: gallery.profile?.image?.cropped?.src || "/placeholder.svg",
+    const formattedArtworks = artworks.map((artwork) => ({
+      internalID: artwork.internalID,
+      slug: artwork.slug,
+      title: artwork.title,
+      date: artwork.date,
+      artistNames: artwork.artistNames,
+      image: {
+        src: artwork.image?.resized?.src || artwork.image?.url || 'https://placehold.co/445x534?text=Indian+Art',
+        width: artwork.image?.resized?.width || 445,
+        height: artwork.image?.resized?.height || 534,
+      },
+      partner: {
+        name: artwork.partner?.name || 'Unknown Gallery',
+        href: artwork.partner?.href || '#',
+      },
+      saleMessage: artwork.saleMessage || 'Price on request',
+      culturalMaker: artwork.culturalMaker,
+      collectingInstitution: artwork.collectingInstitution,
+      attributionClass: artwork.attributionClass?.name,
+      mediumType: artwork.mediumType?.filterGene?.name,
     }));
 
-    res.status(200).json({ galleries: formattedGalleries });
+    res.status(200).json({ galleries: formattedArtworks });
   } catch (error) {
-    console.error("Error fetching Indian Art galleries from MongoDB:", error);
-    res.status(500).json({ error: "Failed to fetch galleries" });
+    console.error("Error fetching Indian Art artworks from MongoDB:", error);
+    res.status(500).json({ error: "Failed to fetch artworks" });
   } finally {
     if (client) {
       await client.close();
