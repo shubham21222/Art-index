@@ -7,6 +7,8 @@ import favorite from "./routes/Favorite/favorite.routes.js";
 import Auction from "./routes/Auction/auction.routes.js";
 import Order from "./routes/order/order.routes.js"
 import seller from "./routes/Seller/seller.routes.js"
+import Inquiry from "./routes/Inquiry/inquiry.routes.js"
+import Quote from "./routes/Quote/quote.routes.js"
 
 const router = Router();
 
@@ -44,6 +46,9 @@ router.use("/order" , Order)
 // Add API routes here for Seller //
 
 router.use("/seller", seller);
+
+router.use("/inquiry", Inquiry);
+router.use("/quote", Quote);
 
 
 
