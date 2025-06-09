@@ -25,7 +25,6 @@ export default async function handler(req, res) {
     const db = client.db(dbName); // Use the database from the Python script
     const collection = db.collection("artists");
 
-    // Fetch up to 20 artists to match the component's original limit
     const artists = await collection.find({}).limit(20).toArray();
 
     // Map data to a format compatible with TrendingArtists component
