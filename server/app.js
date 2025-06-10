@@ -7,7 +7,7 @@ import compression from 'compression';
 import { stripeWebhook } from "./src/v1/api/controllers/AuctionController/auction.controller.js";
 import path from "path";
 import { Orderwebhook } from "./src/v1/api/controllers/OrderController/order.controller.js";
-
+import google from "./src/v1/api/routes/googleRoutes/google.routes.js";
 const app = express();
 import morgan from 'morgan';
 
@@ -43,6 +43,9 @@ app.use("/uploads", express.static(uploadsPath));
 app.get("/", (req, res) => {
   res.status(200).json({ success: true, message: "API is running!" });
 });
+
+
+app.use("/api/googleAuth" , google)
 
 // Add API ROUTES HERE
 app.use("/v1/api", Routerlocation);

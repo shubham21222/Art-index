@@ -7,6 +7,7 @@ import { success,
     notFound,
     badRequest,
     unauthorized,
+
     forbidden,
     serverValidation,
     unknownError,
@@ -39,7 +40,7 @@ const UserSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ["USER", "ADMIN"],
+        enum: ["USER", "ADMIN" , "MUSICIAN", "GALLERY"],
         default: "USER",
     },
 
