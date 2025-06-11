@@ -46,6 +46,9 @@ passport.use(
           img: profile.photos[0].value,
         });
 
+
+        console.log("New user created:", newUser);
+
         await User.findByIdAndUpdate(newUser._id, { activeToken: token });
 
         return done(null, { user: newUser, token });
