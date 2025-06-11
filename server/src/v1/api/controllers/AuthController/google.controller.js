@@ -8,8 +8,8 @@ import User from "../../models/Auth/User.js";
 passport.use(
   new GoogleStrategy(
     {
-      clientID: "598798693334-ko4vpcpme44qinuptcobkvlevflierrn.apps.googleusercontent.com",
-      clientSecret: "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",
+      clientID: "554991212090-gd8lhhtei00a8gi6putq5qjfta3uam9v.apps.googleusercontent.com",
+      clientSecret: "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",
       callbackURL: 'https://artindex.ai/v1/api/googleAuth/google/callback',
       scope: ['profile', 'email'],
     },
