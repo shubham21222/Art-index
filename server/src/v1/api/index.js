@@ -10,12 +10,18 @@ import seller from "./routes/Seller/seller.routes.js"
 import Inquiry from "./routes/Inquiry/inquiry.routes.js"
 import Quote from "./routes/Quote/quote.routes.js"
 
+import google from "./routes/googleRoutes/google.routes.js";
+
 const router = Router();
 
 
 // Add API routes here for REGISTER //
 
 router.use("/auth", User);
+
+
+// Add API routes here for GOOGLE AUTH //
+router.use("/googleAuth", google);
 
 
 // Add API routes here for CATEGORY //

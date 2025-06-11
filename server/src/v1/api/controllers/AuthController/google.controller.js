@@ -10,7 +10,7 @@ passport.use(
     {
       clientID: "598798693334-ko4vpcpme44qinuptcobkvlevflierrn.apps.googleusercontent.com",
       clientSecret: "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",
-      callbackURL: 'https://artindex.ai/api/googleAuth/google/callback',
+      callbackURL: 'https://artindex.ai/v1/api/googleAuth/google/callback',
       scope: ['profile', 'email'],
     },
     async (accessToken, refreshToken, profile, done) => {
