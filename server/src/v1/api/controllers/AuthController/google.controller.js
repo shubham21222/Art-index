@@ -41,9 +41,9 @@ passport.use(
         // If user doesn't exist, create a new user
         const newUser = await User.create({
           googleId: profile.id,
-          userName: profile.displayName,
+          name: profile.displayName,
           email: profile.emails[0].value,
-          profilePicture: profile.photos[0].value,
+          img: profile.photos[0].value,
         });
 
         await User.findByIdAndUpdate(newUser._id, { activeToken: token });

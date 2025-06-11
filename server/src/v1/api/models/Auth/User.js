@@ -38,6 +38,11 @@ const UserSchema = new mongoose.Schema({
         ],
     },
 
+    googleId:{
+        type: String,
+        required: false,
+    },
+
     role: {
         type: String,
         enum: ["USER", "ADMIN" , "MUSICIAN", "GALLERY"],
