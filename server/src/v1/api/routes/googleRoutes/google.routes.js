@@ -1,25 +1,17 @@
-import express from "express"
-import passport from "passport"
-import {handleGoogleCallback} from "../../controllers/AuthController/google.controller.js";
+import express from "express";
+import passport from "passport";
+import { handleGoogleCallback } from "../../controllers/AuthController/google.controller.js";
 
 const router = express.Router();
 
-// Google OAuth routes
-router.get(
-  '/google',
-  (req, res, next) => {
-    // No need to store redirect URLs in state since we're using database now
-    passport.authenticate('google', {
-      scope: ['profile', 'email']
-    })(req, res, next);
-  }
-);
+// Start Google OAuth
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
+// Handle Google OAuth callback
 router.get(
   '/google/callback',
-  passport.authenticate('google', { session: false }),
+  passport.authenticate('google', { session: false, failureRedirect: '/auth/failure' }),
   handleGoogleCallback
 );
-
 
 export default router;
