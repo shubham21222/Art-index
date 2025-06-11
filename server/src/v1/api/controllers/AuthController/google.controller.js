@@ -65,7 +65,7 @@ export const getConfig = async () => {
       clientId: "554991212090-gd8lhhtei00a8gi6putq5qjfta3uam9v.apps.googleusercontent.com",
       clientSecret: "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",
       scope: ["profile", "email"], // replace with actual needed scopes
-      callbackURL: "https://artindex.ai/", // this should match your Google console settings
+      callbackURL: "https://artindex.ai/v1/api/googleAuth/google/callback", // this should match your Google console settings
       successRedirectUrl: "https://artindex.ai/auth/success", // customize this as needed
       failureRedirectUrl: "https://artindex.ai/auth/failure"  // customize this as needed
     }
