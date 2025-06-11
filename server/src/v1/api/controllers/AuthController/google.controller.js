@@ -95,7 +95,7 @@ export const handleGoogleCallback = async (req, res) => {
     const dbUser = await User.findById(user._id);
 
     // Check if user has custom success redirect, fallback to portal config
-    const redirectUrl = dbUser?.successRedirectUrl || successRedirectUrl;
+    const redirectUrl =  successRedirectUrl;
 
     return res.redirect(`${redirectUrl}?token=${dbUser.activeToken}`);
   } catch (error) {
