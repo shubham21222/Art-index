@@ -52,7 +52,7 @@ const UserSchema = new mongoose.Schema({
 
     password: {
         type: String,
-        required: [true, "Please add a password"],
+        required:false
     },
 
     // confirmPassword: {
