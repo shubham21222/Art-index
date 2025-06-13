@@ -11,6 +11,7 @@ import Inquiry from "./routes/Inquiry/inquiry.routes.js"
 import Quote from "./routes/Quote/quote.routes.js"
 
 import google from "./routes/googleRoutes/google.routes.js";
+import Gallery from "./routes/gallery/gallery.routes.js";
 
 const router = Router();
 
@@ -55,6 +56,9 @@ router.use("/seller", seller);
 
 router.use("/inquiry", Inquiry);
 router.use("/quote", Quote);
+
+// Add API routes here for GALLERY //
+router.use("/gallery", Gallery);
 
 
 

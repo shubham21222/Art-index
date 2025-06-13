@@ -5,11 +5,11 @@ import { IsAuthenticated , authorizeRoles} from "../../middlewares/authicationmi
 
 const router = express.Router();
 
-router.post("/create", IsAuthenticated , authorizeRoles('ADMIN') , createCategory);
+router.post("/create", IsAuthenticated , authorizeRoles('GALLERY') , createCategory);
 router.get("/all", getAllCategories);
 router.get("/:id", getSingleCategory);
-router.put("/update/:id", IsAuthenticated , authorizeRoles('ADMIN') , updateCategory);
-router.delete("/delete/:id", IsAuthenticated , authorizeRoles('ADMIN') , deleteCategory);
+router.post("/update/:id", IsAuthenticated , authorizeRoles('ADMIN') , updateCategory);
+router.post("/delete/:id", IsAuthenticated , authorizeRoles('ADMIN') , deleteCategory);
 
 
 

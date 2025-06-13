@@ -19,33 +19,75 @@ import { response } from "express";
 import { validateMongoDbId } from "../../Utils/validateMongodbId.js";
 
 // Create a new category //
-export const createCategory = async (req, res) => {
-try {
+// export const createCategory = async (req, res) => {
+// try {
     
-  const {name , description , active , createdAt , createdBy} = req.body;
-  if(!name){
-    return badRequest(res, "Please add a category name");
-  }
+//   const {name , description , active , createdAt , createdBy} = req.body;
+//   if(!name){
+//     return badRequest(res, "Please add a category name");
+//   }
 
-  const findCategory = await categoryModel.findOne({name});
-    if(findCategory){
-        return  badRequest(res, "Category already exist");
+//   const findCategory = await categoryModel.findOne({name});
+//     if(findCategory){
+//         return  badRequest(res, "Category already exist");
+//     }
+
+//     const category = await categoryModel.create({
+//         name,
+//         description,
+//         active,
+//         createdAt,
+//         createdBy:req.user._id
+//     });
+
+//     return sendResponse(res, "Category created successfully", category);
+
+// } catch (error) {
+//     return unknownError(res, error.message);
+// }
+// }
+
+
+
+export const createCategory = async (req, res) => {
+  try {
+    let categories = Array.isArray(req.body) ? req.body : [req.body];
+
+    // Validate all entries
+    const missingNames = categories.filter(cat => !cat.name);
+    if (missingNames.length > 0) {
+      return badRequest(res, "All categories must have a name.");
     }
 
-    const category = await categoryModel.create({
-        name,
-        description,
-        active,
-        createdAt,
-        createdBy:req.user._id
-    });
+    // Get all category names to check for duplicates
+    const names = categories.map(cat => cat.name);
+    const existing = await categoryModel.find({ name: { $in: names } }).lean();
+    const existingNames = existing.map(cat => cat.name);
 
-    return sendResponse(res, "Category created successfully", category);
+    // Filter out already existing categories
+    const newCategories = categories.filter(cat => !existingNames.includes(cat.name));
 
-} catch (error) {
+    // Add default fields
+    const payload = newCategories.map(cat => ({
+      name: cat.name,
+      description: cat.description || "",
+      active: cat.active !== undefined ? cat.active : true,
+      createdBy: req.user?._id || null,
+    }));
+
+    if (payload.length === 0) {
+      return badRequest(res, "All provided categories already exist.");
+    }
+
+    // Create in bulk
+    const created = await categoryModel.insertMany(payload);
+
+    return sendResponse(res, `${created.length} category(ies) created successfully.`, created);
+  } catch (error) {
     return unknownError(res, error.message);
-}
-}
+  }
+};
+
 
 
 // Get all categories //
