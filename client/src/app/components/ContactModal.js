@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 
-export default function ContactModal({ isOpen, onClose, artwork }) {
+export default function ContactModal({ isOpen, onClose, artwork, onSubmit, user }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,33 +19,48 @@ export default function ContactModal({ isOpen, onClose, artwork }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (!formData.email.includes('@')) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/inquiries', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          artwork: {
-            title: artwork?.title,
-            artistNames: artwork?.artistNames,
-            price: artwork?.price,
-            id: artwork?.id,
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/inquiry`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        }),
-      });
+          body: JSON.stringify({
+            ...formData,
+            itemName: artwork?.title || 'Artwork Inquiry',
+            artwork: {
+              title: artwork?.title,
+              id: artwork?.id,
+              artistNames: artwork?.artistNames,
+            },
+          }),
+        });
 
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success("Inquiry sent successfully! We'll get back to you soon.");
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to send inquiry');
+        }
+
+        toast.success("Inquiry sent successfully! We&apos;ll get back to you soon.");
         onClose();
         setFormData({ name: '', email: '', phone: '', message: '' });
-      } else {
-        throw new Error(data.message || 'Failed to send inquiry');
       }
     } catch (error) {
       toast.error(error.message || "Failed to send inquiry. Please try again.");
@@ -60,22 +75,23 @@ export default function ContactModal({ isOpen, onClose, artwork }) {
         <DialogHeader>
           <DialogTitle>Inquire About {artwork?.title}</DialogTitle>
           <DialogDescription>
-            Fill out the form below and we'll get back to you with pricing details.
+            Fill out the form below and we&apos;ll get back to you with pricing details.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">Name *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
               disabled={isSubmitting}
+              placeholder="Enter your name"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
               type="email"
@@ -83,6 +99,7 @@ export default function ContactModal({ isOpen, onClose, artwork }) {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
               disabled={isSubmitting}
+              placeholder="Enter your email"
             />
           </div>
           <div className="space-y-2">
@@ -93,19 +110,25 @@ export default function ContactModal({ isOpen, onClose, artwork }) {
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               disabled={isSubmitting}
+              placeholder="Enter your phone number"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="message">Message</Label>
+            <Label htmlFor="message">Message *</Label>
             <Textarea
               id="message"
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
               required
               disabled={isSubmitting}
+              placeholder="Please let us know what information you&apos;re interested in..."
             />
           </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? 'Sending...' : 'Send Inquiry'}
           </Button>
         </form>

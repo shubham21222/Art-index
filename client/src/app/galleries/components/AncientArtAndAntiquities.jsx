@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import ContactModal from '@/app/components/ContactModal';
+import { toast } from "react-hot-toast";
 
 // Define the API endpoint
 const API_URL = "/api/ancient-art-antiquities";
@@ -52,6 +53,39 @@ export default function AncientArtAndAntiquities() {
     e.preventDefault();
     setSelectedArtwork(artwork);
     setIsModalOpen(true);
+  };
+
+  const handleInquirySubmit = async (inquiryData) => {
+    try {
+      const response = await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...inquiryData,
+          artwork: {
+            title: selectedArtwork.title,
+            id: selectedArtwork.internalID,
+            artistNames: selectedArtwork.artistNames,
+            date: selectedArtwork.date
+          }
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit inquiry');
+      }
+
+      toast.success('Inquiry submitted successfully!');
+      setIsModalOpen(false);
+      setSelectedArtwork(null);
+    } catch (error) {
+      console.error('Error submitting inquiry:', error);
+      toast.error(error.message || 'Failed to submit inquiry');
+    }
   };
 
   // Calculate 3D slide styles
@@ -229,6 +263,7 @@ export default function AncientArtAndAntiquities() {
           price: selectedArtwork.saleMessage || "Price on request",
           id: selectedArtwork.internalID
         } : null}
+        onSubmit={handleInquirySubmit}
       />
     </div>
   );

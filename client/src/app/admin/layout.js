@@ -11,7 +11,12 @@ import {
   BarChart3, 
   FileText, 
   Bell,
-  LogOut
+  LogOut,
+  HomeIcon,
+  UsersIcon,
+  ImageIcon,
+  GalleryIcon,
+  MessageSquareIcon
 } from "lucide-react";
 import { logout } from "@/redux/features/authSlice";
 import { toast } from "sonner";
@@ -50,6 +55,7 @@ export default function AdminLayout({ children }) {
     { title: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { title: "Artworks", path: "/admin/artworks", icon: FileText },
     { title: "Galleries", path: "/admin/galleries", icon: Users },
+    { title: "Inquiries", path: "/admin/inquiries", icon: MessageSquareIcon },
     // { title: "Analytics", path: "/admin/analytics", icon: BarChart3 },
     // { title: "Settings", path: "/admin/settings", icon: Settings },
   ];

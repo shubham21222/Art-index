@@ -126,6 +126,29 @@ export const getCurrentUser = createAsyncThunk(
   }
 );
 
+export const googleLogin = createAsyncThunk(
+  'auth/googleLogin',
+  async (token, { rejectWithValue, dispatch }) => {
+    try {
+      // Verify user after successful Google login
+      const verifyResponse = await dispatch(verifyUser(token)).unwrap();
+      
+      // Get user data using the token
+      const response = await axios.get(`${BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      return {
+        user: response.data,
+        token: token,
+        message: 'Google login successful!'
+      };
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: 'Google login failed' });
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -217,6 +240,22 @@ const authSlice = createSlice({
         state.token = null;
         localStorage.removeItem('token');
         Cookies.remove('token');
+      })
+      // Google Login
+      .addCase(googleLogin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(googleLogin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.error = null;
+      })
+      .addCase(googleLogin.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Google login failed';
       });
   },
 });

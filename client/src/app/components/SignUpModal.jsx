@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { register } from "@/redux/features/authSlice";
+import { register, googleLogin } from "@/redux/features/authSlice";
 import { toast } from "react-hot-toast";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import Image from "next/image";
@@ -19,6 +19,18 @@ export default function SignUpModal({ isOpen, onClose, onOpenLogin }) {
     });
     const [loading, setLoading] = useState(false);
     const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+    useEffect(() => {
+        // Check for Google auth token in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        
+        if (token) {
+            handleGoogleLogin(token);
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -78,6 +90,23 @@ export default function SignUpModal({ isOpen, onClose, onOpenLogin }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleGoogleLogin = async (token) => {
+        setLoading(true);
+        try {
+            const result = await dispatch(googleLogin(token)).unwrap();
+            toast.success(result.message || 'Google login successful!');
+            onClose();
+        } catch (error) {
+            toast.error(error.message || 'Google login failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const initiateGoogleLogin = () => {
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/v1/api/googleAuth/google`;
     };
 
     if (!isOpen) return null;
@@ -221,21 +250,23 @@ export default function SignUpModal({ isOpen, onClose, onOpenLogin }) {
                         </div>
                     </div>
 
-                    <div className="mt-6 grid grid-cols-2 gap-3">
+                    <div className="mt-6 grid grid-cols-1 gap-3">
                         <button
                             type="button"
+                            onClick={initiateGoogleLogin}
+                            disabled={loading}
                             className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                             <FaGoogle className="h-5 w-5 mr-2" />
                             Google
                         </button>
-                        <button
+                        {/* <button
                             type="button"
                             className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                             <FaFacebook className="h-5 w-5 mr-2" />
                             Facebook
-                        </button>
+                        </button> */}
                     </div>
                 </div>
 
