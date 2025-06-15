@@ -1,5 +1,5 @@
 'use client';
-import { Search, User, Menu, X, ChevronDown, LogOut } from "lucide-react";
+import { Search, User, Menu, X, ChevronDown, LogOut, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,11 +11,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logout } from "@/redux/features/authSlice";
 import toast from 'react-hot-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import "../globals.css";
 
 export default function Header() {
     const dispatch = useDispatch();
-    const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const { isAuthenticated, user, role } = useSelector((state) => state.auth);
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
@@ -72,6 +78,36 @@ export default function Header() {
         }
     };
 
+    const renderUserMenu = () => {
+        if (!isAuthenticated) return null;
+
+        return (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-100/50 hover:bg-gray-200/50">
+                        <User className="w-5 h-5" />
+                        <span className="text-sm">{user?.name}</span>
+                        <ChevronDown className="w-4 h-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                    {role === 'GALLERY' && (
+                        <DropdownMenuItem asChild>
+                            <Link href="/dashboard/gallery" className="flex items-center cursor-pointer">
+                                <LayoutDashboard className="w-4 h-4 mr-2" />
+                                <span>Gallery Dashboard</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
+                        <LogOut className="w-4 h-4 mr-2" />
+                        <span>Logout</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        );
+    };
+
     return (
         <>
             {/* Main Header */}
@@ -118,18 +154,7 @@ export default function Header() {
                             </button>
                             {isAuthenticated ? (
                                 <>
-                                    <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-100/50">
-                                        <User className="w-5 h-5" />
-                                        <span className="text-sm">{user?.name}</span>
-                                    </div>
-                                    <Button
-                                        variant="outline"
-                                        className="flex items-center space-x-2 hover:bg-gray-100/50"
-                                        onClick={handleLogout}
-                                    >
-                                        <LogOut className="w-4 h-4" />
-                                        <span>Logout</span>
-                                    </Button>
+                                    {renderUserMenu()}
                                 </>
                             ) : (
                                 <>
@@ -191,6 +216,16 @@ export default function Header() {
                                         <User className="w-5 h-5" />
                                         <span className="text-sm">{user?.name}</span>
                                     </div>
+                                    {role === 'GALLERY' && (
+                                        <Link
+                                            href="/dashboard/gallery"
+                                            className="flex items-center space-x-2 w-full text-sm font-medium text-gray-900 py-2"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            <LayoutDashboard className="w-4 h-4" />
+                                            <span>Gallery Dashboard</span>
+                                        </Link>
+                                    )}
                                     <button
                                         onClick={handleLogout}
                                         className="w-full text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-full"

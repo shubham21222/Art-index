@@ -44,7 +44,7 @@ export default function InquiriesPage() {
       });
       
       if (!res.ok) {
-        throw new Error('Failed to fetch inquiries');
+        throw new Error('Failed to fetch inquiries'); 
       }
 
       const response = await res.json();

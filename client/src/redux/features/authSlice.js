@@ -7,6 +7,7 @@ const initialState = {
   user: null,
   token: typeof window !== 'undefined' ? Cookies.get('token') : null,
   isAuthenticated: false,
+  role: null,
   loading: false,
   error: null,
 };
@@ -33,8 +34,9 @@ export const login = createAsyncThunk(
         password: credentials.password
       });
       
-      if (response.data.status && response.data.items.token) {
-        const token = response.data.items.token;
+      if (response.data.status && response.data.items) {
+        const { user, token } = response.data.items;
+        
         // Store token in both localStorage and cookies
         localStorage.setItem('token', token);
         Cookies.set('token', token, { expires: 7 }); // Expires in 7 days
@@ -43,8 +45,9 @@ export const login = createAsyncThunk(
         const verifyResponse = await dispatch(verifyUser(token)).unwrap();
         
         return {
-          user: response.data.items.user,
+          user: user,
           token: token,
+          role: user.role,
           message: response.data.message
         };
       }
@@ -160,6 +163,7 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
+      state.role = null;
       state.loading = false;
       state.error = null;
     },
@@ -195,11 +199,13 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        state.role = action.payload.role;
         state.error = null;
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Login failed';
+        state.role = null;
       })
       // Register
       .addCase(register.pending, (state) => {
@@ -221,6 +227,7 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
+        state.role = null;
       })
       // Get Current User
       .addCase(getCurrentUser.pending, (state) => {
