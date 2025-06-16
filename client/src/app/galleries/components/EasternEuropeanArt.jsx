@@ -83,12 +83,12 @@ export default function EasternEuropeanArt() {
           <h2 className="text-3xl font-bold text-gray-900">Eastern European Art</h2>
           <p className="text-gray-900 text-lg mt-2">Discover contemporary Eastern European art</p>
         </div>
-        <Link
+        {/* <Link
           href="/eastern-european-art"
           className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
           View All Artworks
-        </Link>
+        </Link> */}
       </div>
 
       {/* 3D Carousel */}

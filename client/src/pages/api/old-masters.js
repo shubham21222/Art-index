@@ -14,6 +14,11 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
   }
 
+  // Get pagination parameters from query
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 30;
+  const skip = (page - 1) * limit;
+
   let client;
 
   try {
@@ -22,7 +27,15 @@ export default async function handler(req, res) {
     const db = client.db(dbName);
     const collection = db.collection("old_masters_artworks");
 
-    const artworks = await collection.find({}).limit(30).toArray();
+    // Get total count for pagination
+    const total = await collection.countDocuments({});
+
+    // Get paginated artworks
+    const artworks = await collection
+      .find({})
+      .skip(skip)
+      .limit(limit)
+      .toArray();
 
     const formattedArtworks = artworks.map((artwork) => ({
       internalID: artwork.internalID,
@@ -46,7 +59,13 @@ export default async function handler(req, res) {
       mediumType: artwork.mediumType?.filterGene?.name,
     }));
 
-    res.status(200).json({ galleries: formattedArtworks });
+    res.status(200).json({ 
+      galleries: formattedArtworks,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    });
   } catch (error) {
     console.error("Error fetching Old Masters artworks from MongoDB:", error);
     res.status(500).json({ error: "Failed to fetch artworks" });

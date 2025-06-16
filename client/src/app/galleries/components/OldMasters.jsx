@@ -18,7 +18,7 @@ export default function OldMasters() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
+      try { 
         setLoading(true);
         const response = await fetch(API_URL, {
           method: "GET",
@@ -83,12 +83,12 @@ export default function OldMasters() {
           <h2 className="text-3xl font-bold text-gray-900">Old Masters</h2>
           <p className="text-gray-900 text-lg mt-2">Discover classical masterpieces</p>
         </div>
-        <Link
+        {/* <Link
           href="/old-masters"
           className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
           View All Artworks
-        </Link>
+        </Link> */}
       </div>
 
       {/* 3D Carousel */}

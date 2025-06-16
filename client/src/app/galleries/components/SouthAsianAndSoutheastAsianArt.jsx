@@ -83,12 +83,12 @@ export default function SouthAsianAndSoutheastAsianArt() {
           <h2 className="text-3xl font-bold text-gray-900">South Asian & Southeast Asian Art</h2>
           <p className="text-gray-900 text-lg mt-2">Discover contemporary art from South and Southeast Asia</p>
         </div>
-        <Link
+        {/* <Link
           href="/south-asian-art"
           className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
           View All Artworks
-        </Link>
+        </Link> */}
       </div>
 
       {/* 3D Carousel */}
@@ -145,7 +145,7 @@ export default function SouthAsianAndSoutheastAsianArt() {
                     </div>
                   </div>
                 </Link>
-              </div>
+              </div>  
             ))
           ) : (
             <p className="text-gray-500 text-center">No artworks found.</p>

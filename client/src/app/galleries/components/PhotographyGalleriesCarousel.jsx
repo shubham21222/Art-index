@@ -83,12 +83,12 @@ export default function PhotographyGalleriesCarousel() {
           <h2 className="text-3xl font-bold text-gray-900">Photography</h2>
           <p className="text-gray-900 text-lg mt-2">Discover contemporary photography</p>
         </div>
-        <Link
+        {/* <Link
           href="/photography"
           className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
           View All Photographs
-        </Link>
+        </Link> */}
       </div>
 
       {/* 3D Carousel */}

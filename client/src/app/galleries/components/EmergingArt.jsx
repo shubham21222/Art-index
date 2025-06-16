@@ -83,12 +83,12 @@ export default function EmergingArt() {
           <h2 className="text-3xl font-bold text-gray-900">Emerging Art</h2>
           <p className="text-gray-900 text-lg mt-2">Discover up-and-coming artists</p>
         </div>
-        <Link
+        {/* <Link
           href="/emerging-art"
           className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
           View All Emerging Art
-        </Link>
+        </Link> */}
       </div>
 
       {/* 3D Carousel */}

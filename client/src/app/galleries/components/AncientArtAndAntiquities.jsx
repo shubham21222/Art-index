@@ -71,7 +71,7 @@ export default function AncientArtAndAntiquities() {
             date: selectedArtwork.date
           }
         }),
-      });
+      }); 
 
       const data = await response.json();
 
@@ -123,12 +123,12 @@ export default function AncientArtAndAntiquities() {
           <h2 className="text-3xl font-bold text-gray-900">Ancient Art & Antiquities</h2>
           <p className="text-gray-900 text-lg mt-2">Discover rare and historical artifacts</p>
         </div>
-        <Link
+        {/* <Link
           href="/ancient-art"
           className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
         >
           View All Artifacts
-        </Link>
+        </Link> */}
       </div>
 
       {/* 3D Carousel */}
