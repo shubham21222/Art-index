@@ -13,24 +13,24 @@ const ARTWORK_CATEGORIES = [
   { name: "All Artworks", endpoint: "/api/artworks" },
   { name: "Filtered Artworks", endpoint: "/api/filtered-artworks" },
   { name: "Auction Lots", endpoint: "/api/auction_lots" },
-  { name: "Graffiti & Street Art", endpoint: "/api/graffiti-street-art" },
-  { name: "Photography", endpoint: "/api/photography-galleries" },
-  { name: "Modern", endpoint: "/api/modern" },
-  { name: "Middle Eastern Art", endpoint: "/api/middle-eastern-art" },
-  { name: "Emerging Art", endpoint: "/api/emerging-art" },
-  { name: "Drawings", endpoint: "/api/drawings" },
-  { name: "South Asian Art", endpoint: "/api/south-asian-southeast-asian-art" },
-  { name: "Eastern European Art", endpoint: "/api/eastern-european-art" },
-  { name: "Pop Art", endpoint: "/api/pop-art" },
-  { name: "Ancient Art", endpoint: "/api/ancient-art-antiquities" },
-  { name: "Indian Art", endpoint: "/api/indian-art" },
-  { name: "Ceramics", endpoint: "/api/ceramics" },
-  { name: "Old Masters", endpoint: "/api/old-masters" },
-  { name: "New Media", endpoint: "/api/new-media-video" },
-  { name: "Contemporary Design", endpoint: "/api/contemporary-design" },
-  { name: "Outdoor Art", endpoint: "/api/outdoor-art" },
-  { name: "Historical Art", endpoint: "/api/historical-art" },
-  { name: "Modern & Contemporary Art", endpoint: "/api/modern-contemporary-art" },
+  { name: "Graffiti & Street Art", endpoint: "/api/graffiti-street-art", slug: "graffiti-and-street-art" },
+  { name: "Photography", endpoint: "/api/photography-galleries", slug: "photography" },
+  { name: "Contemporary Design", endpoint: "/api/contemporary-design", slug: "contemporary-design" },
+  { name: "Modern", endpoint: "/api/modern", slug: "modern" },
+  { name: "Middle Eastern Art", endpoint: "/api/middle-eastern-art", slug: "middle-eastern-art" },
+  { name: "Emerging Art", endpoint: "/api/emerging-art", slug: "emerging-art" },
+  { name: "Drawings", endpoint: "/api/drawings", slug: "drawings" },
+  { name: "South Asian & Southeast Asian Art", endpoint: "/api/south-asian-southeast-asian-art", slug: "south-asian-and-southeast-asian-art" },
+  { name: "Eastern European Art", endpoint: "/api/eastern-european-art", slug: "eastern-european-art" },
+  { name: "Pop Art", endpoint: "/api/pop-art", slug: "pop-art" },
+  { name: "Ancient Art & Antiquities", endpoint: "/api/ancient-art-antiquities", slug: "ancient-art-and-antiquities" },
+  { name: "Indian Art", endpoint: "/api/indian-art", slug: "indian-art" },
+  { name: "Ceramics", endpoint: "/api/ceramics", slug: "ceramics" },
+  { name: "Old Masters", endpoint: "/api/old-masters", slug: "old-masters" },
+  { name: "New Media & Video", endpoint: "/api/new-media-video", slug: "new-media-and-video" },
+  { name: "Outdoor Art", endpoint: "/api/outdoor-art", slug: "outdoor-art" },
+  { name: "Historical Art", endpoint: "/api/historical-art", slug: "historical-art" },
+  { name: "Modern & Contemporary Art", endpoint: "/api/modern-contemporary-art", slug: "modern-contemporary-art" },
 ];
 
 // Define artist and museum categories
@@ -99,7 +99,9 @@ export default function ArtworksPage() {
         item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.artistNames?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category?.toLowerCase().includes(searchQuery.toLowerCase())
+        item.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.saleMessage?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.partner?.name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     
@@ -147,7 +149,9 @@ export default function ArtworksPage() {
       // Fetch artworks from all categories
       const allArtworksPromises = ARTWORK_CATEGORIES.map(async (category) => {
         try {
-          const response = await fetch(category.endpoint);
+          // Use pagination for gallery APIs
+          const endpoint = category.slug ? `${category.endpoint}?page=1&limit=100` : category.endpoint;
+          const response = await fetch(endpoint);
           const data = await response.json();
           
           // Extract artworks from the response
@@ -155,17 +159,29 @@ export default function ArtworksPage() {
           if (data.artworks) {
             categoryArtworks = data.artworks;
           } else if (data.galleries) {
-            // Some APIs return galleries with artworks
-            categoryArtworks = data.galleries.flatMap(gallery => 
-              gallery.artworks || []
-            );
+            // Gallery APIs return artworks in galleries array
+            categoryArtworks = data.galleries;
+          } else if (data.auction_lots) {
+            categoryArtworks = data.auction_lots;
           }
           
           // Add category information to each artwork
-          return categoryArtworks.map(artwork => ({
+          return categoryArtworks.map((artwork, index) => ({
             ...artwork,
             category: category.name,
-            type: "artwork"
+            type: "artwork",
+            title: artwork.title || artwork.name,
+            name: artwork.title || artwork.name,
+            image: artwork.image?.src || artwork.image?.url || "/placeholder-artwork.jpg",
+            artistNames: artwork.artistNames,
+            saleMessage: artwork.saleMessage,
+            partner: artwork.partner,
+            artists: artwork.artists,
+            date: artwork.date,
+            medium: artwork.mediumType,
+            slug: artwork.slug,
+            internalID: artwork.internalID,
+            uniqueId: `${category.name}-${artwork.internalID || artwork.id || index}-${index}`
           }));
         } catch (error) {
           console.error(`Error fetching ${category.name}:`, error);
@@ -186,12 +202,13 @@ export default function ArtworksPage() {
           }
           
           // Add category information to each artist
-          return categoryArtists.map(artist => ({
+          return categoryArtists.map((artist, index) => ({
             ...artist,
             category: category.name,
             type: "artist",
             title: artist.name, // For consistent display
-            artistNames: artist.nationalityAndBirthday || "Artist"
+            artistNames: artist.nationalityAndBirthday || "Artist",
+            uniqueId: `${category.name}-${artist.id || index}-${index}`
           }));
         } catch (error) {
           console.error(`Error fetching ${category.name}:`, error);
@@ -212,12 +229,13 @@ export default function ArtworksPage() {
           }
           
           // Add category information to each museum
-          return categoryMuseums.map(museum => ({
+          return categoryMuseums.map((museum, index) => ({
             ...museum,
             category: category.name,
             type: "museum",
             title: museum.name, // For consistent display
-            artistNames: museum.locations?.map(loc => loc.city).join(", ") || "Location not specified"
+            artistNames: museum.locations?.map(loc => loc.city).join(", ") || "Location not specified",
+            uniqueId: `${category.name}-${museum.id || index}-${index}`
           }));
         } catch (error) {
           console.error(`Error fetching ${category.name}:`, error);
@@ -273,7 +291,7 @@ export default function ArtworksPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
           <Input
             type="text"
-            placeholder="Search by title, artist, or category..."
+            placeholder="Search by title, artist, price, gallery, or category..."
             className="pl-10 bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-400"
             value={searchQuery}
             onChange={handleSearch}
@@ -317,17 +335,18 @@ export default function ArtworksPage() {
         ) : displayedItems.length > 0 ? (
           displayedItems.map((item, index) => (
             <Card 
-              key={item.id || item.internalID} 
-              className="bg-zinc-900 border-zinc-800"
+              key={item.uniqueId || `${item.category}-${item.internalID || item.id || index}-${index}`} 
+              className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors"
               ref={index === displayedItems.length - 1 ? lastItemRef : null}
             >
               <CardContent className="p-4">
                 <div className="relative aspect-square rounded-lg overflow-hidden">
                   <Image
-                    src={item.image?.resized?.src || item.image || "/placeholder-artwork.jpg"}
+                    src={item.image || "/placeholder-artwork.jpg"}
                     alt={item.title || item.name}
                     fill
                     className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                   <div className="absolute top-2 right-2 flex gap-2">
                     <Button size="icon" variant="secondary" className="bg-white/90 hover:bg-white">
@@ -342,22 +361,35 @@ export default function ArtworksPage() {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <h3 className="text-lg font-semibold text-white">{item.title || item.name}</h3>
-                  <p className="text-sm text-zinc-400">{item.artistNames || "Unknown"}</p>
-                  {item.type === "artwork" && (
-                    <div className="mt-2">
-                      {item.saleMessage ? (
-                        <p className="text-sm font-medium text-green-400">{item.saleMessage}</p>
-                      ) : item.priceCurrency && item.price ? (
-                        <p className="text-sm font-medium text-white">
-                          {item.priceCurrency} {item.price.toLocaleString()}
-                        </p>
-                      ) : (
-                        <p className="text-sm text-zinc-400">Price not available</p>
-                      )}
+                  <h3 className="text-lg font-semibold text-white line-clamp-2">
+                    {item.title || item.name}
+                  </h3>
+                  <p className="text-sm text-zinc-300 mt-1 line-clamp-1">
+                    {item.artistNames || "Unknown"}
+                  </p>
+                  {item.date && (
+                    <p className="text-sm text-zinc-400 mt-1">
+                      {item.date}
+                    </p>
+                  )}
+                  {item.medium && (
+                    <p className="text-sm text-zinc-400 mt-1 line-clamp-1">
+                      {item.medium}
+                    </p>
+                  )}
+                  {item.saleMessage && (
+                    <div className="mt-2 p-2 bg-green-900/20 border border-green-700/30 rounded">
+                      <p className="text-sm font-semibold text-green-400">
+                        {item.saleMessage}
+                      </p>
                     </div>
                   )}
-                  <p className="text-sm text-zinc-400 mt-1">
+                  {item.partner && (
+                    <p className="text-sm text-zinc-400 mt-1 line-clamp-1">
+                      {item.partner.name}
+                    </p>
+                  )}
+                  <p className="text-sm text-zinc-500 mt-2 font-medium">
                     {item.category}
                   </p>
                 </div>
