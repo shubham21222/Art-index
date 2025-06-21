@@ -9,6 +9,7 @@ const bidSchema = new mongoose.Schema({
 
 const auctionSchema = new mongoose.Schema(
     {
+        internalID: { type: String, default: null }, // Add internalID field
         product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
         category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
         startingBid: { type: Number, required: true },
@@ -21,7 +22,7 @@ const auctionSchema = new mongoose.Schema(
         winner: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
         winnerBidTime: { type: Date },
         minBidIncrement: { type: Number, default: 10 }, // Optional
-        lotNumber: { type: String, unique: true }, // Ensure unique LOT numbers
+        lotNumber: { type: String, unique: true, sparse: true }, // Make unique but sparse to allow null values
         status: { type: String, enum: ["ACTIVE", "ENDED"], default: "ACTIVE" },
         auctionType: { type: String, enum: ["LIVE", "TIMED"], default: "TIMED" },
         createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

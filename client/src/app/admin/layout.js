@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import Link from "next/link";
@@ -16,7 +16,8 @@ import {
   UsersIcon,
   ImageIcon,
   GalleryIcon,
-  MessageSquareIcon
+  MessageSquareIcon,
+  Gavel
 } from "lucide-react";
 import { logout } from "@/redux/features/authSlice";
 import { toast } from "sonner";
@@ -27,18 +28,32 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Skip authentication check for login page
   const isLoginPage = pathname === "/admin/login";
 
   useEffect(() => {
-    // Check for token in cookies
-    const token = Cookies.get('token');
-    
-    // Only check authentication for non-login pages
-    if (!isLoginPage && (!token || !isAuthenticated || user?.role !== "ADMIN")) {
-      router.push("/admin/login");
-    }
+    const checkAuth = async () => {
+      try {
+        // Check for token in cookies
+        const token = Cookies.get('token');
+        
+        // Only check authentication for non-login pages
+        if (!isLoginPage && (!token || !isAuthenticated || user?.role !== "ADMIN")) {
+          router.push("/admin/login");
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        if (!isLoginPage) {
+          router.push("/admin/login");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [isAuthenticated, user, router, isLoginPage]);
 
   // For login page, render children without the admin layout
@@ -46,14 +61,28 @@ export default function AdminLayout({ children }) {
     return children;
   }
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-zinc-950 items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
   // For other admin pages, check authentication
   if (!isAuthenticated || user?.role !== "ADMIN") {
-    return null;
+    return (
+      <div className="flex h-screen bg-zinc-950 items-center justify-center">
+        <div className="text-white">Redirecting to login...</div>
+      </div>
+    );
   }
 
   const menuItems = [
     { title: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { title: "Artworks", path: "/admin/artworks", icon: FileText },
+    { title: "Auctions", path: "/admin/auctions", icon: Gavel },
     { title: "Galleries", path: "/admin/galleries", icon: Users },
     { title: "Inquiries", path: "/admin/inquiries", icon: MessageSquareIcon },
     // { title: "Analytics", path: "/admin/analytics", icon: BarChart3 },

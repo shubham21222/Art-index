@@ -9,6 +9,10 @@ import FeaturedShows from "./components/FeaturedShows";
 import CurrentFairs from "./components/CurrentFairs";
 import FeaturedGalleries from "./components/FeaturedGalleries";
 import TrendingArtists from "./components/TrendingArtists";
+import ArtCategoriesShowcase from "./components/ArtCategoriesShowcase";
+import FeaturedArtworksShowcase from "./components/FeaturedArtworksShowcase";
+import ArtInsightsStories from "./components/ArtInsightsStories";
+import AuctionHighlights from "./components/AuctionHighlights";
 import Footer from "./components/Footer";
 
 export default function Home() {
@@ -19,6 +23,8 @@ export default function Home() {
         <ResponsiveCarousel />
         <div className="">
           {/* <FeaturedSection/> */}
+          <ArtCategoriesShowcase />
+
           <CuratorsPicks />
           {/* <ArtsySection /> */}
           <AuctionCarousel/>
@@ -26,6 +32,9 @@ export default function Home() {
           {/* <CurrentFairs /> */}
           <FeaturedGalleries />
           <TrendingArtists />
+          <FeaturedArtworksShowcase />
+          <ArtInsightsStories />
+          <AuctionHighlights />
         </div>
       </main>
       <Footer />
