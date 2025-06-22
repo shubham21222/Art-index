@@ -663,6 +663,87 @@ export const getUserByBillingAddress = async (req, res, next) => {
     }
 }
 
+// Verify Email
+export const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        if (!token) {
+            return badRequest(res, "Invalid verification token");
+        }
+
+        // Find user by verification token (stored in activeToken field)
+        const user = await User.findOne({ activeToken: token });
+
+        if (!user) {
+            return badRequest(res, "Invalid verification token or token expired");
+        }
+
+        // Clear the verification token and mark email as verified
+        user.activeToken = null;
+        // You might want to add an emailVerified field to the User model
+        // user.emailVerified = true;
+        await user.save();
+
+        return success(res, "Email verified successfully. You can now create your password.");
+    } catch (error) {
+        return unknownError(res, error.message);
+    }
+};
+
+// Create Password (for new users from inquiry)
+export const createPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password, confirmPassword } = req.body;
+
+        if (!token || !password || !confirmPassword) {
+            return badRequest(res, "Please provide token, password, and confirm password");
+        }
+
+        if (password !== confirmPassword) {
+            return badRequest(res, "Passwords do not match");
+        }
+
+        if (password.length < 6) {
+            return badRequest(res, "Password must be at least 6 characters long");
+        }
+
+        // Find user by password reset token
+        const user = await User.findOne({
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return badRequest(res, "Invalid token or token expired");
+        }
+
+        // Set password and clear tokens
+        user.password = password;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        user.activeToken = null; // Clear any verification token as well
+        await user.save();
+
+        // Generate login token
+        const loginToken = user.getSignedToken();
+
+        return success(res, "Password created successfully. You are now logged in.", {
+            success: true,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            },
+            token: loginToken,
+        });
+    } catch (error) {
+        return unknownError(res, error.message);
+    }
+};
+
 
 
 

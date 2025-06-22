@@ -58,7 +58,14 @@ export default function ContactModal({ isOpen, onClose, artwork, onSubmit, user 
           throw new Error(data.message || 'Failed to send inquiry');
         }
 
-        toast.success("Inquiry sent successfully! We&apos;ll get back to you soon.");
+        // Check if this is a new user (account was created)
+        if (data.message && data.message.includes('check your email')) {
+          toast.success("Inquiry sent successfully! Please check your email to complete your account setup.", {
+            duration: 6000, // Show for 6 seconds
+          });
+        } else {
+          toast.success("Inquiry sent successfully! We'll get back to you soon.");
+        }
         onClose();
         setFormData({ name: '', email: '', phone: '', message: '' });
       }

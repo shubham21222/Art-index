@@ -22,6 +22,11 @@ const InquirySchema = new mongoose.Schema({
         type: String,
         required: [true, "Please add a message"],
     },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false, // Optional for backward compatibility
+    },
     status: {
         type: String,
         enum: ['pending', 'responded'],

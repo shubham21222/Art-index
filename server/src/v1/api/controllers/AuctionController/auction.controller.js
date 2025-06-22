@@ -33,6 +33,22 @@ import dotenv from "dotenv"
 import { UnknownError } from "postmark/dist/client/errors/Errors.js"
 dotenv.config()
 
+// Add this function at the top of the file, after the imports
+const calculateBidIncrement = (currentBid) => {
+    if (currentBid >= 1000000) return 50000;
+    if (currentBid >= 500000) return 25000;
+    if (currentBid >= 250000) return 10000;
+    if (currentBid >= 100000) return 5000;
+    if (currentBid >= 50000) return 2500;
+    if (currentBid >= 25025) return 1000;
+    if (currentBid >= 10000) return 500;
+    if (currentBid >= 5000) return 250;
+    if (currentBid >= 1000) return 100;
+    if (currentBid >= 100) return 50;
+    if (currentBid >= 50) return 10;
+    if (currentBid >= 25) return 5;
+    return 1;
+};
 
 //Geerate LOT //
 
@@ -295,6 +311,7 @@ export const getAuctions = async (req, res) => {
                 }
             },
 
+            // ✅ Lookup for Minimum Bid Increment
             {
                 $lookup: {
                     from: 'bidincrements',
@@ -385,11 +402,17 @@ export const getAuctions = async (req, res) => {
         }
 
         // Format the startDate and endDate after aggregation
-        const formattedAuctions = auctions.map(auction => ({
-            ...auction,
-            startDateFormatted: formatAuctionDate(auction.startDate),
-            endDateFormatted: formatAuctionDate(auction.endDate),
-        }));
+        const formattedAuctions = auctions.map(auction => {
+            const currentBid = auction.currentBid || auction.startingBid;
+            const calculatedBidIncrement = calculateBidIncrement(currentBid);
+            
+            return {
+                ...auction,
+                minBidIncrement: calculatedBidIncrement,
+                startDateFormatted: formatAuctionDate(auction.startDate),
+                endDateFormatted: formatAuctionDate(auction.endDate),
+            };
+        });
 
 
         return success(res, 'Auctions retrieved successfully.', {
@@ -893,16 +916,11 @@ export const getAuctionById = async (req, res) => {
             return validation(res, 'Invalid auction ID.');
         }
 
-        const findAuction = await auctionModel.findById(id);
-        if (!findAuction) {
-            return notFound(res, 'Auction not found.');
-        }
-
-        const auction = await auctionModel.aggregate([
+        const findAuction = await auctionModel.aggregate([
             { $match: { _id: new mongoose.Types.ObjectId(id) } },
             {
                 $lookup: {
-                    from: 'products',
+                    from: 'auctionproducts', // Changed from 'products' to 'auctionproducts'
                     localField: 'product',
                     foreignField: '_id',
                     as: 'product',
@@ -955,7 +973,8 @@ export const getAuctionById = async (req, res) => {
                         title: { $ifNull: ["$product.title", ""] },
                         description: { $ifNull: ["$product.description", ""] },
                         price: { $ifNull: ["$product.price", ""] },
-                        _id: { $ifNull: ["$product._id", ""] }
+                        _id: { $ifNull: ["$product._id", ""] },
+                        image: { $ifNull: ["$product.image", []] }
                     },
                     category: { _id: 1, name: 1 },
                     startingBid: 1,
@@ -987,14 +1006,19 @@ export const getAuctionById = async (req, res) => {
             },
         ]);
 
-        if (!auction.length) {
+        if (!findAuction.length) {
             return success(res, 'No auction found.', null);
         }
 
+        // Calculate bid increment using the function
+        const currentBid = findAuction[0].currentBid || findAuction[0].startingBid;
+        const calculatedBidIncrement = calculateBidIncrement(currentBid);
+
         const formattedAuction = {
-            ...auction[0],
-            startDateFormatted: formatAuctionDate(auction[0].startDate),
-            endDateFormatted: formatAuctionDate(auction[0].endDate),
+            ...findAuction[0],
+            minBidIncrement: calculatedBidIncrement,
+            startDateFormatted: formatAuctionDate(findAuction[0].startDate),
+            endDateFormatted: formatAuctionDate(findAuction[0].endDate),
         };
 
         return success(res, 'Auction retrieved successfully.', formattedAuction);
@@ -1673,31 +1697,23 @@ export const placeBid = async (req, res) => {
             return badRequest(res, "Your bid must be higher than the current bid.");
         }
 
+        // ✅ Calculate bid increment based on current bid
+        const currentBid = findAuction.currentBid || findAuction.startingBid;
+        const bidIncrement = calculateBidIncrement(currentBid);
+        const requiredBid = currentBid + bidIncrement;
 
-        // ✅ Fetch bid increment rule based on current price
-
-        // ✅ Fetch bid increment rule based on the current bid price
-        const bidRule = await bidIncrementModel
-            .findOne({ price: { $lte: findAuction.currentBid } })
-            .sort({ price: -1 });
-
-        //    console.log("Bid Rule:", bidRule);
-
-        if (!bidRule) {
-            return badRequest(res, "Bid increment rule not found.");
-        }
-
-        const requiredBid = findAuction.currentBid + bidRule.increment;
+        console.log("Current Bid:", currentBid);
+        console.log("Bid Increment:", bidIncrement);
+        console.log("Required Bid:", requiredBid);
 
         // Ensure bid is at least the minimum required bid
         if (bidAmount < requiredBid) {
-            return badRequest(res, `Your bid must be at least $${requiredBid}.`);
+            return badRequest(res, `Your bid must be at least $${requiredBid.toLocaleString()} (minimum increment: $${bidIncrement.toLocaleString()}).`);
         }
-
 
         // Update auction with new bid
         findAuction.currentBid = bidAmount;
-        findAuction.minBidIncrement = requiredBid;
+        findAuction.minBidIncrement = currentBid + calculateBidIncrement(bidAmount); // Next minimum bid
         findAuction.currentBidder = req.user._id;
         findAuction.bids.push({
             bidder: req.user._id,
@@ -1707,7 +1723,11 @@ export const placeBid = async (req, res) => {
 
         await findAuction.save();
 
-        return success(res, "Bid placed successfully.", findAuction);
+        return success(res, "Bid placed successfully.", {
+            ...findAuction.toObject(),
+            nextMinimumBid: findAuction.minBidIncrement,
+            bidIncrement: calculateBidIncrement(bidAmount)
+        });
     } catch (error) {
         console.error("Error placing bid:", error);
         return unknownError(res, error.message);

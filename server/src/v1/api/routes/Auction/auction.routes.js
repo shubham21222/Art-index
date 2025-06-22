@@ -101,5 +101,8 @@ router.post("/deleteCatalog" ,  IsAuthenticated ,  deleteCatalog)
 
 router.post("/addCalender" , IsAuthenticated , addcalender)
 
+// get auction by id (for frontend compatibility) - must be last to avoid conflicts
+router.get("/:id" , getAuctionById)
+
 
 export default router;
