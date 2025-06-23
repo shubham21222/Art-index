@@ -299,7 +299,7 @@ export default function ArtworkPage() {
                         </div>
                         <div className="space-y-2">
                             <h2 className="text-2xl font-bold text-gray-900">Artwork Not Found</h2>
-                            <p className="text-gray-600">The artwork you're looking for doesn't exist or has been removed.</p>
+                            <p className="text-gray-600">The artwork you&apos;re looking for doesn&apos;t exist or has been removed.</p>
                         </div>
                     </motion.div>
                 </div>
@@ -380,7 +380,7 @@ export default function ArtworkPage() {
                                 onClick={handleContactClick}
                                 className="bg-black text-white hover:bg-gray-800 px-8 py-3 rounded-full shadow-lg"
                             >
-                                I'm Interested
+                                I&apos;m Interested
                             </Button>
                         </div>
                     </motion.div>
