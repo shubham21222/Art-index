@@ -157,10 +157,11 @@ export default function PopArt() {
           <>
             <button
               onClick={handlePrev}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+              className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-3 sm:p-2 rounded-full z-[50] transition-transform duration-300 hover:scale-110 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
+              style={{ touchAction: 'manipulation' }}
             >
               <svg
-                className="w-5 h-5 text-gray-700"
+                className="w-6 h-6 sm:w-5 sm:h-5 text-gray-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -175,10 +176,11 @@ export default function PopArt() {
             </button>
             <button
               onClick={handleNext}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+              className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-3 sm:p-2 rounded-full z-[50] transition-transform duration-300 hover:scale-110 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
+              style={{ touchAction: 'manipulation' }}
             >
               <svg
-                className="w-5 h-5 text-gray-700"
+                className="w-6 h-6 sm:w-5 sm:h-5 text-gray-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -197,7 +199,7 @@ export default function PopArt() {
 
       {/* Indicators */}
       {currentIndex !== null && artworks.length > 0 && (
-        <div className="flex justify-center mt-6 space-x-2">
+        <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {artworks.map((_, index) => (
             <div
               key={index}

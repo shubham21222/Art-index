@@ -9,6 +9,8 @@ import Order from "./routes/order/order.routes.js"
 import seller from "./routes/Seller/seller.routes.js"
 import Inquiry from "./routes/Inquiry/inquiry.routes.js"
 import Quote from "./routes/Quote/quote.routes.js"
+import Partnership from "./routes/Partnership/partnership.routes.js";
+import Museum from "./routes/Museum/museum.routes.js";
 
 import google from "./routes/googleRoutes/google.routes.js";
 import Gallery from "./routes/gallery/gallery.routes.js";
@@ -57,8 +59,14 @@ router.use("/seller", seller);
 router.use("/inquiry", Inquiry);
 router.use("/quote", Quote);
 
+// Add API routes here for PARTNERSHIP //
+router.use("/partnership", Partnership);
+
 // Add API routes here for GALLERY //
 router.use("/gallery", Gallery);
+
+// Add API routes here for MUSEUM //
+router.use("/museum", Museum);
 
 
 

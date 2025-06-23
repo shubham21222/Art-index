@@ -78,8 +78,49 @@ export default function Header() {
         }
     };
 
+    const getDashboardLink = () => {
+        switch (role) {
+            case 'GALLERY':
+                return '/dashboard/gallery';
+            case 'GALLERIES':
+                return '/dashboard/galleries';
+            case 'AUCTIONS':
+                return '/dashboard/auctions';
+            case 'FAIRS':
+                return '/dashboard/fairs';
+            case 'MUSEUMS':
+                return '/dashboard/museums';
+            case 'ADMIN':
+                return '/admin';
+            default:
+                return '/dashboard';
+        }
+    };
+
+    const getDashboardLabel = () => {
+        switch (role) {
+            case 'GALLERY':
+                return 'Gallery Dashboard';
+            case 'GALLERIES':
+                return 'Galleries Dashboard';
+            case 'AUCTIONS':
+                return 'Auctions Dashboard';
+            case 'FAIRS':
+                return 'Fairs Dashboard';
+            case 'MUSEUMS':
+                return 'Museums Dashboard';
+            case 'ADMIN':
+                return 'Admin Dashboard';
+            default:
+                return 'Dashboard';
+        }
+    };
+
     const renderUserMenu = () => {
         if (!isAuthenticated) return null;
+
+        const dashboardLink = getDashboardLink();
+        const dashboardLabel = getDashboardLabel();
 
         return (
             <DropdownMenu>
@@ -91,11 +132,11 @@ export default function Header() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                    {role === 'GALLERY' && (
+                    {(role === 'GALLERY' || role === 'GALLERIES' || role === 'AUCTIONS' || role === 'FAIRS' || role === 'MUSEUMS' || role === 'ADMIN') && (
                         <DropdownMenuItem asChild>
-                            <Link href="/dashboard/gallery" className="flex items-center cursor-pointer">
+                            <Link href={dashboardLink} className="flex items-center cursor-pointer">
                                 <LayoutDashboard className="w-4 h-4 mr-2" />
-                                <span>Gallery Dashboard</span>
+                                <span>{dashboardLabel}</span>
                             </Link>
                         </DropdownMenuItem>
                     )}
@@ -112,7 +153,7 @@ export default function Header() {
         <>
             {/* Main Header */}
             <header
-                className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+                className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
                     isScrolled 
                         ? "bg-white/30 backdrop-blur-md border-b border-gray-200/20 shadow-sm" 
                         : "bg-transparent"
@@ -189,7 +230,7 @@ export default function Header() {
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden fixed top-[72px] left-0 right-0 z-20 bg-white/80 backdrop-blur-md py-4 shadow-lg">
+                <div className="md:hidden fixed top-[72px] left-0 right-0 z-[200] bg-white/80 backdrop-blur-md py-4 shadow-lg">
                     <div className="container mx-auto px-4 space-y-4">
                         <div className="relative">
                             <input
@@ -216,14 +257,14 @@ export default function Header() {
                                         <User className="w-5 h-5" />
                                         <span className="text-sm">{user?.name}</span>
                                     </div>
-                                    {role === 'GALLERY' && (
+                                    {(role === 'GALLERY' || role === 'GALLERIES' || role === 'AUCTIONS' || role === 'FAIRS' || role === 'MUSEUMS' || role === 'ADMIN') && (
                                         <Link
-                                            href="/dashboard/gallery"
+                                            href={getDashboardLink()}
                                             className="flex items-center space-x-2 w-full text-sm font-medium text-gray-900 py-2"
                                             onClick={() => setMobileMenuOpen(false)}
                                         >
                                             <LayoutDashboard className="w-4 h-4" />
-                                            <span>Gallery Dashboard</span>
+                                            <span>{getDashboardLabel()}</span>
                                         </Link>
                                     )}
                                     <button

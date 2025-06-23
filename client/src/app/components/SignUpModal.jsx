@@ -112,7 +112,7 @@ export default function SignUpModal({ isOpen, onClose, onOpenLogin }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[300]">
             <div className="bg-white rounded-2xl p-8 w-full max-w-[420px] relative shadow-2xl">
                 <button
                     onClick={onClose}

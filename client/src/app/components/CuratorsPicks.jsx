@@ -148,10 +148,9 @@ export default function CuratorsPicks() {
                         className="text-xs bg-white/90 hover:bg-white text-black w-full"
                         onClick={(e) => handleContactClick(e, art)}
                       >
-                        I’m Interested
+                        I'm Interested
                       </Button>
                       <Link 
-                      
                         href={`/artwork/${art.slug}`}
                         className="text-xs bg-black/40 hover:bg-black/60 px-3 py-1.5 rounded-md transition-colors duration-200"
                       >
@@ -169,10 +168,11 @@ export default function CuratorsPicks() {
           <>
             <button
               onClick={handlePrev}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+              className="absolute left-2 sm:left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-3 sm:p-2 rounded-full z-[50] transition-transform duration-300 hover:scale-110 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
+              style={{ touchAction: 'manipulation' }}
             >
               <svg
-                className="w-5 h-5 text-gray-700"
+                className="w-6 h-6 sm:w-5 sm:h-5 text-gray-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -187,10 +187,11 @@ export default function CuratorsPicks() {
             </button>
             <button
               onClick={handleNext}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-[1] transition-transform duration-300 hover:scale-110 hover:bg-gray-100"
+              className="absolute right-2 sm:right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-3 sm:p-2 rounded-full z-[50] transition-transform duration-300 hover:scale-110 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
+              style={{ touchAction: 'manipulation' }}
             >
               <svg
-                className="w-5 h-5 text-gray-700"
+                className="w-6 h-6 sm:w-5 sm:h-5 text-gray-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -208,7 +209,7 @@ export default function CuratorsPicks() {
       </div>
 
       {currentIndex !== null && (
-        <div className="flex justify-center mt-6 space-x-2">
+        <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {artworks.map((_, index) => (
             <div
               key={index}

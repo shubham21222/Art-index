@@ -45,7 +45,7 @@ const UserSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ["USER", "ADMIN" , "MUSICIAN", "GALLERY"],
+        enum: ["USER", "ADMIN" , "MUSICIAN", "GALLERY", "AUCTIONS", "FAIRS", "MUSEUMS", "GALLERIES"],
         default: "USER",
     },
 
@@ -184,7 +184,24 @@ const UserSchema = new mongoose.Schema({
             type:String,
             enum:['PENDING','PAID','PROCESSING' ,"FAILED"],
             default:'PENDING'
-        }
+        },
+
+    // Partnership related fields
+    isPartner: {
+        type: Boolean,
+        default: false
+    },
+    
+    partnershipType: {
+        type: String,
+        enum: ['auctions', 'fairs', 'museums', 'galleries'],
+        required: false
+    },
+    
+    partnerApprovedAt: {
+        type: Date,
+        required: false
+    },
 
 },{
     timestamps: true,
