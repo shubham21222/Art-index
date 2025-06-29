@@ -11,6 +11,7 @@ import Inquiry from "./routes/Inquiry/inquiry.routes.js"
 import Quote from "./routes/Quote/quote.routes.js"
 import Partnership from "./routes/Partnership/partnership.routes.js";
 import Museum from "./routes/Museum/museum.routes.js";
+import ArtworkPricing from "./routes/ArtworkPricing/artworkPricing.routes.js";
 
 import google from "./routes/googleRoutes/google.routes.js";
 import Gallery from "./routes/gallery/gallery.routes.js";
@@ -67,6 +68,9 @@ router.use("/gallery", Gallery);
 
 // Add API routes here for MUSEUM //
 router.use("/museum", Museum);
+
+// Add API routes here for ARTWORK PRICING //
+router.use("/artwork-pricing", ArtworkPricing);
 
 
 
