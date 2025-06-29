@@ -583,9 +583,9 @@ export default function ArtworkPage() {
     <>
       <Header />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="container mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 md:py-12">
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 gap-8 md:gap-12 lg:grid-cols-2">
             {/* Left Column: Image Carousel */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -593,7 +593,7 @@ export default function ArtworkPage() {
               transition={{ duration: 0.6 }}
               className="space-y-6"
             >
-              <div className="w-full h-[70vh] bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="w-full h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] bg-white rounded-2xl shadow-xl overflow-hidden flex items-center justify-center">
                 <ArtistCarousel slug={artist.slug} />
               </div>
             </motion.div>
@@ -637,7 +637,7 @@ export default function ArtworkPage() {
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    className="absolute right-0 top-20 bg-white rounded-xl shadow-xl border p-4 z-10"
+                    className="absolute right-2 left-2 sm:left-auto sm:right-0 top-20 bg-white rounded-xl shadow-xl border p-4 z-10 w-auto sm:w-48"
                   >
                     <div className="space-y-2">
                       <button
@@ -685,8 +685,8 @@ export default function ArtworkPage() {
               </div>
 
               {/* Artwork Details */}
-              <div className="bg-white p-6 rounded-2xl shadow-lg">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2">
                   <Info className="w-5 h-5 text-blue-500" />
                   <span>Artwork Details</span>
                 </h2>
@@ -694,7 +694,7 @@ export default function ArtworkPage() {
                 {/* Description */}
                 {artwork.description && (
                   <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">
                       Description
                     </h3>
                     <div
@@ -720,7 +720,7 @@ export default function ArtworkPage() {
                                 )} */}
 
                 {/* Technical Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 mb-6">
                   <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
                     <Tag className="w-4 h-4 text-blue-500" />
                     <div>
@@ -958,43 +958,10 @@ export default function ArtworkPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center space-x-3">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsLiked(!isLiked)}
-                  className={`p-3 rounded-full transition-colors ${
-                    isLiked
-                      ? "bg-red-500 text-white shadow-lg"
-                      : "bg-white text-gray-600 hover:bg-gray-50 shadow-md"
-                  }`}
-                >
-                  <Heart
-                    className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`}
-                  />
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowShareMenu(!showShareMenu)}
-                  className="p-3 bg-white text-gray-600 hover:bg-gray-50 rounded-full shadow-md transition-colors"
-                >
-                  <Share2 className="w-5 h-5" />
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleDownload}
-                  className="p-3 bg-white text-gray-600 hover:bg-gray-50 rounded-full shadow-md transition-colors"
-                >
-                  <Download className="w-5 h-5" />
-                </motion.button>
-
+              <div className="flex justify-center w-full">
                 <Button
                   onClick={handleContactClick}
-                  className="bg-black text-white hover:bg-gray-800 px-8 py-3 rounded-full shadow-lg flex-1"
+                  className="bg-black text-white hover:bg-gray-800 w-full sm:w-auto text-base sm:text-lg font-semibold py-4 sm:py-3 px-6 sm:px-8 rounded-2xl shadow-lg text-center transition-all duration-200"
                 >
                   Contact - {getPriceDisplay().estimate}
                 </Button>
@@ -1006,10 +973,10 @@ export default function ArtworkPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="bg-white rounded-2xl shadow-xl p-8"
+              className="bg-white rounded-2xl shadow-xl p-4 sm:p-8"
             >
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                   About the Artwork
                 </h2>
                 <p className="text-gray-600">
@@ -1017,7 +984,7 @@ export default function ArtworkPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
                 {/* Left Column: Description and Additional Info */}
                 <div className="space-y-6">
                   {/* Description */}
