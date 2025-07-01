@@ -43,11 +43,12 @@ export const login = createAsyncThunk(
         
         // Verify user after successful login
         const verifyResponse = await dispatch(verifyUser(token)).unwrap();
+        console.log('verifyUser response in login thunk:', verifyResponse);
         
         return {
-          user: user,
+          user: verifyResponse.items || user,
           token: token,
-          role: user.role,
+          role: (verifyResponse.items && verifyResponse.items.role) || user.role,
           message: response.data.message
         };
       }
@@ -176,9 +177,11 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(verifyUser.fulfilled, (state, action) => {
+        console.log('verifyUser.fulfilled payload:', action.payload);
         state.loading = false;
         state.isAuthenticated = true;
         state.error = null;
+        state.user = action.payload.items;
       })
       .addCase(verifyUser.rejected, (state, action) => {
         state.loading = false;

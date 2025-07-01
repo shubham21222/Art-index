@@ -22,8 +22,13 @@ import {
   Palette,
   Ruler,
   Calendar,
+  X,
+  AlertCircle,
 } from "lucide-react";
 import ContactModal from "@/app/components/ContactModal";
+import LoginModal from "@/app/components/LoginModal";
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
 
 export default function ArtworkPage() {
   const params = useParams();
@@ -31,6 +36,14 @@ export default function ArtworkPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [offerAmount, setOfferAmount] = useState("");
+  const [offerMessage, setOfferMessage] = useState("");
+  const [offerError, setOfferError] = useState("");
+  const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
+
+  const { isAuthenticated, token, user } = useSelector((state) => state.auth);
 
   const [artwork, setArtwork] = useState(null);
   const [artist, setArtist] = useState(null);
@@ -105,6 +118,89 @@ export default function ArtworkPage() {
         adjustmentPercentage: 0,
       };
     }
+  };
+
+  // Helper function to get numeric price for comparison
+  const getNumericPrice = () => {
+    const priceDisplay = getPriceDisplay();
+    const priceString = priceDisplay.estimate || priceDisplay.original;
+    
+    if (priceString === "Price Unavailable") return null;
+    
+    // Extract numeric value from price string (e.g., "$1,000" -> 1000)
+    const numericMatch = priceString.replace(/[$,]/g, '').match(/\d+/);
+    return numericMatch ? parseInt(numericMatch[0]) : null;
+  };
+
+  // Check if price is available
+  const isPriceAvailable = () => {
+    return getNumericPrice() !== null;
+  };
+
+  const handleMakeOffer = () => {
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
+    } else {
+      setIsOfferModalOpen(true);
+    }
+  };
+
+  const handleOfferSubmit = async (e) => {
+    e.preventDefault();
+    setOfferError("");
+    const numericPrice = getNumericPrice();
+    const offerNumeric = parseFloat(offerAmount.replace(/[$,]/g, ''));
+    if (!offerNumeric || offerNumeric <= 0) {
+      setOfferError("Please enter a valid offer amount");
+      return;
+    }
+    setIsSubmittingOffer(true);
+    try {
+      // Fetch product by title to get MongoDB _id
+      const productRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/product/by-title?title=${encodeURIComponent(artwork.title)}`);
+      const productData = await productRes.json();
+      const productId = productData?.item?._id;
+      // Prepare offer payload
+      let offerPayload = {
+        offerAmount: offerNumeric,
+        message: offerMessage
+      };
+      if (productId) {
+        offerPayload.product = productId;
+      } else {
+        offerPayload.externalProductTitle = artwork.title;
+        offerPayload.externalProductId = artwork.id;
+        offerPayload.externalProductSlug = slug;
+      }
+      // Submit the offer to backend
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/offer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token
+        },
+        body: JSON.stringify(offerPayload)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsOfferModalOpen(false);
+        setOfferAmount("");
+        setOfferMessage("");
+        setOfferError("");
+        toast.success("Offer submitted successfully!");
+      } else {
+        setOfferError(data.message || "Failed to submit offer. Please try again.");
+      }
+    } catch (error) {
+      setOfferError("Failed to submit offer. Please try again.");
+    } finally {
+      setIsSubmittingOffer(false);
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    setIsLoginModalOpen(false);
+    setIsOfferModalOpen(true);
   };
 
   useEffect(() => {
@@ -941,30 +1037,47 @@ export default function ArtworkPage() {
                   </div>
 
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-gray-900">
-                      {getPriceDisplay().hasAdjustment
-                        ? `${getPriceDisplay().original} - ${
-                            getPriceDisplay().estimate
-                          }`
-                        : getPriceDisplay().original}
-                    </div>
-                    {getPriceDisplay().hasAdjustment && (
-                      <p className="text-sm text-gray-500 mt-2">
-                        List Price - Estimate Price
-                      </p>
+                    {getPriceDisplay().hasAdjustment ? (
+                      <div className="flex justify-center items-center gap-2">
+                        <div className="text-2xl font-bold text-gray-900">
+                          {getPriceDisplay().original}
+                        </div>
+                        <span className="text-2xl font-bold text-gray-900">-</span>
+                        <div className="text-2xl font-bold text-gray-900">
+                          {getPriceDisplay().estimate}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="text-2xl font-bold text-gray-900">
+                          {getPriceDisplay().original}
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          List Price
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-center w-full">
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <Button
                   onClick={handleContactClick}
-                  className="bg-black text-white hover:bg-gray-800 w-full sm:w-auto text-base sm:text-lg font-semibold py-4 sm:py-3 px-6 sm:px-8 rounded-2xl shadow-lg text-center transition-all duration-200"
+                  className="bg-black text-white hover:bg-gray-800 w-full text-base sm:text-lg font-semibold py-4 sm:py-3 px-6 sm:px-8 rounded-2xl shadow-lg text-center transition-all duration-200"
                 >
-                  Contact - {getPriceDisplay().estimate}
+                  Contact - {getPriceDisplay().hasAdjustment ? getPriceDisplay().estimate : getPriceDisplay().original}
                 </Button>
+                
+                {isPriceAvailable() && (
+                  <Button
+                    onClick={handleMakeOffer}
+                    className="bg-blue-600 text-white hover:bg-blue-700 w-full text-base sm:text-lg font-semibold py-4 sm:py-3 px-6 sm:px-8 rounded-2xl shadow-lg text-center transition-all duration-200"
+                  >
+                    Make an Offer
+                  </Button>
+                )}
               </div>
             </motion.div>
           </div>
@@ -1254,6 +1367,125 @@ export default function ArtworkPage() {
             : null
         }
       />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+
+      {/* Offer Modal */}
+      <AnimatePresence>
+        {isOfferModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setIsOfferModalOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Make an Offer</h2>
+                  <button
+                    onClick={() => setIsOfferModalOpen(false)}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-500" />
+                  </button>
+                </div>
+
+                <div className="mb-6 p-4 bg-gray-50 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Listing Price:</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      {getPriceDisplay().estimate}
+                    </span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleOfferSubmit} className="space-y-4">
+                  <div>
+                    <label htmlFor="offerAmount" className="block text-sm font-medium text-gray-700 mb-2">
+                      Offer Amount *
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                      <input
+                        type="text"
+                        id="offerAmount"
+                        value={offerAmount}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          setOfferAmount(value);
+                          setOfferError("");
+                        }}
+                        placeholder="Enter your offer"
+                        className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="offerMessage" className="block text-sm font-medium text-gray-700 mb-2">
+                      Message (Optional)
+                    </label>
+                    <textarea
+                      id="offerMessage"
+                      value={offerMessage}
+                      onChange={(e) => setOfferMessage(e.target.value)}
+                      placeholder="Add a message to your offer..."
+                      rows={4}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    />
+                  </div>
+
+                  {offerError && (
+                    <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+                      <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                      <p className="text-sm text-red-600">{offerError}</p>
+                    </div>
+                  )}
+
+                  <div className="flex space-x-3 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsOfferModalOpen(false)}
+                      className="flex-1 py-3"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isSubmittingOffer || !offerAmount}
+                      className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300"
+                    >
+                      {isSubmittingOffer ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Submitting...</span>
+                        </div>
+                      ) : (
+                        "Submit Offer"
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

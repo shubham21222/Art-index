@@ -13,7 +13,7 @@ export default function ArtsyPage() {
     const [aggregations, setAggregations] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
-
+    
     const searchArtworks = async (term) => {
         if (!term.trim()) {
             setSearchResults([]);

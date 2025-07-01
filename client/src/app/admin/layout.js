@@ -91,6 +91,7 @@ export default function AdminLayout({ children }) {
     { title: "Partnerships", path: "/admin/partnerships", icon: Users },
     // { title: "Artwork Pricing", path: "/admin/artwork-pricing", icon: DollarSign },
     { title: "Global Pricing", path: "/admin/global-pricing", icon: DollarSign },
+    { title: "Offers", path: "/admin/offers", icon: DollarSign },
   ];
 
   const handleLogout = async () => {
