@@ -80,7 +80,7 @@ const ArtworkCard = ({ artwork }) => {
                 onClick={handleContactClick}
                 className="w-full text-sm"
               >
-                I'm Interested
+                I&apos;m Interested
               </Button>
               
               {/* {artwork.partner?.name && (

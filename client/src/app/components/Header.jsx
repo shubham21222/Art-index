@@ -57,15 +57,15 @@ export default function Header() {
     const primaryLinks = [
         { name: "Artists", href: "/artists" },
         // { name: "Fairs & Events", href: "/art-fairs" },
-        { name: "Museums", href: "/institutions" },
+        // { name: "Museums", href: "/institutions" },
     ];
 
     const mainSecondaryLinks = [];
     const subSecondaryLinks = [
         // { name: "Shows", href: "/shows" },
-        { name: "Buy", href: "/collect" },
-        { name: "Galleries", href: "/galleries" },
-        // { name: "Artworks", href: "/collect" },
+        // { name: "Buy", href: "/collect" },
+        // { name: "Galleries", href: "/galleries" },
+        { name: "Artworks", href: "/collect" },
         { name: "Art Database", href: "/price-database" },
     ];
 
@@ -167,9 +167,9 @@ export default function Header() {
                                 <Image
                                     src={logo}
                                     alt="Logo"
-                                    width={100}
-                                    height={40}
-                                    className="h-10 w-auto"
+                                    width={130}
+                                    height={50}
+                                    className="h-14 w-auto"
                                 />
                             </Link>
                         </div>

@@ -37,6 +37,16 @@ export default function Footer() {
                 </a>
               </li>
               <li>
+                <a href="/galleries" className="hover:text-gray-900 transition-colors">
+                  Galleries
+                </a>
+              </li>
+              <li>
+                <a href="/institutions" className="hover:text-gray-900 transition-colors">
+                  Museums
+                </a>
+              </li>
+              <li>
                 <a href="#" className="hover:text-gray-900 transition-colors">
                   Contact
                 </a>

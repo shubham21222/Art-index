@@ -17,11 +17,12 @@ const page = () => {
     <Header />
     <Carousel3 /> 
     <div className="max-w-[1500px] mx-auto">
+    <Museums />
     <UniversityMuseums />
     {/* <NonprofitOrganizations /> */}
-    <ArtistEstates />
+    <ArtistEstates /> 
     <ModernAndContemporaryArt />
-    <Museums />
+   
     <HistoricalArt />
     <PrivateCollections />
     <OutdoorArt />
