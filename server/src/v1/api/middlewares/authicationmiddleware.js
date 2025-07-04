@@ -35,6 +35,11 @@ import { success,
               token = token.slice(7);
           }
           
+          // Additional check for empty token after Bearer removal
+          if (!token) {
+              return badRequest(res, "Token is required");
+          }
+          
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
   
           const user = await User.findById(decoded.id);
