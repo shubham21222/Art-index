@@ -157,7 +157,7 @@ export default function ArtworkPage() {
     setIsSubmittingOffer(true);
     try {
       // Fetch product by title to get MongoDB _id
-      const productRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/product/by-title?title=${encodeURIComponent(artwork.title)}`);
+      const productRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/by-title?title=${encodeURIComponent(artwork.title)}`);
       const productData = await productRes.json();
       const productId = productData?.item?._id;
       // Prepare offer payload
@@ -173,8 +173,8 @@ export default function ArtworkPage() {
         offerPayload.externalProductSlug = slug;
       }
       // Submit the offer to backend
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/offer`, {
-        method: "POST",
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offer`, {
+        method: "POST", 
         headers: {
           "Content-Type": "application/json",
           "Authorization": token

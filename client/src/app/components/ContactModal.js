@@ -36,7 +36,7 @@ export default function ContactModal({ isOpen, onClose, artwork, onSubmit, user 
       if (onSubmit) {
         await onSubmit(formData);
       } else {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/inquiry`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inquiry`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

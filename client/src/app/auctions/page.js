@@ -34,7 +34,7 @@ const AuctionsPage = () => {
 
   const fetchAuctions = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/auction/all`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/all`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch auctions');

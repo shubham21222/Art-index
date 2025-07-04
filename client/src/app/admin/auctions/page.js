@@ -47,7 +47,7 @@ export default function AdminAuctions() {
 
   const fetchAuctions = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/auction/all`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/all`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -122,7 +122,7 @@ export default function AdminAuctions() {
     if (!confirm('Are you sure you want to delete this auction?')) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/auction/delete`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

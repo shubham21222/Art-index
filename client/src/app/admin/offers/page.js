@@ -24,7 +24,7 @@ export default function AdminOffersPage() {
   const fetchOffers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/offer`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offer`, {
         headers: { 'Authorization': `${token}` }
       });
       const data = await res.json();
@@ -42,7 +42,7 @@ export default function AdminOffersPage() {
 
   const handleAction = async (id, action) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/offer/${id}/${action}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offer/${id}/${action}`, {
         method: "PATCH",
         headers: { 'Authorization': `${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({})

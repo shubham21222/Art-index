@@ -62,7 +62,7 @@ export function MuseumDashboardComponent() {
 
   const fetchMuseums = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/all`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/museum/all`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -89,8 +89,8 @@ export function MuseumDashboardComponent() {
 
     try {
       const url = selectedMuseum
-        ? `${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/update/${selectedMuseum._id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/create`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/museum/update/${selectedMuseum._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/museum/create`;
 
       const res = await fetch(url, {
         method: 'POST',
@@ -131,7 +131,7 @@ export function MuseumDashboardComponent() {
     if (!confirm('Are you sure you want to delete this museum?')) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/delete/${museumId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/museum/delete/${museumId}`, {
         method: 'POST',
         headers: {
           'Authorization': `${token}`

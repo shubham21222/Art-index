@@ -37,7 +37,7 @@ export default function InquiriesPage() {
 
   const fetchInquiries = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/inquiry`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inquiry`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -68,7 +68,7 @@ export default function InquiriesPage() {
 
     setIsResponding(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/inquiry/${selectedInquiry._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inquiry/${selectedInquiry._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -31,7 +31,7 @@ export function MuseumDetailView({ museumId, onBack }) {
 
   const fetchMuseum = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/${museumId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/museum/${museumId}`, {
         headers: {
           'Authorization': `${token}`
         }

@@ -258,7 +258,7 @@ export default function ArtworkPage({ params }) {
   // Handle contact form submission
   const handleContactSubmit = async (formData) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/inquiry`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inquiry`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

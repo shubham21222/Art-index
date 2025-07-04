@@ -224,7 +224,7 @@ export default function BulkUploadModal({ isOpen, onClose, onSuccess }) {
         status: "ACTIVE"
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/auction/bulkCreate`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/bulkCreate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

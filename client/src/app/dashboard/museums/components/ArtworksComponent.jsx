@@ -48,8 +48,8 @@ export function ArtworksComponent({ museum, onUpdate }) {
 
     try {
       const url = selectedArtwork
-        ? `${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/${museum._id}/artworks/${selectedArtwork._id}/update`
-        : `${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/${museum._id}/artworks/add`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/museum/${museum._id}/artworks/${selectedArtwork._id}/update`
+        : `${process.env.NEXT_PUBLIC_API_URL}/museum/${museum._id}/artworks/add`;
 
       const res = await fetch(url, {
         method: 'POST',
@@ -87,7 +87,7 @@ export function ArtworksComponent({ museum, onUpdate }) {
     if (!confirm('Are you sure you want to delete this artwork?')) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/${museum._id}/artworks/${artworkId}/delete`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/museum/${museum._id}/artworks/${artworkId}/delete`, {
         method: 'POST',
         headers: {
           'Authorization': `${token}`

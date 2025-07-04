@@ -31,7 +31,7 @@ export default function CreateAuctionModal({ isOpen, onClose, onSuccess }) {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/product/all`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/all`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -50,7 +50,7 @@ export default function CreateAuctionModal({ isOpen, onClose, onSuccess }) {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/category/all`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category/all`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -81,7 +81,7 @@ export default function CreateAuctionModal({ isOpen, onClose, onSuccess }) {
         endDate: new Date(formData.endDate).toISOString()
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/auction/create`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

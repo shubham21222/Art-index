@@ -51,7 +51,7 @@ export function GalleryDashboard() {
 
   const fetchGalleries = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/gallery/all`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/gallery/all`, {
         headers: {
           'Authorization': `${token}`
         }
@@ -78,8 +78,8 @@ export function GalleryDashboard() {
 
     try {
       const url = selectedGallery
-        ? `${process.env.NEXT_PUBLIC_API_URL}/v1/api/gallery/update/${selectedGallery._id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/v1/api/gallery/create`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/gallery/update/${selectedGallery._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/gallery/create`;
 
       const res = await fetch(url, {
         method: 'POST',
@@ -116,7 +116,7 @@ export function GalleryDashboard() {
     if (!confirm('Are you sure you want to delete this gallery?')) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/gallery/delete/${galleryId}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/gallery/delete/${galleryId}`, {
         method: 'POST',
         headers: {
           'Authorization': `${token}`

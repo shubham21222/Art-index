@@ -46,8 +46,8 @@ export function EventsComponent({ museum, onUpdate }) {
 
     try {
       const url = selectedEvent
-        ? `${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/${museum._id}/events/${selectedEvent._id}/update`
-        : `${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/${museum._id}/events/add`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/museum/${museum._id}/events/${selectedEvent._id}/update`
+        : `${process.env.NEXT_PUBLIC_API_URL}/museum/${museum._id}/events/add`;
 
       const res = await fetch(url, {
         method: 'POST',
@@ -85,7 +85,7 @@ export function EventsComponent({ museum, onUpdate }) {
     if (!confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/museum/${museum._id}/events/${eventId}/delete`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/museum/${museum._id}/events/${eventId}/delete`, {
         method: 'POST',
         headers: {
           'Authorization': `${token}`

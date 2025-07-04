@@ -63,7 +63,7 @@ const AuctionDetailPage = () => {
 
   const fetchAuctionDetails = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/auction/${auctionId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/${auctionId}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch auction details');
@@ -155,7 +155,7 @@ const AuctionDetailPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/api/auction/placeBid`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/placeBid`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

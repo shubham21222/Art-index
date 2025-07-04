@@ -62,7 +62,7 @@ export default function ArtworkPricingPage() {
                 searchQuery: searchQuery
             });
 
-            const response = await fetch(`${BASE_URL}/v1/api/artwork-pricing/all?${params}`, {
+            const response = await fetch(`${BASE_URL}/artwork-pricing/all?${params}`, {
                 headers: {
                     'Authorization': auth.token
                 }
@@ -85,7 +85,7 @@ export default function ArtworkPricingPage() {
 
     const handleCreatePricing = async () => {
         try {
-            const response = await fetch(`${BASE_URL}/v1/api/artwork-pricing/create-or-update`, {
+            const response = await fetch(`${BASE_URL}/artwork-pricing/create-or-update`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export default function ArtworkPricingPage() {
 
     const handleUpdatePricing = async () => {
         try {
-            const response = await fetch(`${BASE_URL}/v1/api/artwork-pricing/create-or-update`, {
+            const response = await fetch(`${BASE_URL}/artwork-pricing/create-or-update`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export default function ArtworkPricingPage() {
         if (!confirm('Are you sure you want to delete this pricing?')) return;
 
         try {
-            const response = await fetch(`${BASE_URL}/v1/api/artwork-pricing/delete/${id}`, {
+            const response = await fetch(`${BASE_URL}/artwork-pricing/delete/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': auth.token
@@ -163,7 +163,7 @@ export default function ArtworkPricingPage() {
         if (!confirm('Are you sure you want to reset this pricing to original?')) return;
 
         try {
-            const response = await fetch(`${BASE_URL}/v1/api/artwork-pricing/reset/${id}`, {
+                const response = await fetch(`${BASE_URL}/artwork-pricing/reset/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': auth.token
