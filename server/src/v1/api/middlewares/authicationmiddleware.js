@@ -42,7 +42,9 @@ import { success,
           
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
   
-          const user = await User.findById(decoded.id);
+          console.log("Auth middleware debug:", { decoded, token });
+          
+          const user = await User.findById(decoded._id);
           if (!user) {
               return sendResponse(res, notFound, "No user found with this ID");
           }

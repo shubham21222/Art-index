@@ -163,8 +163,9 @@ export const logout = async (req, res, next) => {
        }
 
        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-       const userData = await User.findOne({ _id: decoded?.id });
-       if(userData.activeToken && userData.activeToken === token){
+       console.log("Logout debug:", { decoded, token });
+       const userData = await User.findOne({ _id: decoded?._id });
+       if(userData && userData.activeToken && userData.activeToken === token){
           const user = await User.findByIdAndUpdate(userData._id, { activeToken: null }, { new: true });
           if(!user){
               return badRequest(res, "Invalid token , Please login again");
@@ -173,6 +174,9 @@ export const logout = async (req, res, next) => {
           return success(res, "User logged out successfully");
        }
        else{
+              if (!userData) {
+                  return badRequest(res, "User not found");
+              }
               return badRequest(res, "Invalid token , Please login again");
        }
 
@@ -205,11 +209,22 @@ export const verifyUser = async (req, res, next) => {
             return badRequest(res, "Invalid token");
         }
 
-        const {id} = decoded;
-        const loggedInUser = await User.findOne({
-            _id: id,
+        const {_id} = decoded;
+        console.log("Verify debug:", { token, decoded, userId: _id });
+        
+        // First try to find user with exact token match
+        let loggedInUser = await User.findOne({
+            _id: _id,
             activeToken: token
         }).select("-password -activeToken");
+
+        // If not found and it's a Google user, try without token match
+        if (!loggedInUser) {
+            loggedInUser = await User.findById(_id).select("-password -activeToken");
+            if (loggedInUser && loggedInUser.googleId) {
+                console.log("Found Google user without token match:", loggedInUser.email);
+            }
+        }
 
         if(!loggedInUser){
             return badRequest(res, "Invalid token");
@@ -219,6 +234,7 @@ export const verifyUser = async (req, res, next) => {
 
     }
     catch(error){
+        console.error("Verify error:", error);
         unknownError(res, error);
     }
 }
