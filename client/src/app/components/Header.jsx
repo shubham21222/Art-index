@@ -9,7 +9,7 @@ import LoginModal from "./LoginModal";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { logout } from "@/redux/features/authSlice";
+import { logout, getCurrentUser } from "@/redux/features/authSlice";
 import toast from 'react-hot-toast';
 import {
   DropdownMenu,
@@ -21,7 +21,12 @@ import "../globals.css";
 
 export default function Header() {
     const dispatch = useDispatch();
-    const { isAuthenticated, user, role } = useSelector((state) => state.auth);
+    const { isAuthenticated, user, role, loading } = useSelector((state) => state.auth);
+    
+    // Debug logging
+    useEffect(() => {
+        console.log('Header state:', { isAuthenticated, user, role });
+    }, [isAuthenticated, user, role]);
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
@@ -48,6 +53,16 @@ export default function Header() {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
+
+    // Fetch user data on mount if token exists
+    useEffect(() => {
+        if (mounted && !isAuthenticated) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                dispatch(getCurrentUser());
+            }
+        }
+    }, [mounted, isAuthenticated, dispatch]);
 
     // Don't render anything until the component is mounted on the client
     if (!mounted) {
@@ -118,6 +133,16 @@ export default function Header() {
 
     const renderUserMenu = () => {
         if (!isAuthenticated) return null;
+        
+        // Show loading state if user data is being fetched
+        if (loading || !user) {
+            return (
+                <Button variant="ghost" className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-100/50">
+                    <User className="w-5 h-5" />
+                    <span className="text-sm">Loading...</span>
+                </Button>
+            );
+        }
 
         const dashboardLink = getDashboardLink();
         const dashboardLabel = getDashboardLabel();
@@ -127,7 +152,7 @@ export default function Header() {
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-100/50 hover:bg-gray-200/50">
                         <User className="w-5 h-5" />
-                        <span className="text-sm">{user?.name}</span>
+                        <span className="text-sm">{user.name || 'User'}</span>
                         <ChevronDown className="w-4 h-4" />
                     </Button>
                 </DropdownMenuTrigger>
@@ -253,10 +278,17 @@ export default function Header() {
                         <div className="space-y-2 pt-4">
                             {isAuthenticated ? (
                                 <>
-                                    <div className="flex items-center space-x-2 py-2">
-                                        <User className="w-5 h-5" />
-                                        <span className="text-sm">{user?.name}</span>
-                                    </div>
+                                    {loading || !user ? (
+                                        <div className="flex items-center space-x-2 py-2">
+                                            <User className="w-5 h-5" />
+                                            <span className="text-sm">Loading...</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center space-x-2 py-2">
+                                            <User className="w-5 h-5" />
+                                            <span className="text-sm">{user.name || 'User'}</span>
+                                        </div>
+                                    )}
                                     {(role === 'GALLERY' || role === 'GALLERIES' || role === 'AUCTIONS' || role === 'FAIRS' || role === 'MUSEUMS' || role === 'ADMIN') && (
                                         <Link
                                             href={getDashboardLink()}
