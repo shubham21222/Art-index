@@ -13,6 +13,7 @@ import Partnership from "./routes/Partnership/partnership.routes.js";
 import Museum from "./routes/Museum/museum.routes.js";
 import ArtworkPricing from "./routes/ArtworkPricing/artworkPricing.routes.js";
 import offerRoutes from './routes/Offer/offer.routes.js';
+import SponsorBanner from './routes/SponsorBanner/sponsorBanner.routes.js';
 
 import google from "./routes/googleRoutes/google.routes.js";
 import Gallery from "./routes/gallery/gallery.routes.js";
@@ -75,6 +76,9 @@ router.use("/artwork-pricing", ArtworkPricing);
 
 // Add API routes here for OFFER //
 router.use('/offer', offerRoutes);
+
+// Add API routes here for SPONSOR BANNER //
+router.use('/sponsor-banner', SponsorBanner);
 
 
 

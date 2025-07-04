@@ -13,6 +13,7 @@ import ArtCategoriesShowcase from "./components/ArtCategoriesShowcase";
 import FeaturedArtworksShowcase from "./components/FeaturedArtworksShowcase";
 import ArtInsightsStories from "./components/ArtInsightsStories";
 import AuctionHighlights from "./components/AuctionHighlights";
+import SponsorBanner from "../components/SponsorBanner";
 import Footer from "./components/Footer";
 
 export default function Home() {
@@ -28,9 +29,15 @@ export default function Home() {
           <CuratorsPicks />
           {/* <ArtsySection /> */}
           <AuctionCarousel/>
+          
+          {/* Sponsor Banner - Middle */}
+          <div className=" mx-auto px-4 sm:px-6 py-8">
+            <SponsorBanner placement="homepage" position="middle" />
+          </div>
+          
           {/* <FeaturedShows /> */}
           {/* <CurrentFairs /> */}
-          <FeaturedGalleries />
+          <FeaturedGalleries /> 
           <TrendingArtists />
           <FeaturedArtworksShowcase />
           <ArtInsightsStories />

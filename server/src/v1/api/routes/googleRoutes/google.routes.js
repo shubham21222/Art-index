@@ -4,6 +4,15 @@ import { handleGoogleCallback } from "../../controllers/AuthController/google.co
 
 const router = express.Router();
 
+// Test route to check if Google OAuth is configured
+router.get('/test', (req, res) => {
+  res.json({ 
+    message: 'Google OAuth routes are working',
+    clientId: process.env.GOOGLE_CLIENT_ID ? 'Configured' : 'Not configured',
+    callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'https://artindex.ai/v1/api/googleAuth/google/callback'
+  });
+});
+
 // Start Google OAuth
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 

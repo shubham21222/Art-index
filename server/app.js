@@ -7,6 +7,8 @@ import compression from 'compression';
 import { stripeWebhook } from "./src/v1/api/controllers/AuctionController/auction.controller.js";
 import path from "path";
 import { Orderwebhook } from "./src/v1/api/controllers/OrderController/order.controller.js";
+import passport from 'passport';
+import session from 'express-session';
 const app = express();
 import morgan from 'morgan';
 
@@ -27,8 +29,26 @@ app.use((req, res, next) => {
   express.json({ limit: '10mb' })(req, res, next);
 });
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.options('*', cors());
+
+// Session configuration for Passport
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Increase URL-encoded payload limit to 10MB
 app.use(urlencoded({ extended: false, limit: '10mb' }));

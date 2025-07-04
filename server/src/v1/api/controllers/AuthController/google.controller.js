@@ -3,14 +3,28 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { generateToken } from '../../config/jwt.js'
 import User from "../../models/Auth/User.js";
 
+// Passport serialization
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
+
 
 
 passport.use(
   new GoogleStrategy(
     {
-      clientID: "554991212090-gd8lhhtei00a8gi6putq5qjfta3uam9v.apps.googleusercontent.com",
-      clientSecret: "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",
-      callbackURL: 'https://artindex.ai/v1/api/googleAuth/google/callback',
+      clientID: process.env.GOOGLE_CLIENT_ID || "554991212090-gd8lhhtei00a8gi6putq5qjfta3uam9v.apps.googleusercontent.com",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "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",
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://artindex.ai/v1/api/googleAuth/google/callback',
       scope: ['profile', 'email'],
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -23,7 +37,7 @@ passport.use(
           ]
         });
 
-        const token = generateToken(user?._id || null, "User");
+        const token = generateToken(user?._id || null);
 
         if (user) {
 
@@ -44,12 +58,11 @@ passport.use(
           name: profile.displayName,
           email: profile.emails[0].value,
           img: profile.photos[0].value,
+          activeToken: token,
         });
 
 
         console.log("New user created:", newUser);
-
-        await User.findByIdAndUpdate(newUser._id, { activeToken: token });
 
         return done(null, { user: newUser, token });
       } catch (err) {
@@ -65,12 +78,12 @@ passport.use(
 export const getConfig = async () => {
   return {
     google: {
-      clientId: "554991212090-gd8lhhtei00a8gi6putq5qjfta3uam9v.apps.googleusercontent.com",
-      clientSecret: "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",
-      scope: ["profile", "email"], // replace with actual needed scopes
-      callbackURL: "https://artindex.ai/v1/api/googleAuth/google/callback", // this should match your Google console settings
-      successRedirectUrl: "https://artindex.ai/auth/success", // customize this as needed
-      failureRedirectUrl: "https://artindex.ai/auth/failure"  // customize this as needed
+      clientId: process.env.GOOGLE_CLIENT_ID || "554991212090-gd8lhhtei00a8gi6putq5qjfta3uam9v.apps.googleusercontent.com",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "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",
+      scope: ["profile", "email"],
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || "https://artindex.ai/v1/api/googleAuth/google/callback",
+      successRedirectUrl: process.env.FRONTEND_URL || "https://artindex.ai",
+      failureRedirectUrl: process.env.FRONTEND_URL || "https://artindex.ai"
     }
   };
 };
@@ -80,31 +93,35 @@ export const getConfig = async () => {
 // Handle Google authentication response
 export const handleGoogleCallback = async (req, res) => {
   try {
-    const { user } = req.user;
-
-    // Load redirect URLs from DB config
-    const config = await getConfig();
-    const failureRedirectUrl = "https://artindex.ai/";
-    const successRedirectUrl = "https://artindex.ai/";
-
-
-
-    if (!user) {
+    console.log("Google callback received:", req.user);
+    
+    if (!req.user || !req.user.user) {
+      console.error("No user data in callback");
+      const failureRedirectUrl = process.env.FRONTEND_URL || "https://artindex.ai";
       return res.redirect(`${failureRedirectUrl}?error=AuthenticationFailed`);
     }
 
+    const { user, token } = req.user;
+    const config = await getConfig();
+    const successRedirectUrl = config.google.successRedirectUrl;
+    const failureRedirectUrl = config.google.failureRedirectUrl;
 
+    if (!user) {
+      console.error("No user found in callback data");
+      return res.redirect(`${failureRedirectUrl}?error=AuthenticationFailed`);
+    }
 
     const dbUser = await User.findById(user._id);
+    if (!dbUser) {
+      console.error("User not found in database");
+      return res.redirect(`${failureRedirectUrl}?error=UserNotFound`);
+    }
 
-    // Check if user has custom success redirect, fallback to portal config
-    const redirectUrl =  successRedirectUrl;
-
-    return res.redirect(`${redirectUrl}?token=${dbUser.activeToken}`);
+    console.log("Redirecting to:", `${successRedirectUrl}?token=${dbUser.activeToken}`);
+    return res.redirect(`${successRedirectUrl}?token=${dbUser.activeToken}`);
   } catch (error) {
     console.error("Error in Google callback:", error);
-    const config = await getConfig();
-    const failureRedirectUrl = config.google.failureRedirectUrl || "https://candidate-portal.fincooperstech.com/login";
+    const failureRedirectUrl = process.env.FRONTEND_URL || "https://artindex.ai";
     return res.redirect(`${failureRedirectUrl}?error=ServerError`);
   }
 };

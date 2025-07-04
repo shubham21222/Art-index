@@ -15,6 +15,7 @@ import {
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ContactModal from '@/app/components/ContactModal';
+import SponsorBanner from '../../components/SponsorBanner';
 import { Info } from 'lucide-react';
 
 // Define the API endpoint
@@ -221,6 +222,11 @@ export default function ArtGallery() {
               ))
             : null}
         </Masonry>
+
+        {/* Sponsor Banner - Bottom */}
+        <div className="mt-12">
+          <SponsorBanner placement="collect" position="bottom" />
+        </div>
 
         {/* Load More Button */}
         {hasNextPage && (
