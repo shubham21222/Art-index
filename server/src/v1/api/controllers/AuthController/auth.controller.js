@@ -663,6 +663,23 @@ export const getUserByBillingAddress = async (req, res, next) => {
     }
 }
 
+// Get Current User (me) //
+export const getCurrentUser = async (req, res, next) => {
+    try {
+        // User is already attached to req by IsAuthenticated middleware
+        const user = await User.findById(req.user._id).select("-password -activeToken");
+        
+        if (!user) {
+            return notFound(res, "User not found");
+        }
+
+        return success(res, "User found", user);
+        
+    } catch (error) {
+        return unknownError(res, error);
+    }
+}
+
 // Verify Email
 export const verifyEmail = async (req, res) => {
     try {

@@ -28,7 +28,13 @@ import { success,
               return forbidden(res, "Not authorized to access this route");
           }
   
-          const token = authenticationHeader.trim(); // Trim any extra spaces
+          let token = authenticationHeader.trim(); // Trim any extra spaces
+          
+          // Handle both "Bearer token" and direct token formats
+          if (token.startsWith('Bearer ')) {
+              token = token.slice(7);
+          }
+          
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
   
           const user = await User.findById(decoded.id);
@@ -45,7 +51,13 @@ import { success,
           next();
   
       } catch (error) {
-         return res.status(500).json({status: false, subCode:500 ,  message: "Something went wrong!"});
+          console.error("Authentication error:", error);
+          if (error.name === 'JsonWebTokenError') {
+              return badRequest(res, "Invalid token");
+          } else if (error.name === 'TokenExpiredError') {
+              return badRequest(res, "Token expired");
+          }
+          return res.status(500).json({status: false, subCode:500 ,  message: "Something went wrong!"});
       }
   };
   

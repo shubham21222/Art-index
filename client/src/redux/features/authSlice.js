@@ -121,11 +121,11 @@ export const getCurrentUser = createAsyncThunk(
       if (!token) return null;
       
       const response = await axios.get(`${BASE_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: token }
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: 'Failed to get user data' });
     }
   }
 );
