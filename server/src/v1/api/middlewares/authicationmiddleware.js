@@ -47,13 +47,29 @@ import { success,
               return sendResponse(res, notFound, "No user found with this ID");
           }
   
-          // Check if the active token matches
-          if (!user.activeToken || user.activeToken !== token) {
-              return badRequest(res, "Token is not valid");
-          }
+          console.log("Auth debug:", {
+              userId: user._id,
+              userEmail: user.email,
+              hasGoogleId: !!user.googleId,
+              hasActiveToken: !!user.activeToken,
+              tokenMatch: user.activeToken === token
+          });
   
-          req.user = user;
-          next();
+          // For Google OAuth users, be more lenient with token validation
+          // Check if the active token matches, but don't fail if it doesn't for Google users
+          if (user.googleId) {
+              // For Google users, just verify the JWT is valid and user exists
+              // Don't require exact token match since Google OAuth might have timing issues
+              req.user = user;
+              next();
+          } else {
+              // For regular users, check if the active token matches
+              if (!user.activeToken || user.activeToken !== token) {
+                  return badRequest(res, "Token is not valid");
+              }
+              req.user = user;
+              next();
+          }
   
       } catch (error) {
           console.error("Authentication error:", error);

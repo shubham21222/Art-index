@@ -37,14 +37,14 @@ passport.use(
           ]
         });
 
-        const token = generateToken(user?._id || null);
-
         if (user) {
-
           if (!user.googleId) {
             user.googleId = profile.id;
           }
 
+          // Generate token for existing user
+          const token = generateToken(user._id);
+          
           // Update token
           user.activeToken = token;
           await user.save();
@@ -58,9 +58,14 @@ passport.use(
           name: profile.displayName,
           email: profile.emails[0].value,
           img: profile.photos[0].value,
-          activeToken: token,
         });
 
+        // Generate token for new user
+        const token = generateToken(newUser._id);
+        
+        // Update the new user with the token
+        newUser.activeToken = token;
+        await newUser.save();
 
         console.log("New user created:", newUser);
 
