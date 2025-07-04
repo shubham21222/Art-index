@@ -79,7 +79,7 @@ export default function LoginModal({ isOpen, onClose, onOpenSignUp }) {
     };
 
     const initiateGoogleLogin = () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/v1/api/googleAuth/google`;
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/googleAuth/google`;
     };
 
     if (!isOpen) return null;

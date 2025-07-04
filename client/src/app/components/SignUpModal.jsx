@@ -106,7 +106,7 @@ export default function SignUpModal({ isOpen, onClose, onOpenLogin }) {
     };
 
     const initiateGoogleLogin = () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/v1/api/googleAuth/google`;
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/googleAuth/google`;
     };
 
     if (!isOpen) return null;
