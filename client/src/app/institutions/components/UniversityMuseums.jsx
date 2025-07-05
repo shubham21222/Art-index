@@ -10,7 +10,7 @@ const API_URL = "/api/university-museums";
 export default function UniversityMuseums() {
   const [institutions, setInstitutions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(null); 
 
   useEffect(() => {
     const fetchData = async () => {

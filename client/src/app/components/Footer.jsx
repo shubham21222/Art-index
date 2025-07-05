@@ -32,6 +32,11 @@ export default function Footer() {
                 </a>
               </li>
               <li>
+                <a href="/all-artists" className="hover:text-gray-900 transition-colors">
+                  All Artists
+                </a>
+              </li>
+              <li>
                 <a href="/art-news" className="hover:text-gray-900 transition-colors">
                   Art News
                 </a>

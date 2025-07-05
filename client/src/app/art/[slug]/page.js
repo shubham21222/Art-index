@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'react-hot-toast';
 
 export default function ArtworkPage({ params }) {
   const { slug } = use(params);
@@ -21,6 +22,7 @@ export default function ArtworkPage({ params }) {
   const [error, setError] = useState(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [globalPricing, setGlobalPricing] = useState(null);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   // Fetch artwork data from Algolia using slug
   const fetchArtworkData = async (slug) => {
@@ -51,6 +53,7 @@ export default function ArtworkPage({ params }) {
       return data.hits?.find(hit => hit.slug === slug) || data.hits?.[0] || null;
     } catch (error) {
       console.error('Error fetching artwork data:', error);
+      toast.error('Failed to load artwork data. Please try again.');
       return null;
     }
   };
@@ -84,6 +87,7 @@ export default function ArtworkPage({ params }) {
       return data.hits?.filter(hit => hit.artId.toString() !== currentArtworkId) || [];
     } catch (error) {
       console.error('Error fetching related artworks:', error);
+      toast.error('Failed to load related artworks.');
       return [];
     }
   };
@@ -251,6 +255,7 @@ export default function ArtworkPage({ params }) {
       }
     } catch (error) {
       console.error("Error fetching adjusted pricing:", error);
+      toast.error('Failed to load price estimates.');
       return null;
     }
   };
@@ -283,10 +288,63 @@ export default function ArtworkPage({ params }) {
         throw new Error(data.message || 'Failed to send inquiry');
       }
 
+      // Check if this is a new user (account was created)
+      if (data.message && data.message.includes('check your email')) {
+        toast.success("Inquiry sent successfully! Please check your email to complete your account setup.", {
+          duration: 6000, // Show for 6 seconds
+        });
+      } else {
+        toast.success("Inquiry sent successfully! We'll get back to you soon.");
+      }
+
+      setIsContactModalOpen(false);
       return data;
     } catch (error) {
+      toast.error(error.message || 'Failed to send inquiry. Please try again.');
       throw error;
     }
+  };
+
+  // Handle favorite artwork
+  const handleFavorite = () => {
+    setIsFavorited(!isFavorited);
+    if (!isFavorited) {
+      toast.success('Added to favorites!');
+    } else {
+      toast.success('Removed from favorites!');
+    }
+  };
+
+  // Handle share artwork
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: artwork?.artwork_title || 'Artwork',
+          text: `Check out this amazing artwork: ${artwork?.artwork_title} by ${artwork?.full_name}`,
+          url: window.location.href,
+        });
+        toast.success('Shared successfully!');
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast.error('Failed to share. Please try again.');
+    }
+  };
+
+  // Handle view in room
+  const handleViewInRoom = () => {
+    toast.info('View in Room feature coming soon!');
+  };
+
+  // Handle make an offer
+  const handleMakeOffer = () => {
+    setIsContactModalOpen(true);
+    toast.info('Opening inquiry form for your offer...');
   };
 
   // Load artwork data
@@ -305,12 +363,16 @@ export default function ArtworkPage({ params }) {
           // Fetch global pricing adjustment
           const pricing = await fetchGlobalPricing(artworkData);
           setGlobalPricing(pricing);
+          
+          toast.success('Artwork loaded successfully!');
         } else {
           setError('Artwork not found');
+          toast.error('Artwork not found. Please check the URL and try again.');
         }
       } catch (error) {
         console.error('Error loading artwork:', error);
         setError('Failed to load artwork data');
+        toast.error('Failed to load artwork data. Please refresh the page.');
       } finally {
         setLoading(false);
       }
@@ -402,15 +464,20 @@ export default function ArtworkPage({ params }) {
               
               {/* Action Buttons */}
               <div className="flex justify-center mt-4 space-x-4">
-                <Button variant="outline" size="sm">
-                  <Heart className="w-4 h-4 mr-2" />
-                  Favorite
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleFavorite}
+                  className={isFavorited ? 'bg-red-50 border-red-200 text-red-600' : ''}
+                >
+                  <Heart className={`w-4 h-4 mr-2 ${isFavorited ? 'fill-current' : ''}`} />
+                  {isFavorited ? 'Favorited' : 'Favorite'}
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleShare}>
                   <Share2 className="w-4 h-4 mr-2" />
                   Share
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleViewInRoom}>
                   <Eye className="w-4 h-4 mr-2" />
                   View in Room
                 </Button>
@@ -598,7 +665,7 @@ export default function ArtworkPage({ params }) {
                 
                 {isPriceAvailable() && (
                   <Button
-                    onClick={() => setIsContactModalOpen(true)}
+                    onClick={handleMakeOffer}
                     className="bg-blue-600 text-white hover:bg-blue-700 w-full text-base sm:text-lg font-semibold py-4 sm:py-3 px-6 sm:px-8 rounded-2xl shadow-lg text-center transition-all duration-200"
                   >
                     Make an Offer

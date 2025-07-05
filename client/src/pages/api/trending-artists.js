@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     const artists = await collection.find({}).limit(20).toArray();
 
     // Map data to a format compatible with TrendingArtists component
-    const formattedArtists = artists.map((artist) => ({
+    const formattedArtists = artists.map((artist) => ({ 
       id: artist.internalID,
       slug: artist.slug,
       name: artist.name,

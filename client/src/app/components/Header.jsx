@@ -71,6 +71,7 @@ export default function Header() {
 
     const primaryLinks = [
         { name: "Artists", href: "/artists" },
+        // { name: "All Artists", href: "/all-artists" },
         // { name: "Fairs & Events", href: "/art-fairs" },
         // { name: "Museums", href: "/institutions" },
     ];
