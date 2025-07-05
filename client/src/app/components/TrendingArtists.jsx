@@ -105,13 +105,45 @@ export default function TrendingArtists() {
                 <Link href={`/trending-shows/${artist.slug}`} className="block h-full">
                   {/* Image */}
                   <div className="relative w-full h-full">
-                    <Image
-                      src={artist.image}
-                      alt={artist.name}
-                      width={400}
-                      height={400}
-                      className="object-cover w-full h-full rounded-lg shadow-md transition-transform duration-500 group-hover:scale-110"
-                    />
+                    {artist.image ? (
+                      <Image
+                        src={artist.image}
+                        alt={artist.name}
+                        width={400}
+                        height={400}
+                        className="object-cover w-full h-full rounded-lg shadow-md transition-transform duration-500 group-hover:scale-110"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    
+                    {/* Fallback Image Not Available */}
+                    <div 
+                      className={`w-full h-full rounded-lg shadow-md transition-transform duration-500 group-hover:scale-110 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center ${
+                        artist.image ? 'hidden' : 'flex'
+                      }`}
+                      style={{ display: artist.image ? 'none' : 'flex' }}
+                    >
+                      <div className="text-center text-gray-500">
+                        <svg 
+                          className="w-16 h-16 mx-auto mb-2 text-gray-400" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth="1.5" 
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
+                          />
+                        </svg>
+                        <p className="text-sm font-medium">Image Not Available</p>
+                      </div>
+                    </div>
+                    
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
                   </div>
@@ -205,7 +237,7 @@ export default function TrendingArtists() {
       </div>
 
       {/* Indicators */}
-      {artists.length > 0 && (
+      {/* {artists.length > 0 && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {artists.map((_, index) => (
             <div
@@ -217,7 +249,7 @@ export default function TrendingArtists() {
             />
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

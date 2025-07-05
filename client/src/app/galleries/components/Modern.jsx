@@ -10,7 +10,7 @@ import ContactModal from '@/app/components/ContactModal';
 const API_URL = "/api/modern";
 
 export default function Modern() {
-  const [artworks, setArtworks] = useState([]);
+  const [artworks, setArtworks] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -198,7 +198,7 @@ export default function Modern() {
       </div>
 
       {/* Indicators */}
-      {currentIndex !== null && artworks.length > 0 && (
+      {/* {currentIndex !== null && artworks.length > 0 && (
         <div className="flex justify-center mt-6 space-x-2">
           {artworks.map((_, index) => (
             <div
@@ -210,7 +210,7 @@ export default function Modern() {
             />
           ))}
         </div>
-      )}
+      )} */}
 
       {/* Contact Modal */}
       <ContactModal 

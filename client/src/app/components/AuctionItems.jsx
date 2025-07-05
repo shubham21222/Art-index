@@ -231,7 +231,7 @@ export default function AuctionCarousel() {
             </div>
 
             {/* Indicators */}
-            {currentIndex !== null && (
+            {/* {currentIndex !== null && (
                 <div className="hidden sm:flex justify-center mt-6 space-x-2">
                     {(auctionData.length > 0 ? auctionData : Array.from({ length: 6 })).map((_, index) => (
                         <div
@@ -243,7 +243,7 @@ export default function AuctionCarousel() {
                         />
                     ))}
                 </div>
-            )}
+            )} */}
 
             {/* Contact Modal */}
             <ContactModal 

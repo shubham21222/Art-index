@@ -208,7 +208,7 @@ export default function CuratorsPicks() {
         )}
       </div>
 
-      {currentIndex !== null && (
+      {/* {currentIndex !== null && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {artworks.map((_, index) => (
             <div
@@ -220,7 +220,7 @@ export default function CuratorsPicks() {
             />
           ))}
         </div>
-      )}
+      )} */}
 
       {/* Contact Modal */}
       <ContactModal 

@@ -198,7 +198,7 @@ export default function Drawings() {
       </div>
 
       {/* Indicators */}
-      {currentIndex !== null && artworks.length > 0 && (
+      {/* {currentIndex !== null && artworks.length > 0 && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {artworks.map((_, index) => (
             <div
@@ -210,7 +210,7 @@ export default function Drawings() {
             />
           ))}
         </div>
-      )}
+          )}
 
       {/* Contact Modal */}
       <ContactModal 

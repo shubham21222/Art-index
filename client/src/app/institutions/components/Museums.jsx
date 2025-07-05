@@ -369,7 +369,7 @@ export default function Museums() {
       )}
 
       {/* Indicators for Carousel */}
-      {viewMode === "carousel" && currentIndex !== null && filteredInstitutions.length > 0 && (
+      {/* {viewMode === "carousel" && currentIndex !== null && filteredInstitutions.length > 0 && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {filteredInstitutions.map((_, index) => (
             <div
@@ -381,7 +381,7 @@ export default function Museums() {
             />
           ))}
         </div>
-      )}
+      )} */}
 
       {/* View All Link */}
       <div className="mt-8 text-center">

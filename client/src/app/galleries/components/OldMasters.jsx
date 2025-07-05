@@ -171,7 +171,7 @@ export default function OldMasters() {
                   strokeLinejoin="round"
                   strokeWidth="2"
                   d="M15 19l-7-7 7-7"
-                />
+                />  
               </svg>
             </button>
             <button
@@ -198,7 +198,7 @@ export default function OldMasters() {
       </div>
 
       {/* Indicators */}
-      {currentIndex !== null && artworks.length > 0 && (
+        {/* {currentIndex !== null && artworks.length > 0 && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {artworks.map((_, index) => (
             <div
@@ -210,7 +210,7 @@ export default function OldMasters() {
             />
           ))}
         </div>
-      )}
+           )} 
 
       {/* Contact Modal */}
       <ContactModal 

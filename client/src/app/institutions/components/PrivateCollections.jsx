@@ -175,7 +175,7 @@ export default function PrivateCollections() {
       </div>
 
       {/* Indicators */}
-      {currentIndex !== null && institutions.length > 0 && (
+      {/* {currentIndex !== null && institutions.length > 0 && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {institutions.map((_, index) => (
             <div
@@ -187,7 +187,7 @@ export default function PrivateCollections() {
             />
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

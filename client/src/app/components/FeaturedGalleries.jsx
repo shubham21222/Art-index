@@ -202,7 +202,7 @@ export default function FeaturedGalleries() {
       </div>
 
       {/* Indicators */}
-      {galleries.length > 0 && (
+      {/* {galleries.length > 0 && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {galleries.map((_, index) => (
             <div
@@ -214,7 +214,7 @@ export default function FeaturedGalleries() {
             />
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

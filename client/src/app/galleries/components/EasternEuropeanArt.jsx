@@ -14,7 +14,7 @@ export default function EasternEuropeanArt() {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [selectedArtwork, setSelectedArtwork] = useState(null); 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -198,7 +198,7 @@ export default function EasternEuropeanArt() {
       </div>
 
       {/* Indicators */}
-      {currentIndex !== null && artworks.length > 0 && (
+      {/* {currentIndex !== null && artworks.length > 0 && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {artworks.map((_, index) => (
             <div
@@ -210,7 +210,7 @@ export default function EasternEuropeanArt() {
             />
           ))}
         </div>
-      )}
+      )} */}
 
       {/* Contact Modal */}
       <ContactModal 

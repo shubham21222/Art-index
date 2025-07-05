@@ -11,7 +11,7 @@ const API_URL = "/api/middle-eastern-art";
 
 export default function MiddleEasternArt() {
   const [artworks, setArtworks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); 
   const [currentIndex, setCurrentIndex] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedArtwork, setSelectedArtwork] = useState(null);
@@ -198,7 +198,7 @@ export default function MiddleEasternArt() {
       </div>
 
       {/* Indicators */}
-      {currentIndex !== null && artworks.length > 0 && (
+      {/* {currentIndex !== null && artworks.length > 0 && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {artworks.map((_, index) => (
             <div
@@ -210,7 +210,7 @@ export default function MiddleEasternArt() {
             />
           ))}
         </div>
-      )}
+      )} */}
 
       {/* Contact Modal */}
       <ContactModal 

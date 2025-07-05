@@ -8,7 +8,7 @@ import ContactModal from '@/app/components/ContactModal';
 
 const API_URL = "/api/graffiti-street-art";
 
-export default function GraffitiAndStreetArtCarousel() {
+export default function GraffitiAndStreetArtCarousel() {  
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(null);
@@ -195,7 +195,7 @@ export default function GraffitiAndStreetArtCarousel() {
       </div>
 
       {/* Indicators */}
-      {currentIndex !== null && artworks.length > 0 && (
+      {/* {currentIndex !== null && artworks.length > 0 && (
         <div className="hidden sm:flex justify-center mt-6 space-x-2">
           {artworks.map((_, index) => (
             <div
@@ -207,7 +207,7 @@ export default function GraffitiAndStreetArtCarousel() {
             />
           ))}
         </div>
-      )}
+      )} */}
 
       {/* Contact Modal */}
       <ContactModal 
