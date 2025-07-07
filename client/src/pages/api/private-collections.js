@@ -25,6 +25,7 @@ export default async function handler(req, res) {
     const institutions = await collection.find({}).toArray();
 
     const formattedInstitutions = institutions.map((institution) => ({
+      _id: institution._id, // Include MongoDB _id
       internalID: institution.internalID,
       slug: institution.slug,
       name: institution.name,

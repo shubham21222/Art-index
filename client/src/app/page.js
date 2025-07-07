@@ -38,7 +38,7 @@ export default function Home() {
           {/* <FeaturedShows /> */}
           {/* <CurrentFairs /> */}
           <FeaturedGalleries /> 
-          <TrendingArtists />
+          <TrendingArtists /> 
           <FeaturedArtworksShowcase />
           <ArtInsightsStories />
           <AuctionHighlights />

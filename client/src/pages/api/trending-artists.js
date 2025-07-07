@@ -29,6 +29,7 @@ export default async function handler(req, res) {
 
     // Map data to a format compatible with TrendingArtists component
     const formattedArtists = artists.map((artist) => ({ 
+      _id: artist._id, // Include MongoDB _id
       id: artist.internalID,
       slug: artist.slug,
       name: artist.name,

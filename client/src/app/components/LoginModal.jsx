@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { login, googleLogin } from "@/redux/features/authSlice";
+import { login, googleLogin, forgotPassword } from "@/redux/features/authSlice";
 import { toast } from "react-hot-toast";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import Image from "next/image";
@@ -15,6 +15,9 @@ export default function LoginModal({ isOpen, onClose, onOpenSignUp }) {
         password: '',
     });
     const [loading, setLoading] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+    const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
 
     useEffect(() => {
         // Check for Google auth token in URL
@@ -80,6 +83,27 @@ export default function LoginModal({ isOpen, onClose, onOpenSignUp }) {
 
     const initiateGoogleLogin = () => {
         window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/googleAuth/google`;
+    };
+
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        
+        if (!forgotPasswordEmail || !forgotPasswordEmail.includes('@')) {
+            toast.error('Please enter a valid email address');
+            return;
+        }
+
+        setForgotPasswordLoading(true);
+        try {
+            const result = await dispatch(forgotPassword(forgotPasswordEmail)).unwrap();
+            toast.success(result.message || 'Password reset email sent successfully!');
+            setShowForgotPassword(false);
+            setForgotPasswordEmail('');
+        } catch (error) {
+            toast.error(error.message || 'Failed to send reset email');
+        } finally {
+            setForgotPasswordLoading(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -150,7 +174,10 @@ export default function LoginModal({ isOpen, onClose, onOpenSignUp }) {
                                 Remember me
                             </label>
                         </div>
-                        <button className="text-sm text-black hover:underline font-medium">
+                        <button 
+                            onClick={() => setShowForgotPassword(true)}
+                            className="text-sm text-black hover:underline font-medium"
+                        >
                             Forgot password?
                         </button>
                     </div>
@@ -207,6 +234,75 @@ export default function LoginModal({ isOpen, onClose, onOpenSignUp }) {
                     </button>
                 </p>
             </div>
+
+            {/* Forgot Password Modal */}
+            {showForgotPassword && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[400]">
+                    <div className="bg-white rounded-2xl p-8 w-full max-w-[420px] relative shadow-2xl">
+                        <button
+                            onClick={() => {
+                                setShowForgotPassword(false);
+                                setForgotPasswordEmail('');
+                            }}
+                            className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <div className="flex flex-col items-center mb-8">
+                            <Image
+                                src={logo}
+                                alt="ArtIndex Logo"
+                                width={60}
+                                height={60}
+                                className="mb-4"
+                            />
+                            <h2 className="text-2xl font-bold text-gray-900">Reset Password</h2>
+                            <p className="text-gray-500 text-sm mt-2">Enter your email to receive reset instructions</p>
+                        </div>
+
+                        <form onSubmit={handleForgotPassword} className="space-y-5">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    value={forgotPasswordEmail}
+                                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                    placeholder="Enter your email"
+                                    disabled={forgotPasswordLoading}
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={forgotPasswordLoading}
+                                className="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50 font-medium"
+                            >
+                                {forgotPasswordLoading ? 'Sending...' : 'Send Reset Email'}
+                            </button>
+                        </form>
+
+                        <p className="mt-6 text-center text-sm text-gray-600">
+                            Remember your password?{' '}
+                            <button
+                                onClick={() => {
+                                    setShowForgotPassword(false);
+                                    setForgotPasswordEmail('');
+                                }}
+                                className="text-black hover:underline font-medium"
+                            >
+                                Back to login
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

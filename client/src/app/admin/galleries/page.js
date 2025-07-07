@@ -4,9 +4,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit, Trash2, MapPin, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Plus, Edit, Trash2, MapPin, Filter, ChevronLeft, ChevronRight, X, Save } from "lucide-react";
 import Image from "next/image";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import toast, { Toaster } from 'react-hot-toast';
 
 // Define all gallery categories and their API endpoints
 const GALLERY_CATEGORIES = [
@@ -64,6 +68,11 @@ export default function GalleriesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const observer = useRef();
   const lastItemRef = useCallback(node => {
     if (loading) return;
@@ -271,11 +280,156 @@ export default function GalleriesPage() {
     setCurrentPage(newPage);
   };
 
+  const handleEdit = (item) => {
+    setEditingItem({
+      ...item,
+      name: item.name || item.title,
+      artist: item.artist || item.artistNames,
+      gallery: item.partner?.name,
+      image: item.image?.src || item.image,
+      medium: item.medium || item.mediumType,
+      locations: item.locations || []
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDelete = (item) => {
+    setItemToDelete(item);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleUpdateItem = async (updatedData) => {
+    if (!editingItem) return;
+    
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/galleries/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: editingItem.internalID || editingItem._id,
+          category: editingItem.category,
+          updates: updatedData
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update item');
+      }
+
+      const result = await response.json();
+      
+      // Show success toast
+      toast.success('Item updated successfully!', {
+        duration: 3000,
+        position: 'top-right',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+        },
+      });
+      
+      // Update the item in the local state with proper image handling
+      const updatedGalleries = allGalleries.map(item => {
+        if (item.internalID === editingItem.internalID || item._id === editingItem._id) {
+          const updatedItem = { ...item, ...result.item };
+          // Ensure image is a string URL for Next.js Image component
+          if (updatedItem.image && typeof updatedItem.image === 'object' && updatedItem.image.src) {
+            updatedItem.image = updatedItem.image.src;
+          }
+          return updatedItem;
+        }
+        return item;
+      });
+      
+      setAllGalleries(updatedGalleries);
+      setIsEditDialogOpen(false);
+      setEditingItem(null);
+      
+      // Refresh the filtered galleries with proper image handling
+      const updatedFiltered = filteredGalleries.map(item => {
+        if (item.internalID === editingItem.internalID || item._id === editingItem._id) {
+          const updatedItem = { ...item, ...result.item };
+          // Ensure image is a string URL for Next.js Image component
+          if (updatedItem.image && typeof updatedItem.image === 'object' && updatedItem.image.src) {
+            updatedItem.image = updatedItem.image.src;
+          }
+          return updatedItem;
+        }
+        return item;
+      });
+      setFilteredGalleries(updatedFiltered);
+      
+    } catch (error) {
+      console.error('Error updating item:', error);
+      alert('Failed to update item. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteItem = async () => {
+    if (!itemToDelete) return;
+    
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/galleries/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: itemToDelete.internalID || itemToDelete._id,
+          category: itemToDelete.category
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete item');
+      }
+
+      const result = await response.json();
+      
+      // Show success toast
+      toast.success('Item deleted successfully!', {
+        duration: 3000,
+        position: 'top-right',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+        },
+      });
+      
+      // Remove the item from local state
+      const updatedGalleries = allGalleries.filter(item => 
+        item.internalID !== itemToDelete.internalID && item._id !== itemToDelete._id
+      );
+      setAllGalleries(updatedGalleries);
+      
+      const updatedFiltered = filteredGalleries.filter(item => 
+        item.internalID !== itemToDelete.internalID && item._id !== itemToDelete._id
+      );
+      setFilteredGalleries(updatedFiltered);
+      
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
+      
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert('Failed to delete item. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const totalPages = Math.ceil(filteredGalleries.length / ITEMS_PER_PAGE);
   const displayedItems = galleries.slice(0, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-6">
+      <Toaster />
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-white">Galleries & Museums</h1>
         <Button className="bg-white text-black hover:bg-zinc-200">
@@ -348,10 +502,20 @@ export default function GalleriesPage() {
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                   <div className="absolute top-2 right-2 flex gap-2">
-                    <Button size="icon" variant="secondary" className="bg-white/90 hover:bg-white">
+                    <Button 
+                      size="icon" 
+                      variant="secondary" 
+                      className="bg-white/90 hover:bg-white"
+                      onClick={() => handleEdit(item)}
+                    >
                       <Edit className="w-4 h-4 text-black" />
                     </Button>
-                    <Button size="icon" variant="secondary" className="bg-white/90 hover:bg-white">
+                    <Button 
+                      size="icon" 
+                      variant="secondary" 
+                      className="bg-white/90 hover:bg-white"
+                      onClick={() => handleDelete(item)}
+                    >
                       <Trash2 className="w-4 h-4 text-black" />
                     </Button>
                   </div>
@@ -438,6 +602,175 @@ export default function GalleriesPage() {
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-zinc-800 border-t-white"></div>
         </div>
       )}
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">Edit Item</DialogTitle>
+          </DialogHeader>
+          {editingItem && (
+            <EditItemForm 
+              item={editingItem} 
+              onSave={handleUpdateItem} 
+              onCancel={() => setIsEditDialogOpen(false)}
+              isSubmitting={isSubmitting}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-red-400">Confirm Delete</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-zinc-300">
+              Are you sure you want to delete &quot;{itemToDelete?.name || itemToDelete?.title}&quot;? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsDeleteDialogOpen(false)}
+                className="border-zinc-700 text-white hover:bg-zinc-800"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleDeleteItem}
+                disabled={isSubmitting}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isSubmitting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+// Edit Item Form Component
+function EditItemForm({ item, onSave, onCancel, isSubmitting }) {
+  const [formData, setFormData] = useState({
+    name: item.name || item.title || '',
+    artist: item.artist || item.artistNames || '',
+    gallery: item.gallery || item.partner?.name || '',
+    image: item.image || '',
+    medium: item.medium || item.mediumType || '',
+    date: item.date || '',
+    saleMessage: item.saleMessage || '',
+    locations: item.locations || []
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  const handleChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="name" className="text-white">Name/Title</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => handleChange('name', e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-white"
+            required
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="artist" className="text-white">Artist</Label>
+          <Input
+            id="artist"
+            value={formData.artist}
+            onChange={(e) => handleChange('artist', e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-white"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="gallery" className="text-white">Gallery/Partner</Label>
+          <Input
+            id="gallery"
+            value={formData.gallery}
+            onChange={(e) => handleChange('gallery', e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-white"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="medium" className="text-white">Medium</Label>
+          <Input
+            id="medium"
+            value={formData.medium}
+            onChange={(e) => handleChange('medium', e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-white"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="date" className="text-white">Date</Label>
+          <Input
+            id="date"
+            value={formData.date}
+            onChange={(e) => handleChange('date', e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-white"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="saleMessage" className="text-white">Sale Message</Label>
+          <Input
+            id="saleMessage"
+            value={formData.saleMessage}
+            onChange={(e) => handleChange('saleMessage', e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-white"
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="image" className="text-white">Image URL</Label>
+        <Input
+          id="image"
+          value={formData.image}
+          onChange={(e) => handleChange('image', e.target.value)}
+          className="bg-zinc-800 border-zinc-700 text-white"
+          placeholder="https://example.com/image.jpg"
+        />
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          className="border-zinc-700 text-white hover:bg-zinc-800"
+        >
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </form>
   );
 } 

@@ -30,7 +30,7 @@ const generateResetPasswordToken = () => {
 
 // Register User //
 export const register = async (req, res , next) => {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
     try {
 
         const existingUser = await User.findOne({ email });
@@ -38,32 +38,137 @@ export const register = async (req, res , next) => {
             return badRequest(res, 'User already exists');
         }
 
-        if(!email || !password){
-            return badRequest(res, 'Please provide an email and password');
+        if(!email || !password || !name){
+            return badRequest(res, 'Please provide name, email and password');
         }
 
-        // Generate reset password token and set expiry
-        const resetToken = generateResetPasswordToken();
-        const passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+        // Generate verification token
+        const verificationToken = generateResetPasswordToken();
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
 
         const userData = {
             email,
-            name: req.body.name,
-            role: req.body.role,
-            passwordResetToken: resetToken,
-            passwordResetExpires: passwordResetExpires,
+            name: name,
+            role: req.body.role || "USER",
+            passwordResetToken: verificationToken,
+            passwordResetExpires: verificationExpires,
         }
 
         if(password){
             userData.password = password;
         }
 
-        // create a new User //
+        // Create the new user
+        const newUser = await User.create(userData);
 
-            // Create the new user
-          const newUser = await User.create(userData);
-        sendToken(newUser, 201, res);
+        // Send verification email
+        const verificationUrl = `${req.protocol}://localhost:3000/verify-email/${verificationToken}`;
+        
+        const message = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: white;
+                    border-radius: 10px;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                }
+                .header {
+                    background-color: #000;
+                    color: white;
+                    padding: 20px;
+                    text-align: center;
+                    border-radius: 10px 10px 0 0;
+                }
+                .content {
+                    padding: 30px;
+                    line-height: 1.6;
+                }
+                .button {
+                    display: inline-block;
+                    padding: 12px 30px;
+                    background-color: #000;
+                    color: white !important;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    margin: 20px 0;
+                }
+                .footer {
+                    background-color: #f8f8f8;
+                    padding: 20px;
+                    text-align: center;
+                    border-radius: 0 0 10px 10px;
+                    color: #666;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Welcome to ArtIndex!</h1>
+                </div>
+                <div class="content">
+                    <h2>Hello ${name},</h2>
+                    <p>Thank you for registering with ArtIndex. To complete your registration and verify your email address, please click the button below:</p>
+                    
+                    <div style="text-align: center;">
+                        <a class="button" href="${verificationUrl}">Verify Your Email</a>
+                    </div>
+                    
+                    <p>This verification link will expire in <strong>24 hours</strong> for security reasons.</p>
+                    
+                    <p>If you did not create an account with ArtIndex, you can safely ignore this email.</p>
+                </div>
+                <div class="footer">
+                    <p>Best regards,<br>The ArtIndex Team</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
 
+        try {
+            await sendEmail({
+                to: email,
+                subject: "Verify Your Email - ArtIndex",
+                html: message,
+            });
+
+            return success(res, "Registration successful! Please check your email to verify your account.", {
+                success: true,
+                user: {
+                    _id: newUser._id,
+                    name: newUser.name,
+                    email: newUser.email,
+                    role: newUser.role,
+                },
+                message: "Please check your email to verify your account"
+            });
+        } catch (error) {
+            // If email fails, still create user but inform about email issue
+            console.error('Email sending failed:', error);
+            return success(res, "Registration successful! However, verification email could not be sent. Please contact support.", {
+                success: true,
+                user: {
+                    _id: newUser._id,
+                    name: newUser.name,
+                    email: newUser.email,
+                    role: newUser.role,
+                },
+                message: "Registration successful but verification email failed"
+            });
+        }
 
     } catch (error) {
         next(error);
@@ -266,8 +371,7 @@ export const forgotPassword = async (req, res) => {
         await user.save({ validateBeforeSave: false });
 
         // Construct reset URL
-        // const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auth/resetpassword/${resetToken}`;
-        const resetUrl = `https://bid.nyelizabeth.com/reset-password/${resetToken}`;
+        const resetUrl = `${req.protocol}://localhost:3000/reset-password/${resetToken}`;
 
         // Email Template
         const message = `
@@ -279,55 +383,65 @@ export const forgotPassword = async (req, res) => {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f4f4f4;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         .header {
-            background-color: #f5f5f5;
-            padding: 10px;
-            border-radius: 5px 5px 0 0;
+            background-color: #000;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
         }
         .content {
-            padding: 20px;
+            padding: 30px;
+            line-height: 1.6;
         }
         .button {
             display: inline-block;
-            padding: 10px 20px;
-            background-color: #4CAF50;
+            padding: 12px 30px;
+            background-color: #000;
             color: white !important;
             text-decoration: none;
             border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
         }
         .footer {
-            background-color: #f5f5f5;
-            padding: 10px;
-            border-top: 1px solid #e0e0e0;
-            border-radius: 0 0 5px 5px;
+            background-color: #f8f8f8;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h2>Hello ${user.name},</h2>
+            <h1>Password Reset Request</h1>
         </div>
         <div class="content">
-            <p>We have received a request to reset your password for your account on <strong>Event Panel</strong>. If you did not request this change, you can ignore this email and your password will not be changed.</p>
+            <h2>Hello ${user.name},</h2>
+            <p>We have received a request to reset your password for your account on <strong>ArtIndex</strong>. If you did not request this change, you can safely ignore this email and your password will not be changed.</p>
             
-            <p>To reset your password, please click on the following link and follow the instructions:</p>
+            <p>To reset your password, please click the button below and follow the instructions:</p>
             
-            <p><a class="button" href="${resetUrl}">Reset Password</a></p>
+            <div style="text-align: center;">
+                <a class="button" href="${resetUrl}">Reset Password</a>
+            </div>
             
             <p>This link will expire in <strong>15 minutes</strong> for security reasons. If you need to reset your password after this time, please make another request.</p>
         </div>
         <div class="footer">
-            <h3>Thank you,</h3>
-            <h3> Dear Team </h3>
+            <p>Best regards,<br>The ArtIndex Team</p>
         </div>
     </div>
 </body>
@@ -338,7 +452,7 @@ export const forgotPassword = async (req, res) => {
         try {
             await sendEmail({
                 to: user.email,
-                subject: "Password Reset Request",
+                subject: "Password Reset Request - ArtIndex",
                 html: message, // Sending as HTML
             });
 
@@ -705,20 +819,24 @@ export const verifyEmail = async (req, res) => {
             return badRequest(res, "Invalid verification token");
         }
 
-        // Find user by verification token (stored in activeToken field)
-        const user = await User.findOne({ activeToken: token });
+        // Find user by verification token (stored in passwordResetToken field)
+        const user = await User.findOne({ 
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: Date.now() }
+        });
 
         if (!user) {
             return badRequest(res, "Invalid verification token or token expired");
         }
 
         // Clear the verification token and mark email as verified
-        user.activeToken = null;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
         // You might want to add an emailVerified field to the User model
         // user.emailVerified = true;
         await user.save();
 
-        return success(res, "Email verified successfully. You can now create your password.");
+        return success(res, "Email verified successfully. You can now log in to your account.");
     } catch (error) {
         return unknownError(res, error.message);
     }

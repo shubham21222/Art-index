@@ -38,6 +38,7 @@ export default async function handler(req, res) {
       const height = Math.round(width / aspectRatio);
       
       return {
+        _id: artwork._id, // Include MongoDB _id
         internalID: artwork.internalID || artwork._id?.toString(),
         slug: artwork.slug || '',
         href: artwork.href || '',

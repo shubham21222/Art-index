@@ -42,11 +42,28 @@ import { success,
           
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
   
-          console.log("Auth middleware debug:", { decoded, token });
+          console.log("Auth middleware debug:", { decoded, token, userId: decoded.id || decoded._id });
           
-          const user = await User.findById(decoded._id);
+          // Check if the decoded ID is valid (JWT contains 'id', not '_id')
+          const userId = decoded.id || decoded._id;
+          if (!userId) {
+              console.log("No id found in decoded token");
+              return badRequest(res, "Invalid token format");
+          }
+          
+          // Test database connection by counting users
+          const totalUsers = await User.countDocuments();
+          console.log("Total users in database:", totalUsers);
+          
+          const user = await User.findById(userId);
+          console.log("User lookup result:", { found: !!user, userId: userId });
+          
           if (!user) {
-              return sendResponse(res, notFound, "No user found with this ID");
+              console.log("No user found for ID:", userId);
+              // Let's also try to find any user to see if the database is working
+              const anyUser = await User.findOne();
+              console.log("Any user in database:", anyUser ? { id: anyUser._id, email: anyUser.email } : "No users found");
+              return notFound(res, "No user found with this ID");
           }
   
           console.log("Auth debug:", {

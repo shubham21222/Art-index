@@ -38,6 +38,7 @@ export default async function handler(req, res) {
       .toArray();
 
     const formattedArtworks = artworks.map((artwork) => ({
+      _id: artwork._id, // Include MongoDB _id
       internalID: artwork.internalID,
       slug: artwork.slug,
       title: artwork.title,

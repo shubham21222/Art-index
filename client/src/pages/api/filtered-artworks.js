@@ -47,6 +47,7 @@ export default async function handler(req, res) {
 
     // Map data to a format compatible with ArtGallery component
     const formattedArtworks = artworks.map((artwork) => ({
+      _id: artwork._id, // Include MongoDB _id
       id: artwork.id,
       slug: artwork.slug,
       image: artwork.image?.url || "/images/placeholder.jpg",

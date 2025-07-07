@@ -25,8 +25,8 @@ export default function Header() {
     
     // Debug logging
     useEffect(() => {
-        console.log('Header state:', { isAuthenticated, user, role });
-    }, [isAuthenticated, user, role]);
+        console.log('Header state:', { isAuthenticated, user, role, loading });
+    }, [isAuthenticated, user, role, loading]);
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
@@ -59,7 +59,15 @@ export default function Header() {
         if (mounted && !isAuthenticated) {
             const token = localStorage.getItem('token');
             if (token) {
-                dispatch(getCurrentUser());
+                console.log('Fetching current user with token:', token);
+                dispatch(getCurrentUser()).then((result) => {
+                    if (result.error) {
+                        console.log('getCurrentUser failed:', result.error);
+                        // Clear invalid token
+                        localStorage.removeItem('token');
+                        Cookies.remove('token');
+                    }
+                });
             }
         }
     }, [mounted, isAuthenticated, dispatch]);
@@ -136,11 +144,21 @@ export default function Header() {
         if (!isAuthenticated) return null;
         
         // Show loading state if user data is being fetched
-        if (loading || !user) {
+        if (loading) {
             return (
                 <Button variant="ghost" className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-100/50">
                     <User className="w-5 h-5" />
                     <span className="text-sm">Loading...</span>
+                </Button>
+            );
+        }
+        
+        // If not loading but no user data, show a fallback
+        if (!user) {
+            return (
+                <Button variant="ghost" className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-100/50">
+                    <User className="w-5 h-5" />
+                    <span className="text-sm">User</span>
                 </Button>
             );
         }
@@ -279,7 +297,7 @@ export default function Header() {
                         <div className="space-y-2 pt-4">
                             {isAuthenticated ? (
                                 <>
-                                    {loading || !user ? (
+                                    {loading ? (
                                         <div className="flex items-center space-x-2 py-2">
                                             <User className="w-5 h-5" />
                                             <span className="text-sm">Loading...</span>
@@ -287,7 +305,7 @@ export default function Header() {
                                     ) : (
                                         <div className="flex items-center space-x-2 py-2">
                                             <User className="w-5 h-5" />
-                                            <span className="text-sm">{user.name || 'User'}</span>
+                                            <span className="text-sm">{user?.name || 'User'}</span>
                                         </div>
                                     )}
                                     {(role === 'GALLERY' || role === 'GALLERIES' || role === 'AUCTIONS' || role === 'FAIRS' || role === 'MUSEUMS' || role === 'ADMIN') && (

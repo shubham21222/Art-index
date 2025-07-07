@@ -26,6 +26,7 @@ const ALGOLIA_CONFIG = {
 
 export default function ArtistsPage() {
   const [artworks, setArtworks] = useState([]);
+  const [allArtworks, setAllArtworks] = useState([]); // Store all artworks for filter options
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -36,10 +37,10 @@ export default function ArtistsPage() {
   const [selectedMedium, setSelectedMedium] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
 
-  // Get unique values for filters
-  const categories = [...new Set(artworks.map(art => art.category).filter(Boolean))].sort();
-  const styles = [...new Set(artworks.flatMap(art => art.styles || []).filter(Boolean))].sort();
-  const mediums = [...new Set(artworks.flatMap(art => art.mediums || []).filter(Boolean))].sort();
+  // Get unique values for filters from all artworks (not just current filtered results)
+  const categories = [...new Set(allArtworks.map(art => art.category).filter(Boolean))].sort();
+  const styles = [...new Set(allArtworks.flatMap(art => art.styles || []).filter(Boolean))].sort();
+  const mediums = [...new Set(allArtworks.flatMap(art => art.mediums || []).filter(Boolean))].sort();
 
   // Fetch artworks from Algolia API via proxy
   const fetchArtworks = useCallback(async (pageNum = 0, append = false) => {
@@ -125,10 +126,50 @@ export default function ArtistsPage() {
     }
   }, [searchTerm, selectedCategory, selectedStyle, selectedMedium]);
 
+  // Fetch all artworks for filter options (without any filters)
+  const fetchAllArtworksForFilters = useCallback(async () => {
+    try {
+      const payload = {
+        analytics: true,
+        analyticsTags: ["web"],
+        clickAnalytics: true,
+        enablePersonalization: false,
+        facetingAfterDistinct: true,
+        facets: "*",
+        filters: "(has_prints:\"true\")",
+        hitsPerPage: 1000, // Get a large number to have all categories
+        page: 0,
+        query: "",
+        userToken: "vc_eond94ta93"
+      };
+
+      const response = await fetch('/api/algolia', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.hits) {
+        setAllArtworks(data.hits);
+      }
+    } catch (error) {
+      console.error('Error fetching all artworks for filters:', error);
+    }
+  }, []);
+
   // Initial load
   useEffect(() => {
+    fetchAllArtworksForFilters(); // Load all artworks for filter options
     fetchArtworks(0, false);
-  }, [fetchArtworks]);
+  }, [fetchAllArtworksForFilters, fetchArtworks]);
 
   // Infinite scroll handler
   const handleScroll = useCallback(() => {
@@ -219,7 +260,7 @@ export default function ArtistsPage() {
           <Card className="mb-8">
             <CardContent className="p-6 space-y-4">
               {/* Search Bar */}
-              <div className="relative">
+              <div className="relative z-30">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
                   type="text"
@@ -231,12 +272,12 @@ export default function ArtistsPage() {
               </div>
 
               {/* Filters */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative z-40">
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger>
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-50">
                     <SelectItem value="all">All Categories</SelectItem>
                     {categories.map(category => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
@@ -248,7 +289,7 @@ export default function ArtistsPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="Style" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-50">
                     <SelectItem value="all">All Styles</SelectItem>
                     {styles.map(style => (
                       <SelectItem key={style} value={style}>{style}</SelectItem>
@@ -260,7 +301,7 @@ export default function ArtistsPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="Medium" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-50">
                     <SelectItem value="all">All Mediums</SelectItem>
                     {mediums.map(medium => (
                       <SelectItem key={medium} value={medium}>{medium}</SelectItem>
@@ -268,21 +309,12 @@ export default function ArtistsPage() {
                   </SelectContent>
                 </Select>
 
-                {/* <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="relevance">Relevance</SelectItem>
-                    <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="popular">Most Popular</SelectItem>
-                  </SelectContent>
-                </Select> */}
-
                 <Button variant="outline" onClick={clearFilters}>
                   Clear Filters
                 </Button>
               </div>
+
+
 
               {/* Results Count */}
               <div className="text-center text-sm text-gray-600">

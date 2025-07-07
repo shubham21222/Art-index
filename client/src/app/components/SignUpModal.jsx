@@ -83,9 +83,10 @@ export default function SignUpModal({ isOpen, onClose, onOpenLogin }) {
                 password: formData.password
             })).unwrap();
             
-            toast.success(result.message || 'Registration successful!');
+            toast.success(result.message || 'Registration successful! Please check your email to verify your account.');
             onClose();
         } catch (error) {
+            console.log('SignUp error:', error);
             toast.error(error.message || 'Registration failed');
         } finally {
             setLoading(false);

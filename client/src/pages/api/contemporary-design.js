@@ -25,6 +25,7 @@ export default async function handler(req, res) {
     const galleries = await collection.find({}).toArray();
 
     const formattedGalleries = galleries.map((gallery) => ({
+      _id: gallery._id, // Include MongoDB _id
       internalID: gallery.internalID,
       slug: gallery.slug,
       name: gallery.name,

@@ -14,10 +14,16 @@ export default function AuctionCarousel() {
     const [currentIndex, setCurrentIndex] = useState(null); // Initialize as null, set to middle after data loads
     const [selectedArtwork, setSelectedArtwork] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [imageErrors, setImageErrors] = useState(new Set());
 
     // Fetch data from your MongoDB API
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoading(true);
+            setError(null);
+            
             try {
                 const response = await fetch(API_URL, {
                     method: "GET", // Your API uses GET by default
@@ -26,12 +32,32 @@ export default function AuctionCarousel() {
                     },
                 });
 
-                const { auctionLots } = await response.json();
-                setAuctionData(auctionLots || []);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const fetchedAuctionLots = data.auctionLots || [];
+                
+                // Validate and filter auction lots with required fields
+                const validAuctionLots = fetchedAuctionLots.filter(lot => 
+                    lot && 
+                    lot.internalID && 
+                    lot.title && 
+                    lot.image?.src
+                );
+
+                setAuctionData(validAuctionLots);
                 // Set initial index to the middle of the array
-                setCurrentIndex(Math.floor((auctionLots || []).length / 2));
+                if (validAuctionLots.length > 0) {
+                    setCurrentIndex(Math.floor(validAuctionLots.length / 2));
+                }
             } catch (error) {
                 console.error("Error fetching data from MongoDB API:", error);
+                setError("Failed to load auction items. Please try again later.");
+                setAuctionData([]);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -40,11 +66,18 @@ export default function AuctionCarousel() {
 
     // Navigation handlers
     const handlePrev = () => {
+        if (auctionData.length === 0) return;
         setCurrentIndex((prev) => (prev === 0 ? auctionData.length - 1 : prev - 1));
     };
 
     const handleNext = () => {
+        if (auctionData.length === 0) return;
         setCurrentIndex((prev) => (prev === auctionData.length - 1 ? 0 : prev + 1));
+    };
+
+    // Handle image load errors
+    const handleImageError = (lotId) => {
+        setImageErrors(prev => new Set(prev).add(lotId));
     };
 
     // Calculate 3D positions for each slide
@@ -98,6 +131,113 @@ export default function AuctionCarousel() {
         return numericPrice ? `$${(numericPrice * 1.1).toLocaleString()}` : null;
     };
 
+    // Show loading state
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
+                <div className="flex flex-col items-center justify-between w-full mb-6">
+                    <div className="text-center">
+                        <h2 className="text-3xl font-bold text-gray-900">Masters</h2>
+                        <p className="text-gray-900 text-lg mt-2">
+                            Discover top picks from ongoing auctions.
+                        </p>
+                    </div>
+                    <Link
+                        href="/collect"
+                        className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
+                    >
+                        View All Auctions
+                    </Link>
+                </div>
+
+                <div className="relative h-[400px] w-full perspective-[1000px] overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <div
+                                key={index}
+                                style={getSlideStyle(index)}
+                                className="w-[350px] h-[300px] rounded-md overflow-hidden"
+                            >
+                                <Skeleton className="w-full h-full rounded-md" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
+                <div className="flex flex-col items-center justify-between w-full mb-6">
+                    <div className="text-center">
+                        <h2 className="text-3xl font-bold text-gray-900">Masters</h2>
+                        <p className="text-gray-900 text-lg mt-2">
+                            Discover top picks from ongoing auctions.
+                        </p>
+                    </div>
+                    <Link
+                        href="/collect"
+                        className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
+                    >
+                        View All Auctions
+                    </Link>
+                </div>
+
+                <div className="flex flex-col items-center justify-center h-[400px] text-center">
+                    <div className="text-gray-500 mb-4">
+                        <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <p className="text-lg font-medium">{error}</p>
+                        <p className="text-sm mt-2">Please check your connection and try again.</p>
+                    </div>
+                    <Button 
+                        onClick={() => window.location.reload()} 
+                        variant="outline"
+                        className="mt-4"
+                    >
+                        Retry
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    // Show empty state
+    if (auctionData.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
+                <div className="flex flex-col items-center justify-between w-full mb-6">
+                    <div className="text-center">
+                        <h2 className="text-3xl font-bold text-gray-900">Masters</h2>
+                        <p className="text-gray-900 text-lg mt-2">
+                            Discover top picks from ongoing auctions.
+                        </p>
+                    </div>
+                    <Link
+                        href="/collect"
+                        className="text-black text-sm font-medium hover:underline transition-colors duration-300 mt-4 md:mt-0"
+                    >
+                        View All Auctions
+                    </Link>
+                </div>
+
+                <div className="flex flex-col items-center justify-center h-[400px] text-center">
+                    <div className="text-gray-500 mb-4">
+                        <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <p className="text-lg font-medium">No auction items available</p>
+                        <p className="text-sm mt-2">Check back later for new auction items.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
             {/* Header Section */}
@@ -119,8 +259,7 @@ export default function AuctionCarousel() {
             {/* 3D Carousel */}
             <div className="relative h-[400px] w-full perspective-[1000px] overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center">
-                    {auctionData.length > 0 ? (
-                        auctionData.map((item, index) => (
+                    {auctionData.map((item, index) => (
                             <div
                                 key={item.internalID}
                                 style={getSlideStyle(index)}
@@ -130,11 +269,13 @@ export default function AuctionCarousel() {
                                     {/* Image */}
                                     <div className="relative w-full h-full">
                                         <Image
-                                            src={item.image?.src || "/placeholder.svg"}
+                                        src={imageErrors.has(item.internalID) ? "/placeholder.jpeg" : (item.image?.src || "/placeholder.jpeg")}
                                             alt={item.title}
                                             width={350}
                                             height={item.image?.height || 240}
                                             className="object-cover w-full h-full rounded-md shadow-md transition-transform duration-500 group-hover:scale-110"
+                                        onError={() => handleImageError(item.internalID)}
+                                        priority={index === currentIndex}
                                         />
                                         {/* Gradient Overlay */}
                                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
@@ -171,18 +312,7 @@ export default function AuctionCarousel() {
                                     </div>
                                 </Link>
                             </div>
-                        ))
-                    ) : (
-                        Array.from({ length: 6 }).map((_, index) => (
-                            <div
-                                key={index}
-                                style={getSlideStyle(index)}
-                                className="w-[350px] h-[300px] rounded-md overflow-hidden"
-                            >
-                                <Skeleton className="w-full h-full rounded-md" />
-                            </div>
-                        ))
-                    )}
+                    ))}
                 </div>
 
                 {/* Navigation Buttons */}
@@ -229,21 +359,6 @@ export default function AuctionCarousel() {
                     </>
                 )}
             </div>
-
-            {/* Indicators */}
-            {/* {currentIndex !== null && (
-                <div className="hidden sm:flex justify-center mt-6 space-x-2">
-                    {(auctionData.length > 0 ? auctionData : Array.from({ length: 6 })).map((_, index) => (
-                        <div
-                            key={index}
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
-                            }`}
-                            onClick={() => setCurrentIndex(index)}
-                        />
-                    ))}
-                </div>
-            )} */}
 
             {/* Contact Modal */}
             <ContactModal 

@@ -35,6 +35,7 @@ export default async function handler(req, res) {
     const endCursor = shows.length > 0 ? shows[shows.length - 1]._id : null;
 
     const formattedShows = shows.map((show) => ({
+      _id: show._id, // Include MongoDB _id
       id: show.id,
       name: show.name,
       href: show.href,
