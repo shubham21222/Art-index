@@ -22,7 +22,6 @@ const page = () => {
     {/* <NonprofitOrganizations /> */}
     <ArtistEstates /> 
     <ModernAndContemporaryArt />
-   
     <HistoricalArt />
     <PrivateCollections />
     <OutdoorArt />

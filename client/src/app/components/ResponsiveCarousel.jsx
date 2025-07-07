@@ -13,6 +13,7 @@ const Carousel = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -34,35 +35,72 @@ const Carousel = () => {
 
   const slides = [
     {
-      image: "https://d7hftxdivxxvm.cloudfront.net?height=500&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2F6pzQaRA5WB8-XtHWuAW4RA%2Fmain.jpg&width=1270",
+      image: "https://d7hftxdivxxvm.cloudfront.net?height=800&quality=85&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2F6pzQaRA5WB8-XtHWuAW4RA%2Fmain.jpg&width=1600",
       title: "FOG Design+Art",
       description: "San Francisco's annual fair for art and design is back for its 11th edition.",
       buttonText: "Explore Fair",
     },
     {
-      image: "https://d7hftxdivxxvm.cloudfront.net?height=500&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FRYLtSPyYuHuL8P6xVaxK0g%2Fmain.jpg&width=1270",
+      image: "https://d7hftxdivxxvm.cloudfront.net?height=800&quality=85&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FRYLtSPyYuHuL8P6xVaxK0g%2Fmain.jpg&width=1600",
       title: "Modern Art Fair",
       description: "A unique exhibition featuring works from modern artists.",
       buttonText: "Learn More",
     },
     {
-      image: "https://d7hftxdivxxvm.cloudfront.net?height=500&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FPa-fblR2j-r-B_eSfm4ang%2Fmain.jpg&width=1270",
+      image: "https://d7hftxdivxxvm.cloudfront.net?height=800&quality=85&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FPa-fblR2j-r-B_eSfm4ang%2Fmain.jpg&width=1600",
       title: "Contemporary Showcase",
       description: "Explore the finest contemporary art pieces.",
       buttonText: "Discover More",
     },
   ];
 
+  // Preload first image for better LCP
+  useEffect(() => {
+    if (mounted) {
+      const img = new window.Image();
+      img.onload = () => setImagesLoaded(true);
+      img.src = slides[0].image;
+    }
+  }, [mounted]);
+
   if (!mounted) {
-    return null;
+    return (
+      <div className="relative w-full h-[60vh] sm:h-[50vh] md:h-[70vh] lg:h-[80vh] bg-gradient-to-br from-gray-900 to-gray-800 animate-pulse">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div 
-      className="relative  w-full h-[60vh] sm:h-[50vh] md:h-[70vh] lg:h-[80vh] bg-black overflow-hidden"
+      className="relative w-full h-[60vh] sm:h-[50vh] md:h-[70vh] lg:h-[80vh] bg-black overflow-hidden"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
+      {/* Preload critical images */}
+      <div className="hidden">
+        {slides.map((slide, index) => (
+          <link
+            key={index}
+            rel="preload"
+            as="image"
+            href={slide.image}
+            fetchPriority={index === 0 ? "high" : "auto"}
+          />
+        ))}
+      </div>
+
+      {/* Loading skeleton */}
+      {!imagesLoaded && (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800 animate-pulse">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      )}
+
       {/* Animated Background Gradient */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-cyan-900/20"
@@ -80,9 +118,9 @@ const Carousel = () => {
         }}
       />
 
-      {/* Animated Particles */}
+      {/* Animated Particles - Reduced for better performance */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-white/20 rounded-full"
@@ -143,9 +181,17 @@ const Carousel = () => {
                   src={slide.image}
                   alt={slide.title}
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+                  sizes="100vw"
                   className="object-cover"
                   priority={index === 0}
+                  quality={85}
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  onLoad={() => {
+                    if (index === 0) setImagesLoaded(true);
+                  }}
                 />
               </motion.div>
 

@@ -24,27 +24,55 @@ export default async function handler(req, res) {
 
     const institutions = await collection.find({}).toArray();
 
-    const formattedInstitutions = institutions.map((institution) => ({
-      _id: institution._id, // Include MongoDB _id
-      internalID: institution.internalID,
-      slug: institution.slug,
-      name: institution.name,
-      href: institution.href,
-      initials: institution.initials,
-      locations: institution.locations || [],
-      categories: institution.categories || [],
-      image: {
-        src: institution.profile?.image?.src || "/placeholder.svg",
-        srcSet: institution.profile?.image?.srcSet,
-        width: 445,
-        height: 334,
-      },
-      profile: {
-        avatar: institution.profile?.avatar,
-        icon: institution.profile?.icon,
-      },
-      type: institution.type,
-    }));
+    const formattedInstitutions = institutions.map((institution) => {
+      // Extract city from locations[0].city, or from contact.address, or fallback
+      let city = null;
+      if (institution.locations && institution.locations.length > 0 && institution.locations[0].city) {
+        city = institution.locations[0].city;
+      } else if (institution.contact && institution.contact.address) {
+        const parts = institution.contact.address.split(',').map(part => part.trim());
+        if (parts.length > 0) {
+          city = parts[0];
+        }
+      }
+      if (!city) city = 'Unknown';
+
+      // Keep country for display, but not for filtering
+      let country = null;
+      if (institution.locations && institution.locations.length > 0 && institution.locations[0].country) {
+        country = institution.locations[0].country;
+      } else if (institution.contact && institution.contact.address) {
+        const parts = institution.contact.address.split(',').map(part => part.trim());
+        if (parts.length > 1) {
+          country = parts[parts.length - 1];
+        }
+      }
+      if (!country) country = 'Unknown';
+
+      return {
+        _id: institution._id, // Include MongoDB _id
+        internalID: institution.internalID,
+        slug: institution.slug,
+        name: institution.name,
+        href: institution.href,
+        initials: institution.initials,
+        locations: institution.locations || [],
+        categories: institution.categories || [],
+        city, // Always include city
+        country, // Always include country
+        image: {
+          src: institution.profile?.image?.src || "/placeholder.svg",
+          srcSet: institution.profile?.image?.srcSet,
+          width: 445,
+          height: 334,
+        },
+        profile: {
+          avatar: institution.profile?.avatar,
+          icon: institution.profile?.icon,
+        },
+        type: institution.type,
+      };
+    });
 
     res.status(200).json({ institutions: formattedInstitutions });
   } catch (error) {

@@ -5,7 +5,7 @@ import logo from "../../../public/logo2.png";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-100 py-8">
+    <footer className="bg-gray-100 py-8 overflow-hidden">
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start text-center md:text-left">
           {/* Logo and Copyright */}
@@ -71,19 +71,19 @@ export default function Footer() {
           </div>
 
           {/* Newsletter Signup and Social Media */}
-          <div className="flex flex-col items-center md:items-start space-y-4">
+          <div className="flex flex-col items-center md:items-start space-y-4 w-full">
             <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
               Stay Connected
             </h3>
-            <form className="flex w-full max-w-xs">
+            <form className="flex w-full max-w-xs min-w-0">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gray-900"
+                className="flex-1 px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gray-900 min-w-0"
               />
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-r-md hover:bg-gray-800 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-r-md hover:bg-gray-800 transition-colors whitespace-nowrap"
               >
                 Sign Up
               </button>

@@ -10,13 +10,20 @@ export const config = {
 
 export default async function handler(req, res) {
   const uri = process.env.MONGODB_URI;
-  const dbName = "artworks_db2";
+  const dbName = "test";
 
   if (!uri || !dbName) {
     return res.status(500).json({ error: "Missing MongoDB configuration" });
   }
 
-  const { after, first = 50 } = req.query; // Support pagination with 'after' and 'first'
+  const { 
+    search, 
+    category, 
+    sortBy = "internalID",
+    sortOrder = "asc",
+    page = 1,
+    limit = 100
+  } = req.query;
 
   let client;
 
@@ -24,30 +31,53 @@ export default async function handler(req, res) {
     // Connect to MongoDB
     client = new MongoClient(uri);
     await client.connect();
-    const db = client.db("artworks_db2"); // Use the database from the Python script
-    const collection = db.collection("filtered_artworks");
+    const db = client.db("test");
+    const collection = db.collection("artworks");
 
-    // Build query for pagination
+    // Build query for filters
     let query = {};
-    if (after) {
-      query = { internalID: { $gt: after } }; // Use internalID for cursor-based pagination
+
+    // Search filter
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { 'artist.name': { $regex: search, $options: 'i' } },
+        { 'partner.name': { $regex: search, $options: 'i' } }
+      ];
     }
 
-    // Fetch artworks with limit
+    // Category filter - using the actual field from your data
+    if (category && category !== 'All Categories') {
+      query.category = { $regex: category, $options: 'i' };
+    }
+
+    // Build sort object
+    let sortObject = {};
+    if (sortBy === 'price') {
+      sortObject.saleMessage = sortOrder === 'desc' ? -1 : 1;
+    } else if (sortBy === 'date') {
+      sortObject.date = sortOrder === 'desc' ? -1 : 1;
+    } else {
+      sortObject.internalID = sortOrder === 'desc' ? -1 : 1;
+    }
+
+    // Calculate skip for pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Get total count for pagination info
+    const totalCount = await collection.countDocuments(query);
+
+    // Fetch artworks with pagination
     const artworks = await collection
       .find(query)
-      .sort({ internalID: 1 }) // Sort by internalID for consistent pagination
-      .limit(parseInt(first))
+      .sort(sortObject)
+      .skip(skip)
+      .limit(parseInt(limit))
       .toArray();
-
-    // Determine pagination info
-    const totalCount = await collection.countDocuments();
-    const hasNextPage = artworks.length === parseInt(first) && artworks[artworks.length - 1].internalID < totalCount;
-    const endCursor = artworks.length > 0 ? artworks[artworks.length - 1].internalID : null;
 
     // Map data to a format compatible with ArtGallery component
     const formattedArtworks = artworks.map((artwork) => ({
-      _id: artwork._id, // Include MongoDB _id
+      _id: artwork._id,
       id: artwork.id,
       slug: artwork.slug,
       image: artwork.image?.url || "/images/placeholder.jpg",
@@ -57,15 +87,25 @@ export default async function handler(req, res) {
       price: artwork.saleMessage || "Price on request",
       primaryLabel: artwork.collectorSignals?.primaryLabel || "Available",
       demandRank: artwork.marketPriceInsights?.demandRank || "N/A",
+      category: artwork.category,
+      medium: artwork.medium,
+      rarity: artwork.rarity,
+      year: artwork.date,
+      dimensions: artwork.dimensions,
     }));
+
+    // Calculate pagination info
+    const hasNextPage = skip + parseInt(limit) < totalCount;
+    const hasPreviousPage = parseInt(page) > 1;
 
     // Send formatted data as JSON with pagination info
     res.status(200).json({
       artworks: formattedArtworks,
-      pageInfo: {
-        hasNextPage,
-        endCursor,
-      },
+      totalCount,
+      currentPage: parseInt(page),
+      hasNextPage,
+      hasPreviousPage,
+      totalPages: Math.ceil(totalCount / parseInt(limit))
     });
   } catch (error) {
     console.error("Error fetching filtered artworks from MongoDB:", error);

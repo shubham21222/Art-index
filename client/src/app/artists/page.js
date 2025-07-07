@@ -36,11 +36,40 @@ export default function ArtistsPage() {
   const [selectedStyle, setSelectedStyle] = useState('all');
   const [selectedMedium, setSelectedMedium] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
+  const [imageErrors, setImageErrors] = useState(new Set());
 
   // Get unique values for filters from all artworks (not just current filtered results)
   const categories = [...new Set(allArtworks.map(art => art.category).filter(Boolean))].sort();
   const styles = [...new Set(allArtworks.flatMap(art => art.styles || []).filter(Boolean))].sort();
   const mediums = [...new Set(allArtworks.flatMap(art => art.mediums || []).filter(Boolean))].sort();
+
+  // Helper function to get image URL from artwork data
+  const getImageUrl = (artwork) => {
+    // Try different possible image properties
+    if (artwork.image_url) return artwork.image_url;
+    if (artwork.imageUrl) return artwork.imageUrl;
+    if (artwork.image?.src) return artwork.image.src;
+    if (artwork.image?.resized?.src) return artwork.image.resized.src;
+    if (artwork.image?.url) return artwork.image.url;
+    
+    // Return placeholder if no image found
+    return '/placeholder.svg';
+  };
+
+  // Helper function to get artwork title
+  const getArtworkTitle = (artwork) => {
+    return artwork.artwork_title || artwork.title || artwork.name || 'Untitled Artwork';
+  };
+
+  // Helper function to get artist name
+  const getArtistName = (artwork) => {
+    return artwork.full_name || artwork.artist || artwork.artistNames || 'Unknown Artist';
+  };
+
+  // Handle image error
+  const handleImageError = (artworkId) => {
+    setImageErrors(prev => new Set(prev).add(artworkId));
+  };
 
   // Fetch artworks from Algolia API via proxy
   const fetchArtworks = useCallback(async (pageNum = 0, append = false) => {
@@ -314,8 +343,6 @@ export default function ArtistsPage() {
                 </Button>
               </div>
 
-
-
               {/* Results Count */}
               <div className="text-center text-sm text-gray-600">
                 Showing {artworks.length} artworks
@@ -341,102 +368,85 @@ export default function ArtistsPage() {
           ) : artworks.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {artworks.map((artwork) => (
-                  <Link href={`/art/${artwork.slug || `artwork-${artwork.artId}`}`} key={artwork.objectID}>
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
-                      {/* Artwork Image */}
-                      <div className="relative w-full h-64 overflow-hidden">
-                        <Image
-                          src={artwork.image_url || '/placeholder.jpeg'}
-                          alt={artwork.artwork_title || 'Artwork'}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            e.target.src = '/placeholder.jpeg';
-                          }}
-                        />
-                        {/* Overlay with quick info */}
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                          <Eye className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-                        {/* Price badge */}
-                        {/* <div className="absolute top-2 right-2">
-                          <Badge className="bg-white text-gray-900 font-semibold">
-                            {formatPrice(artwork.geo_prices)}
-                          </Badge>
-                        </div> */}
-                        {/* Size badge */}
-                        <div className="absolute top-2 left-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {artwork.width || 'N/A'}×{artwork.height || 'N/A'}cm
-                          </Badge>
-                        </div>
-                      </div>
+                {artworks.map((artwork) => {
+                  const imageUrl = getImageUrl(artwork);
+                  const artworkTitle = getArtworkTitle(artwork);
+                  const artistName = getArtistName(artwork);
+                  const artworkId = artwork.objectID || artwork.artId || artwork.id;
 
-                      <CardContent className="p-4">
-                        {/* Artist Name */}
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-1">
-                          {artwork.full_name || 'Unknown Artist'}
-                        </h3>
-                        
-                        {/* Artwork Title */}
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-1">
-                          &ldquo;{artwork.artwork_title || 'Untitled'}&rdquo;
-                        </p>
-
-                        {/* Location */}
-                        <div className="flex items-center text-xs text-gray-500 mb-2">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          {artwork.city || 'Unknown'}, {artwork.country || 'Unknown'}
-                        </div>
-
-                        {/* Medium and Style */}
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {artwork.mediums?.slice(0, 2).map((medium, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              <Palette className="w-3 h-3 mr-1" />
-                              {medium}
+                  return (
+                    <Link href={`/art/${artwork.slug || `artwork-${artworkId}`}`} key={artworkId}>
+                      <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
+                        {/* Artwork Image */}
+                        <div className="relative w-full h-64 overflow-hidden">
+                          <Image
+                            src={imageErrors.has(artworkId) ? '/placeholder.svg' : imageUrl}
+                            alt={`${artworkTitle} by ${artistName}`}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            onError={() => handleImageError(artworkId)}
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                          />
+                          {/* Overlay with quick info */}
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                            <Eye className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
+                          {/* Size badge */}
+                          <div className="absolute top-2 left-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {artwork.width || 'N/A'}×{artwork.height || 'N/A'}cm
                             </Badge>
-                          ))}
-                          {artwork.styles?.slice(0, 1).map((style, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {style}
-                            </Badge>
-                          ))}
+                          </div>
                         </div>
 
-                        {/* Subject and Materials */}
-                        {artwork.subject && (
-                          <div className="text-xs text-gray-500 mb-2">
-                            Subject: {artwork.subject}
-                          </div>
-                        )}
-                        {artwork.materials && artwork.materials.length > 0 && (
-                          <div className="text-xs text-gray-500 mb-2">
-                            Materials: {artwork.materials.join(', ')}
-                          </div>
-                        )}
+                        <CardContent className="p-4">
+                          {/* Artist Name */}
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-1">
+                            {artistName}
+                          </h3>
+                          
+                          {/* Artwork Title */}
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-1">
+                            &ldquo;{artworkTitle}&rdquo;
+                          </p>
 
-                        {/* Price */}
-                        {/* <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <span className="text-lg font-bold text-gray-900">
-                              {formatPrice(artwork.geo_prices)}
-                            </span>
-                            {artwork.min_print_price && (
-                              <div className="text-xs text-gray-500">
-                                Print from {formatPrintPrice(artwork.min_print_price)}
-                              </div>
-                            )}
+                          {/* Location */}
+                          <div className="flex items-center text-xs text-gray-500 mb-2">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            {artwork.city || 'Unknown'}, {artwork.country || 'Unknown'}
                           </div>
-                          <Badge variant="outline" className="text-xs">
-                            {artwork.category || 'Art'}
-                          </Badge>
-                        </div> */}
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
+
+                          {/* Medium and Style */}
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {artwork.mediums?.slice(0, 2).map((medium, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                <Palette className="w-3 h-3 mr-1" />
+                                {medium}
+                              </Badge>
+                            ))}
+                            {artwork.styles?.slice(0, 1).map((style, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {style}
+                              </Badge>
+                            ))}
+                          </div>
+
+                          {/* Subject and Materials */}
+                          {artwork.subject && (
+                            <div className="text-xs text-gray-500 mb-2">
+                              Subject: {artwork.subject}
+                            </div>
+                          )}
+                          {artwork.materials && artwork.materials.length > 0 && (
+                            <div className="text-xs text-gray-500 mb-2">
+                              Materials: {artwork.materials.join(', ')}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
               </div>
 
               {/* Loading More Indicator */}

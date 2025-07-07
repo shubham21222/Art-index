@@ -3,9 +3,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Filter, Globe, MapPin, SortAsc, SortDesc } from "lucide-react";
+import { MapPin, SortAsc, SortDesc } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Define the API endpoint
@@ -15,19 +14,18 @@ export default function Museums() {
   const [institutions, setInstitutions] = useState([]);
   const [filteredInstitutions, setFilteredInstitutions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("all");
-  const [selectedState, setSelectedState] = useState("all");
   const [selectedCity, setSelectedCity] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [viewMode, setViewMode] = useState("carousel"); // carousel or list
   const [currentIndex, setCurrentIndex] = useState(null);
 
-  // Get unique values for filters
-  const countries = [...new Set(institutions.map(inst => inst.locations?.[0]?.country).filter(Boolean))].sort();
-  const states = [...new Set(institutions.map(inst => inst.locations?.[0]?.state).filter(Boolean))].sort();
-  const cities = [...new Set(institutions.map(inst => inst.locations?.[0]?.city).filter(Boolean))].sort();
+  // Get unique values for filters - now for city
+  const cities = [...new Set(
+    institutions
+      .map(inst => inst.city)
+      .filter(Boolean)
+  )].sort();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,39 +53,28 @@ export default function Museums() {
   // Filter and sort institutions
   useEffect(() => {
     let filtered = institutions.filter(institution => {
-      const matchesSearch = institution.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           institution.locations?.[0]?.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           institution.locations?.[0]?.country?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesCountry = selectedCountry === "all" || institution.locations?.[0]?.country === selectedCountry;
-      const matchesState = selectedState === "all" || institution.locations?.[0]?.state === selectedState;
-      const matchesCity = selectedCity === "all" || institution.locations?.[0]?.city === selectedCity;
-
-      return matchesSearch && matchesCountry && matchesState && matchesCity;
+      // Only filter by city
+      const matchesCity = selectedCity === "all" || 
+                            (institution.city && institution.city.toLowerCase() === selectedCity.toLowerCase());
+      return matchesCity;
     });
 
     // Sort institutions
     filtered.sort((a, b) => {
       let aValue, bValue;
-      
       switch (sortBy) {
         case "name":
           aValue = a.name;
           bValue = b.name;
           break;
         case "city":
-          aValue = a.locations?.[0]?.city || "";
-          bValue = b.locations?.[0]?.city || "";
-          break;
-        case "country":
-          aValue = a.locations?.[0]?.country || "";
-          bValue = b.locations?.[0]?.country || "";
+          aValue = a.city || "";
+          bValue = b.city || "";
           break;
         default:
           aValue = a.name;
           bValue = b.name;
       }
-
       if (sortOrder === "asc") {
         return aValue.localeCompare(bValue);
       } else {
@@ -97,7 +84,7 @@ export default function Museums() {
 
     setFilteredInstitutions(filtered);
     setCurrentIndex(Math.floor(filtered.length / 2));
-  }, [institutions, searchTerm, selectedCountry, selectedState, selectedCity, sortBy, sortOrder]);
+  }, [institutions, selectedCity, sortBy, sortOrder]);
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? filteredInstitutions.length - 1 : prev - 1));
@@ -131,9 +118,6 @@ export default function Museums() {
   };
 
   const clearFilters = () => {
-    setSearchTerm("");
-    setSelectedCountry("all");
-    setSelectedState("all");
     setSelectedCity("all");
   };
 
@@ -163,46 +147,9 @@ export default function Museums() {
         </div>
       </div>
 
-      {/* Search and Filter Section */}
+      {/* City Filter Only */}
       <div className="w-full mb-8 space-y-4">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <Input
-            type="text"
-            placeholder="Search museums by name, city, or country..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-3"
-          />
-        </div>
-
-        {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Country" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Countries</SelectItem>
-              {countries.map(country => (
-                <SelectItem key={country} value={country}>{country}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={selectedState} onValueChange={setSelectedState}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select State" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All States</SelectItem>
-              {states.map(state => (
-                <SelectItem key={state} value={state}>{state}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
           <Select value={selectedCity} onValueChange={setSelectedCity}>
             <SelectTrigger>
               <SelectValue placeholder="Select City" />
@@ -223,7 +170,6 @@ export default function Museums() {
               <SelectContent>
                 <SelectItem value="name">Name</SelectItem>
                 <SelectItem value="city">City</SelectItem>
-                <SelectItem value="country">Country</SelectItem>
               </SelectContent>
             </Select>
             <Button
@@ -237,10 +183,10 @@ export default function Museums() {
         </div>
 
         {/* Clear Filters */}
-        {(searchTerm || selectedCountry !== "all" || selectedState !== "all" || selectedCity !== "all") && (
+        {selectedCity !== "all" && (
           <div className="flex justify-center">
             <Button variant="outline" onClick={clearFilters} size="sm">
-              Clear All Filters
+              Clear City Filter
             </Button>
           </div>
         )}
@@ -248,6 +194,11 @@ export default function Museums() {
         {/* Results Count */}
         <div className="text-center text-sm text-gray-600">
           Showing {filteredInstitutions.length} of {institutions.length} museums
+          {cities.length > 0 && (
+            <span className="ml-4">
+              ({cities.length} cities available)
+            </span>
+          )}
         </div>
       </div>
 
@@ -286,9 +237,13 @@ export default function Museums() {
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-4 text-center text-white z-10">
                       <h3 className="text-lg font-semibold drop-shadow-md">{institution.name}</h3>
-                      <p className="text-sm drop-shadow-md">{institution.locations[0]?.city || "N/A"}</p>
+                      <p className="text-sm drop-shadow-md">
+                        {institution.city || "N/A"}
+                      </p>
                       <p className="text-xs drop-shadow-md">
-                        {institution.categories.map(cat => cat.name).join(", ") || "N/A"}
+                        {institution.categories?.map(cat => cat.name).join(", ") || "N/A"}
+                        <br />
+                        <span className="text-xs text-green-700 font-semibold">{institution.city}</span>
                       </p>
                     </div>
                   </Link>
@@ -351,11 +306,10 @@ export default function Museums() {
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">{institution.name}</h3>
                       <div className="flex items-center text-sm text-gray-600 mb-1">
                         <MapPin className="w-4 h-4 mr-1" />
-                        {institution.locations[0]?.city || "N/A"}
-                        {institution.locations[0]?.country && `, ${institution.locations[0].country}`}
+                        {institution.city || "N/A"}
                       </div>
                       <p className="text-xs text-gray-500">
-                        {institution.categories.map(cat => cat.name).join(", ") || "N/A"}
+                        {institution.categories?.map(cat => cat.name).join(", ") || "N/A"}
                       </p>
                     </div>
                   </Link>
@@ -367,21 +321,6 @@ export default function Museums() {
           )}
         </div>
       )}
-
-      {/* Indicators for Carousel */}
-      {/* {viewMode === "carousel" && currentIndex !== null && filteredInstitutions.length > 0 && (
-        <div className="hidden sm:flex justify-center mt-6 space-x-2">
-          {filteredInstitutions.map((_, index) => (
-            <div
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
-              }`}
-              onClick={() => setCurrentIndex(index)}
-            />
-          ))}
-        </div>
-      )} */}
 
       {/* View All Link */}
       <div className="mt-8 text-center">
