@@ -62,7 +62,7 @@ export const register = async (req, res , next) => {
         const newUser = await User.create(userData);
 
         // Send verification email
-        const verificationUrl = `${req.protocol}://localhost:3000/verify-email/${verificationToken}`;
+        const verificationUrl = `https://artindex.ai/verify-email/${verificationToken}`;
         
         const message = `
         <!DOCTYPE html>
@@ -371,7 +371,7 @@ export const forgotPassword = async (req, res) => {
         await user.save({ validateBeforeSave: false });
 
         // Construct reset URL
-        const resetUrl = `${req.protocol}://localhost:3000/reset-password/${resetToken}`;
+        const resetUrl = `https://artindex.ai/reset-password/${resetToken}`;
 
         // Email Template
         const message = `

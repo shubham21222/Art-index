@@ -458,7 +458,7 @@ export const approvePartnership = async (req, res) => {
         }
 
         // Send approval email
-        const createPasswordLink = isNewUser ? `http://localhost:3000/create-password/${user.passwordResetToken}` : null;
+        const createPasswordLink = isNewUser ? `https://artindex.ai/create-password/${user.passwordResetToken}` : null;
         
         const emailContent = `<!DOCTYPE html>
 <html lang="en">

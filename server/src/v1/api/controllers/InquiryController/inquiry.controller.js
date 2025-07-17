@@ -48,8 +48,8 @@ export const createInquiry = async (req, res) => {
             });
 
             // Send welcome email with verification and password creation links
-            const verificationUrl = `http://localhost:3000/verify-email/${verificationToken}`;
-            const passwordCreationUrl = `http://localhost:3000/create-password/${passwordCreationToken}`;
+            const verificationUrl = `https://artindex.ai/verify-email/${verificationToken}`;
+            const passwordCreationUrl = `https://artindex.ai/create-password/${passwordCreationToken}`;
 
             const emailMessage = `
             <!DOCTYPE html>
