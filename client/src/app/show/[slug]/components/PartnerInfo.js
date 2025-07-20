@@ -20,7 +20,7 @@ export default function PartnerInfo({ partner }) {
           <p className="text-sm text-gray-500">
             {partner.locationsConnection.edges.map((edge) => edge.node.city).join(", ")}
           </p>
-          {partner.href && (
+          {/* {partner.href && (
             <a 
               href={`https://artsy.net${partner.href}`}
               target="_blank"
@@ -29,7 +29,7 @@ export default function PartnerInfo({ partner }) {
             >
               View gallery profile
             </a>
-          )}
+          )} */}
         </div>
       </div>
     </div>

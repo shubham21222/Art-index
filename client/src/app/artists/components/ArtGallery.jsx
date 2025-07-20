@@ -230,9 +230,9 @@ export default function ArtGallery() {
                                         <p className="text-gray-600 text-sm">
                                             {artist.nationality}, {artist.years}
                                         </p>
-                                        <button className="btn2 mt-3 w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                        {/* <button className="btn2 mt-3 w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
                                             Follow
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             </Link>

@@ -14,6 +14,7 @@ import Museum from "./routes/Museum/museum.routes.js";
 import ArtworkPricing from "./routes/ArtworkPricing/artworkPricing.routes.js";
 import offerRoutes from './routes/Offer/offer.routes.js';
 import SponsorBanner from './routes/SponsorBanner/sponsorBanner.routes.js';
+import Newsletter from './routes/Newsletter/index.js';
 
 import google from "./routes/googleRoutes/google.routes.js";
 import Gallery from "./routes/gallery/gallery.routes.js";
@@ -80,9 +81,8 @@ router.use('/offer', offerRoutes);
 // Add API routes here for SPONSOR BANNER //
 router.use('/sponsor-banner', SponsorBanner);
 
-
-
-
+// Add API routes here for NEWSLETTER //
+router.use('/newsletter', Newsletter);
 
 
 export default router;

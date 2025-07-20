@@ -6,6 +6,7 @@ import Image from "next/image";
 import logo from "../../../public/logo2.png";
 import SignUpModal from "./SignUpModal";
 import LoginModal from "./LoginModal";
+import SearchModal from "./SearchModal";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [mounted, setMounted] = useState(false);
 
@@ -44,13 +46,23 @@ export default function Header() {
             setIsMobile(window.innerWidth < 768);
         };
 
+        const handleKeyDown = (e) => {
+            // Open search modal with Ctrl+K or Cmd+K
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                setIsSearchModalOpen(true);
+            }
+        };
+
         handleResize();
         window.addEventListener("scroll", handleScroll);
         window.addEventListener("resize", handleResize);
+        window.addEventListener("keydown", handleKeyDown);
 
         return () => {
             window.removeEventListener("scroll", handleScroll);
             window.removeEventListener("resize", handleResize);
+            window.removeEventListener("keydown", handleKeyDown);
         };
     }, []);
 
@@ -234,8 +246,15 @@ export default function Header() {
 
                         {/* Right Side - Search + Auth */}
                         <div className="flex items-center space-x-4">
-                            <button className="p-2 hidden md:block hover:bg-gray-100/50 rounded-full transition-colors">
-                                <Search className="h-5 w-5 text-gray-900" />
+                            <button 
+                                onClick={() => setIsSearchModalOpen(true)}
+                                className="hidden md:flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 bg-gray-100/50 rounded-full hover:bg-gray-200/50 transition-colors"
+                            >
+                                <Search className="h-4 w-4" />
+                                <span>Search</span>
+                                <kbd className="hidden lg:inline-block px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded border border-gray-300">
+                                    ⌘K
+                                </kbd>
                             </button>
                             {isAuthenticated ? (
                                 <>
@@ -281,6 +300,11 @@ export default function Header() {
                                 type="text"
                                 placeholder="Search..."
                                 className="w-full border rounded-full px-4 py-2 text-sm bg-white/50 backdrop-blur-sm"
+                                onClick={() => {
+                                    setIsSearchModalOpen(true);
+                                    setMobileMenuOpen(false);
+                                }}
+                                readOnly
                             />
                             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
                         </div>
@@ -365,6 +389,10 @@ export default function Header() {
                     setIsLoginModalOpen(false);
                     setIsSignUpModalOpen(true);
                 }}
+            />
+            <SearchModal 
+                isOpen={isSearchModalOpen} 
+                onClose={() => setIsSearchModalOpen(false)}
             />
         </>
     );

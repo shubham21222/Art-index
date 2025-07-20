@@ -19,7 +19,8 @@ import {
   MessageSquareIcon,
   Gavel,
   DollarSign,
-  Megaphone
+  Megaphone,
+  Mail
 } from "lucide-react";
 import { logout } from "@/redux/features/authSlice";
 import { toast } from "sonner";
@@ -91,6 +92,7 @@ export default function AdminLayout({ children }) {
     // { title: "Settings", path: "/admin/settings", icon: Settings },
     { title: "Partnerships", path: "/admin/partnerships", icon: Users },
     { title: "Sponsor Banners", path: "/admin/sponsor-banners", icon: Megaphone },
+    { title: "Newsletter", path: "/admin/newsletter", icon: Mail },
     // { title: "Artwork Pricing", path: "/admin/artwork-pricing", icon: DollarSign },
     { title: "Global Pricing", path: "/admin/global-pricing", icon: DollarSign },
     { title: "Offers", path: "/admin/offers", icon: DollarSign },

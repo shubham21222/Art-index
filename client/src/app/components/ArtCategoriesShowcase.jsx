@@ -12,11 +12,11 @@ const ArtCategoriesShowcase = () => {
   const categories = [
     {
       id: 1,
-      name: "Contemporary Art",
+      name: "Old Masters",
       description: "Explore cutting-edge contemporary artworks from emerging and established artists",
       image: "https://d7hftxdivxxvm.cloudfront.net?height=400&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2F6pzQaRA5WB8-XtHWuAW4RA%2Fmain.jpg&width=600",
       icon: Palette,
-      link: "/galleries/contemporary-design"
+      link: "/galleries/old-masters"
     },
     {
       id: 2,

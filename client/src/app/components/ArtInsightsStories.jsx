@@ -48,27 +48,6 @@ const ArtInsightsStories = () => {
     }
   ];
 
-  const artistSpotlights = [
-    {
-      id: 1,
-      name: "Emma Rodriguez",
-      specialty: "Abstract Expressionism",
-      image: "https://d7hftxdivxxvm.cloudfront.net?height=200&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FP2PBzTmhDlq2AD7D6G9S5g%2Fwide.jpg&width=200",
-      story: "From corporate lawyer to full-time artist, Emma's journey explores themes of transformation and self-discovery through bold, emotional brushstrokes.",
-      location: "New York, NY",
-      followers: "12.5k"
-    },
-    {
-      id: 2,
-      name: "David Park",
-      specialty: "Contemporary Sculpture",
-      image: "https://d7hftxdivxxvm.cloudfront.net?height=200&quality=80&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FRYLtSPyYuHuL8P6xVaxK0g%2Fmain.jpg&width=200",
-      story: "David's innovative use of recycled materials challenges our perception of waste and beauty, creating thought-provoking installations worldwide.",
-      location: "Los Angeles, CA",
-      followers: "8.9k"
-    }
-  ];
-
   const artTrends = [
     {
       id: 1,
@@ -117,7 +96,6 @@ const ArtInsightsStories = () => {
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-full">
             {[
               { id: 'featured', label: 'Featured Articles', icon: BookOpen },
-              { id: 'artists', label: 'Artist Spotlights', icon: User },
               { id: 'trends', label: 'Art Trends', icon: TrendingUp }
             ].map((tab) => {
               const IconComponent = tab.icon;
@@ -202,70 +180,9 @@ const ArtInsightsStories = () => {
                         </div>
                         <span className="text-sm font-medium text-black">{article.author}</span>
                       </div>
-                      <motion.button
-                        className="p-2 rounded-full bg-gray-100 group-hover:bg-gray-200 transition-colors"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <ArrowRight className="w-4 h-4 text-black" />
-                      </motion.button>
                     </div>
                   </div>
                 </motion.article>
-              ))}
-            </motion.div>
-          )}
-
-          {/* Artist Spotlights */}
-          {activeTab === 'artists' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-12"
-            >
-              {artistSpotlights.map((artist, index) => (
-                <motion.div
-                  key={artist.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                  className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-200 overflow-hidden"
-                >
-                  <div className="relative h-64 overflow-hidden">
-                    <Image
-                      src={artist.image}
-                      alt={artist.name}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-6 left-6 right-6">
-                      <h3 className="text-2xl font-bold text-white mb-2">{artist.name}</h3>
-                      <p className="text-white/90 text-sm mb-2">{artist.specialty}</p>
-                      <div className="flex items-center text-white/80 text-sm">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        <span>{artist.location}</span>
-                        <span className="mx-2">•</span>
-                        <span>{artist.followers} followers</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-6">
-                    <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                      {artist.story}
-                    </p>
-                    <motion.button
-                      className="inline-flex items-center px-6 py-3 bg-black text-white text-sm font-semibold rounded-full hover:bg-gray-800 transition-all duration-300"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      View Artist Profile
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </motion.button>
-                  </div>
-                </motion.div>
               ))}
             </motion.div>
           )}

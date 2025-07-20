@@ -5,11 +5,13 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, EffectFade } from "swiper/modules";
+import { useRouter } from "next/navigation";
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 
 const Carousel = () => {
+  const router = useRouter();
   const [isHovering, setIsHovering] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -38,13 +40,13 @@ const Carousel = () => {
       image: "https://d7hftxdivxxvm.cloudfront.net?height=800&quality=85&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2F6pzQaRA5WB8-XtHWuAW4RA%2Fmain.jpg&width=1600",
       title: "FOG Design+Art",
       description: "San Francisco's annual fair for art and design is back for its 11th edition.",
-      buttonText: "Explore Fair",
+      buttonText: "Discover More",
     },
     {
       image: "https://d7hftxdivxxvm.cloudfront.net?height=800&quality=85&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FRYLtSPyYuHuL8P6xVaxK0g%2Fmain.jpg&width=1600",
       title: "Modern Art Fair",
       description: "A unique exhibition featuring works from modern artists.",
-      buttonText: "Learn More",
+      buttonText: "Discover More",
     },
     {
       image: "https://d7hftxdivxxvm.cloudfront.net?height=800&quality=85&resize_to=fill&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FPa-fblR2j-r-B_eSfm4ang%2Fmain.jpg&width=1600",
@@ -233,6 +235,7 @@ const Carousel = () => {
                   transition={{ duration: 0.6, delay: 0.8 }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push('/collect')}
                 >
                   <span className="relative z-10">{slide.buttonText}</span>
                   <motion.div

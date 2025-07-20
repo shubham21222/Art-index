@@ -126,7 +126,7 @@ export default function ArtsyPage() {
         setShowSuggestions(false);
         
         // If it's an artwork, navigate to it
-        if (result.node.__typename === 'SearchableItem' && result.node.displayType === 'Artwork' && result.node.slug) {
+        if (result.node.displayType === 'Artwork' && result.node.slug) {
             router.push(`/artwork/${result.node.slug}`);
         }
     };
@@ -163,7 +163,7 @@ export default function ArtsyPage() {
 
                         {/* Search Suggestions */}
                         {showSuggestions && searchResults.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                            <div className="mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
                                 {searchResults.map((result, index) => (
                                     <div
                                         key={index}
@@ -186,7 +186,7 @@ export default function ArtsyPage() {
                                                 {result.node.displayLabel}
                                             </div>
                                             <div className="text-sm text-gray-500">
-                                                {result.node.displayType}
+                                                {result.node.displayType || result.node.__typename}
                                             </div>
                                         </div>
                                     </div>
@@ -196,7 +196,7 @@ export default function ArtsyPage() {
                     </form>
 
                     {/* Search Filters */}
-                    <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+                    {/* <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
                         <select className="border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black">
                             <option>All Mediums</option>
                             <option>Painting</option>
@@ -210,7 +210,7 @@ export default function ArtsyPage() {
                             <option>Medium (40-100cm)</option>
                             <option>Large (over 100cm)</option>
                         </select>
-                    </div>
+                    </div> */}
 
                     {/* Search Results Summary */}
                     {aggregations.length > 0 && (

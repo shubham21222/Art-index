@@ -136,17 +136,24 @@ export default function AllArtistsPage() {
     loadArtists();
   }, [currentLetter, currentPage]);
 
-  // Filter artists based on search query
+  // Filter artists based on search query and current letter
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredArtists(artists);
-    } else {
-      const filtered = artists.filter(artist => 
+    let filtered = artists;
+    
+    // First filter by current letter (in case API doesn't filter properly)
+    filtered = filtered.filter(artist => 
+      artist.artist.name.toLowerCase().startsWith(currentLetter.toLowerCase())
+    );
+    
+    // Then filter by search query if provided
+    if (searchQuery.trim() !== '') {
+      filtered = filtered.filter(artist => 
         artist.artist.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setFilteredArtists(filtered);
     }
-  }, [artists, searchQuery]);
+    
+    setFilteredArtists(filtered);
+  }, [artists, searchQuery, currentLetter]);
 
   // Handle letter filter change
   const handleLetterChange = (letter) => {
@@ -239,7 +246,10 @@ export default function AllArtistsPage() {
                   <div className="flex items-center space-x-2">
                     <Palette className="w-5 h-5 text-gray-600" />
                     <span className="text-lg font-medium text-gray-900">
-                      {searchQuery ? `Search results for "${searchQuery}"` : `Artists starting with "${currentLetter.toUpperCase()}"`}
+                      {searchQuery 
+                        ? `Search results for "${searchQuery}" within artists starting with "${currentLetter.toUpperCase()}"`
+                        : `Artists starting with "${currentLetter.toUpperCase()}"`
+                      }
                     </span>
                     <Badge variant="secondary" className="ml-2">
                       {filteredArtists.length} artists
@@ -282,7 +292,7 @@ export default function AllArtistsPage() {
                     </h3>
                     <p className="text-gray-600">
                       {searchQuery 
-                        ? `No artists found matching "${searchQuery}"`
+                        ? `No artists found matching "${searchQuery}" within artists starting with "${currentLetter.toUpperCase()}"`
                         : `No artists found starting with "${currentLetter.toUpperCase()}"`
                       }
                     </p>

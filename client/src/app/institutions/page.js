@@ -7,6 +7,7 @@ import NonprofitOrganizations from './components/NonprofitOrganizations'
 import ArtistEstates from './components/ArtistEstates'
 import ModernAndContemporaryArt from './components/ModernAndContemporaryArt'
 import Museums from './components/Museums'
+import AllMuseums from './components/AllMuseums'
 import HistoricalArt from './components/HistoricalArt'
 import PrivateCollections from './components/PrivateCollections'
 import OutdoorArt from './components/OutdoorArt'
@@ -18,6 +19,7 @@ const page = () => {
     <Carousel3 /> 
     <div className="max-w-[1500px] mx-auto">
     <Museums />
+    <AllMuseums />
     <UniversityMuseums />
     {/* <NonprofitOrganizations /> */}
     <ArtistEstates /> 

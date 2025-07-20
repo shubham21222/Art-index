@@ -26,6 +26,9 @@ export default function ArtistCarousel({ slug }) {
     const [showControls, setShowControls] = useState(true);
     const imageRef = useRef(null);
     const containerRef = useRef(null);
+    const [zoomModalOpen, setZoomModalOpen] = useState(false);
+    const [zoomModalImage, setZoomModalImage] = useState(null);
+    const [zoomModalZoomed, setZoomModalZoomed] = useState(false);
 
     useEffect(() => {
         if (!slug) {
@@ -154,6 +157,12 @@ export default function ArtistCarousel({ slug }) {
         document.addEventListener('keydown', handleKeyPress);
         return () => document.removeEventListener('keydown', handleKeyPress);
     }, [currentIndex, images.length]);
+
+    const handleThumbnailClick = (image, index) => {
+        setZoomModalImage(image);
+        setZoomModalOpen(true);
+        setZoomModalZoomed(false);
+    };
 
     if (loading) {
         return (
@@ -334,21 +343,21 @@ export default function ArtistCarousel({ slug }) {
                                         ? 'border-white shadow-lg' 
                                         : 'border-transparent hover:border-white/50'
                                 }`}
-                                onClick={() => handleImageClick(image, index)}
+                                onClick={() => handleThumbnailClick(image, index)}
                     >
                         <img
                             src={image}
                             alt={`Thumbnail ${index + 1}`}
-                                    className="object-cover w-full h-full"
-                                />
-                                {currentIndex === index && (
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="absolute inset-0 bg-white/20"
-                                    />
-                                )}
-                            </motion.div>
+                            className="object-cover w-full h-full"
+                        />
+                        {currentIndex === index && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="absolute inset-0 bg-white/20"
+                            />
+                        )}
+                    </motion.div>
                         ))}
                     </div>
             </div>
@@ -368,6 +377,45 @@ export default function ArtistCarousel({ slug }) {
                     <X className="w-6 h-6" />
                 </motion.button>
             )}
+
+            {/* Zoom Modal for Thumbnails */}
+            <AnimatePresence>
+                {zoomModalOpen && zoomModalImage && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                        onClick={() => setZoomModalOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="relative max-w-3xl w-full max-h-[90vh] flex items-center justify-center"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <motion.img
+                                src={zoomModalImage}
+                                alt="Zoomed artwork thumbnail"
+                                className={`w-full h-auto max-h-[80vh] object-contain rounded-xl shadow-2xl transition-transform duration-300 ${zoomModalZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}`}
+                                onClick={() => setZoomModalZoomed(z => !z)}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.3 }}
+                            />
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setZoomModalOpen(false)}
+                                className="absolute top-4 right-4 p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors z-10"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

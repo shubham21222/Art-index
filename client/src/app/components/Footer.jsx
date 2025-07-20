@@ -1,9 +1,48 @@
 "use client";
-import { Facebook, Instagram, Twitter } from "lucide-react"; // Removed unused icons
+import { Facebook, Instagram, Twitter } from "lucide-react";
 import Image from "next/image";
 import logo from "../../../public/logo2.png";
+import { useState } from "react";
+import toast from 'react-hot-toast';
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!email.trim()) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    setLoading(true);
+    try {
+        const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || 'Successfully subscribed to newsletter!');
+        setEmail('');
+      } else {
+        toast.error(data.error || 'Failed to subscribe to newsletter');
+      }
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <footer className="bg-gray-100 py-8 overflow-hidden">
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,13 +91,8 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-gray-900 transition-colors">
+                <a href="mailto:hello@nyelizabeth.com" className="hover:text-gray-900 transition-colors">
                   Contact
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-gray-900 transition-colors">
-                  Blog
                 </a>
               </li>
               <li>
@@ -66,7 +100,6 @@ export default function Footer() {
                   Partnerships
                 </a>
               </li>
-             
             </ul>
           </div>
 
@@ -75,17 +108,21 @@ export default function Footer() {
             <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
               Stay Connected
             </h3>
-            <form className="flex w-full max-w-xs min-w-0">
+            <form onSubmit={handleNewsletterSubmit} className="flex w-full max-w-xs min-w-0">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gray-900 min-w-0"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                className="flex-1 px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gray-900 min-w-0 disabled:bg-gray-50 disabled:cursor-not-allowed"
               />
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-r-md hover:bg-gray-800 transition-colors whitespace-nowrap"
+                disabled={loading}
+                className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-r-md hover:bg-gray-800 transition-colors whitespace-nowrap disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Sign Up
+                {loading ? 'Signing...' : 'Sign Up'}
               </button>
             </form>
             <div className="flex space-x-4">

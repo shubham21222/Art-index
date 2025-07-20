@@ -251,9 +251,9 @@ export default function ArtGallery() {
               Discover and collect contemporary artworks
             </p>
           </div>
-          <Button variant="outline" size="lg" className="w-full md:w-auto">
+          {/* <Button variant="outline" size="lg" className="w-full md:w-auto">
             Browse Collections
-          </Button>
+          </Button> */}
         </div>
 
         {/* Search Bar */}

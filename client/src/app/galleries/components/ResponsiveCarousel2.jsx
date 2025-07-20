@@ -48,9 +48,9 @@ const Carousel2 = () => {
               <div className="w-full md:w-1/2 md:ml-[100px] ml-0 p-6 md:p-12 text-center">
                 <h2 className="text-2xl md:text-3xl mb-4">{slide.title}</h2>
                 <p className="text-gray-700 mb-6">{slide.description}</p>
-                <button className="bg-blue-800 btn text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300">
+                {/* <button className="bg-blue-800 btn text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300">
                   {slide.buttonText}
-                </button>
+                </button> */}
               </div>
               <div className="w-full md:w-1/2 h-full">
                 <img
