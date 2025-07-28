@@ -106,6 +106,7 @@ export const addEvent = async (req, res) => {
 
         return created(res, "Event added successfully", museum);
     } catch (error) {
+        console.log(error)
         return unknownError(res, error.message);
     }
 };
@@ -118,7 +119,7 @@ export const updateEvent = async (req, res) => {
         const museum = await MuseumModel.findById(museumId);
         if (!museum) return notFound(res, "Museum not found");
 
-        const eventIndex = museum.events.findIndex(event => event._id.toString() === eventId);
+        const eventIndex = museum.events.findIndex(event => event._id.toString() == eventId);
         if (eventIndex === -1) return notFound(res, "Event not found");
 
         museum.events[eventIndex] = { ...museum.events[eventIndex].toObject(), ...req.body };

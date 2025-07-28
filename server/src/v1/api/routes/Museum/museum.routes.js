@@ -13,7 +13,7 @@ import {
     deleteArtwork,
     getMuseumStats
 } from "../../controllers/MuseumController/museum.controller.js";
-import { IsAuthenticated } from "../../middlewares/authicationmiddleware.js";
+import { IsAuthenticated  } from "../../middlewares/authicationmiddleware.js";
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.get("/:id", getMuseumById);
 router.get("/:id/stats", getMuseumStats);
 
 // Protected routes (require authentication)
-router.post("/create", IsAuthenticated, createMuseum);
+router.post("/create", IsAuthenticated,  createMuseum);
 router.post("/update/:id", IsAuthenticated, updateMuseum);
 router.post("/delete/:id", IsAuthenticated, deleteMuseum);
 

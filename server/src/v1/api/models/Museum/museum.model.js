@@ -35,10 +35,16 @@ const EventSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
-  date: {
+  startDate: {
     type: Date,
     required: true,
   },
+
+  endDate:{
+    type:Date,
+    required:false
+  },
+  
   description: {
     type: String,
     default: "",
@@ -85,6 +91,10 @@ const MuseumSchema = new mongoose.Schema(
         default: "",
       },
     },
+
+    ArtType:[{
+      type:String
+    }],
     events: [EventSchema],
     artworks: [ArtworkSchema],
     isActive: {
