@@ -1,5 +1,5 @@
 "use client";
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import Image from "next/image";
 import logo from "../../../public/logo2.png";
 import { useState } from "react";
@@ -126,13 +126,13 @@ export default function Footer() {
               </button>
             </form>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
+              <a href="https://x.com/ArtIndex4" target="_blank" className="text-gray-600 hover:text-gray-900 transition-colors">
                 <Twitter size={18} />
               </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
-                <Facebook size={18} />
+              <a href="https://www.youtube.com/@ArtIndex_ai" target="_blank" className="text-gray-600 hover:text-gray-900 transition-colors">
+                <Youtube size={18} /> 
               </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
+              <a href="https://www.instagram.com/artindex.ai/" target="_blank" className="text-gray-600 hover:text-gray-900 transition-colors">
                 <Instagram size={18} />
               </a>
             </div>
