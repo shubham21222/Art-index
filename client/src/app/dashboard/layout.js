@@ -24,7 +24,7 @@ export default function DashboardLayout({ children }) {
       {/* Simple top navigation */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4">
-          <nav className="flex space-x-8 py-4 overflow-x-auto">
+          {/* <nav className="flex space-x-8 py-4 overflow-x-auto">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }) {
                 </Link>
               );
             })}
-          </nav>
+          </nav> */}
         </div>
       </div>
 

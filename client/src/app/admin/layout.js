@@ -5,22 +5,18 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import Link from "next/link";
 import { 
-  LayoutDashboard, 
-  Users, 
-  Settings, 
-  BarChart3, 
-  FileText, 
-  Bell,
-  LogOut,
-  HomeIcon,
-  UsersIcon,
-  ImageIcon,
-  GalleryIcon,
-  MessageSquareIcon,
-  Gavel,
-  DollarSign,
-  Megaphone,
-  Mail
+    Home, 
+    Users, 
+    Building2, 
+    Palette, 
+    Gavel, 
+    FileText, 
+    Settings, 
+    LogOut,
+    Handshake,
+    Megaphone,
+    DollarSign,
+    MessageSquare
 } from "lucide-react";
 import { logout } from "@/redux/features/authSlice";
 import { toast } from "sonner";
@@ -83,16 +79,18 @@ export default function AdminLayout({ children }) {
   }
 
   const menuItems = [
-    { title: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-    { title: "Artworks", path: "/admin/artworks", icon: FileText },
+    { title: "Dashboard", path: "/admin/dashboard", icon: Home },
+    { title: "Artworks", path: "/admin/artworks", icon: Palette },
     { title: "Auctions", path: "/admin/auctions", icon: Gavel },
     { title: "Galleries", path: "/admin/galleries", icon: Users },
-    { title: "Inquiries", path: "/admin/inquiries", icon: MessageSquareIcon },
+    { title: "User Galleries", path: "/admin/user-galleries", icon: Building2 },
+    { title: "Inquiries", path: "/admin/inquiries", icon: MessageSquare },
     // { title: "Analytics", path: "/admin/analytics", icon: BarChart3 },
     // { title: "Settings", path: "/admin/settings", icon: Settings },
     { title: "Partnerships", path: "/admin/partnerships", icon: Users },
     { title: "Sponsor Banners", path: "/admin/sponsor-banners", icon: Megaphone },
-    { title: "Newsletter", path: "/admin/newsletter", icon: Mail },
+    { title: "Newsletter", path: "/admin/newsletter", icon: FileText },
+    { title: "User Museums", path: "/admin/user-museums", icon: Building2 },
     // { title: "Artwork Pricing", path: "/admin/artwork-pricing", icon: DollarSign },
     { title: "Global Pricing", path: "/admin/global-pricing", icon: DollarSign },
     { title: "Offers", path: "/admin/offers", icon: DollarSign },

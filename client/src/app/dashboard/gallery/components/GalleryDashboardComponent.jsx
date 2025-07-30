@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-hot-toast';
 import {
@@ -25,8 +25,41 @@ import {
   Star,
   Grid,
   List,
+  Palette,
+  Eye,
 } from 'lucide-react';
 import Image from 'next/image';
+import { MuseumDetailView } from '../../museums/components/MuseumDetailView';
+import { ArtworkForm } from './ArtworkForm';
+import { ArtworkList } from './ArtworkList';
+
+// Helper function to format image URLs
+const formatImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return '/placeholder.jpeg';
+  
+  // If it's already a valid URL, return it
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // If it starts with www, add https://
+  if (url.startsWith('www.')) {
+    return `https://${url}`;
+  }
+  
+  // If it's a relative path, return as is
+  if (url.startsWith('/')) {
+    return url;
+  }
+  
+  // For other cases, treat as invalid and return placeholder
+  return '/placeholder.jpeg';
+};
+
+// Helper function to handle image errors
+const handleImageError = (e) => {
+  e.target.src = '/placeholder.jpeg';
+};
 
 export function GalleryDashboardComponent() {
   const [galleries, setGalleries] = useState([]);
@@ -35,6 +68,11 @@ export function GalleryDashboardComponent() {
   const [selectedGallery, setSelectedGallery] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [selectedGalleryForArtwork, setSelectedGalleryForArtwork] = useState(null);
+  const [isArtworkListOpen, setIsArtworkListOpen] = useState(false);
+  const [selectedGalleryForList, setSelectedGalleryForList] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -44,13 +82,14 @@ export function GalleryDashboardComponent() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { token } = useSelector((state) => state.auth);
+  const isFetching = useRef(false);
 
-  useEffect(() => {
-    fetchGalleries();
-  }, []);
+  const fetchGalleries = useCallback(async () => {
+    if (!token || isFetching.current) return;
 
-  const fetchGalleries = async () => {
     try {
+      isFetching.current = true;
+      setLoading(true);
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/gallery/all`, {
         headers: {
           'Authorization': `${token}`
@@ -69,8 +108,15 @@ export function GalleryDashboardComponent() {
       toast.error(error.message || 'Failed to fetch galleries');
     } finally {
       setLoading(false);
+      isFetching.current = false;
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      fetchGalleries();
+    }
+  }, [fetchGalleries]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,6 +127,9 @@ export function GalleryDashboardComponent() {
         ? `${process.env.NEXT_PUBLIC_API_URL}/gallery/update/${selectedGallery._id}`
         : `${process.env.NEXT_PUBLIC_API_URL}/gallery/create`;
 
+      console.log('Submitting gallery data:', formData);
+      console.log('URL:', url);
+
       const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -90,9 +139,17 @@ export function GalleryDashboardComponent() {
         body: JSON.stringify(formData)
       });
 
+      console.log('Response status:', res.status);
+      console.log('Response headers:', res.headers);
+
       if (!res.ok) {
-        throw new Error('Failed to save gallery');
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Error response:', errorData);
+        throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
       }
+
+      const result = await res.json();
+      console.log('Success response:', result);
 
       toast.success(selectedGallery ? 'Gallery updated successfully' : 'Gallery created successfully');
       setIsModalOpen(false);
@@ -106,6 +163,7 @@ export function GalleryDashboardComponent() {
       });
       fetchGalleries();
     } catch (error) {
+      console.error('Gallery submit error:', error);
       toast.error(error.message || 'Failed to save gallery');
     } finally {
       setIsSubmitting(false);
@@ -140,7 +198,7 @@ export function GalleryDashboardComponent() {
       title: gallery.title,
       description: gallery.description,
       images: gallery.images.length ? gallery.images : [''],
-      category: typeof gallery.category === 'object' ? gallery.category._id : gallery.category,
+      category: gallery.categoryName || (typeof gallery.category === 'object' ? gallery.category._id : gallery.category) || '',
       isFeatured: gallery.isFeatured
     });
     setIsModalOpen(true);
@@ -155,7 +213,9 @@ export function GalleryDashboardComponent() {
 
   const handleImageChange = (index, value) => {
     const newImages = [...formData.images];
-    newImages[index] = value;
+    // Format the URL if it's not empty
+    const formattedUrl = value.trim() ? formatImageUrl(value) : value;
+    newImages[index] = formattedUrl;
     setFormData(prev => ({
       ...prev,
       images: newImages
@@ -169,16 +229,94 @@ export function GalleryDashboardComponent() {
     }));
   };
 
-  const filteredGalleries = galleries.filter(gallery =>
+  const handleAddArtwork = (gallery) => {
+    setSelectedGalleryForArtwork(gallery);
+    setSelectedArtwork(null);
+    setIsArtworkModalOpen(true);
+  };
+
+  const handleViewArtworks = (gallery) => {
+    setSelectedGalleryForList(gallery);
+    setIsArtworkListOpen(true);
+  };
+
+  const handleEditArtwork = (gallery, artwork) => {
+    setSelectedGalleryForArtwork(gallery);
+    setSelectedArtwork(artwork);
+    setIsArtworkModalOpen(true);
+  };
+
+  const handleDeleteArtwork = async (galleryId, artworkId) => {
+    if (!confirm('Are you sure you want to delete this artwork?')) return;
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/gallery/${galleryId}/artworks/${artworkId}/delete`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to delete artwork');
+      }
+
+      toast.success('Artwork deleted successfully');
+      fetchGalleries();
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete artwork');
+    }
+  };
+
+  const handleArtworkSubmit = async (artworkData) => {
+    setIsSubmitting(true);
+
+    try {
+      const url = selectedArtwork
+        ? `${process.env.NEXT_PUBLIC_API_URL}/gallery/${selectedGalleryForArtwork._id}/artworks/${selectedArtwork._id}/update`
+        : `${process.env.NEXT_PUBLIC_API_URL}/gallery/${selectedGalleryForArtwork._id}/artworks/add`;
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token}`
+        },
+        body: JSON.stringify(artworkData)
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to save artwork');
+      }
+
+      toast.success(selectedArtwork ? 'Artwork updated successfully' : 'Artwork added successfully');
+      setIsArtworkModalOpen(false);
+      setSelectedArtwork(null);
+      setSelectedGalleryForArtwork(null);
+      fetchGalleries();
+    } catch (error) {
+      toast.error(error.message || 'Failed to save artwork');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const filteredGalleries = useMemo(() => {
+    return galleries.filter(gallery =>
     gallery.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     gallery.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  }, [galleries, searchQuery]);
 
-  const stats = {
+  const stats = useMemo(() => {
+    return {
     total: galleries.length,
     featured: galleries.filter(g => g.isFeatured).length,
-    categories: new Set(galleries.map(g => g.category?.name || g.category)).size,
+      categories: new Set(galleries.map(g => g.categoryDisplay || g.category?.name || g.categoryName || 'Uncategorized')).size,
+      totalArtworks: galleries.reduce((sum, gallery) => sum + (gallery.artworks?.length || 0), 0),
+      activeArtworks: galleries.reduce((sum, gallery) => sum + (gallery.artworks?.filter(a => a.isActive)?.length || 0), 0),
   };
+  }, [galleries]);
 
   if (loading) {
     return (
@@ -201,7 +339,7 @@ export function GalleryDashboardComponent() {
       </div>
 
       {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Total Galleries</h3>
@@ -225,6 +363,24 @@ export function GalleryDashboardComponent() {
           </div>
           <p className="text-3xl font-bold text-gray-900">
             {stats.categories}
+          </p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Total Artworks</h3>
+            <Palette className="h-6 w-6 text-green-600" />
+          </div>
+          <p className="text-3xl font-bold text-gray-900">
+            {stats.totalArtworks}
+          </p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Active Artworks</h3>
+            <Eye className="h-6 w-6 text-blue-600" />
+          </div>
+          <p className="text-3xl font-bold text-gray-900">
+            {stats.activeArtworks}
           </p>
         </div>
       </div>
@@ -278,10 +434,11 @@ export function GalleryDashboardComponent() {
             <div key={gallery._id} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 group hover:shadow-md transition-shadow">
               <div className="relative h-64">
                 <Image
-                  src={gallery.images[0] || '/placeholder.jpg'}
+                  src={formatImageUrl(gallery.images[0])}
                   alt={gallery.title}
                   fill
                   className="object-cover"
+                  onError={handleImageError}
                 />
                 {gallery.isFeatured && (
                   <Badge className="absolute top-4 right-4 bg-yellow-500">
@@ -307,6 +464,24 @@ export function GalleryDashboardComponent() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => handleAddArtwork(gallery)}
+                      className="hover:bg-green-50 text-green-600"
+                      title="Add Artwork"
+                    >
+                      <Palette className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleViewArtworks(gallery)}
+                      className="hover:bg-blue-50 text-blue-600"
+                      title="View Artworks"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleDelete(gallery._id)}
                       className="hover:bg-red-50 text-red-600"
                     >
@@ -319,11 +494,18 @@ export function GalleryDashboardComponent() {
                 </p>
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="bg-gray-50">
-                    {gallery.category?.name || gallery.category}
+                    {gallery.categoryDisplay || gallery.category?.name || gallery.categoryName || 'Uncategorized'}
                   </Badge>
+                  <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-500">
                     {gallery.images.length} images
                   </span>
+                    {gallery.artworks && gallery.artworks.length > 0 && (
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        {gallery.artworks.length} artworks
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -348,6 +530,7 @@ export function GalleryDashboardComponent() {
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Description</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Category</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Images</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Artworks</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Featured</th>
                   <th className="px-6 py-4 text-right text-sm font-medium text-gray-900">Actions</th>
                 </tr>
@@ -359,10 +542,11 @@ export function GalleryDashboardComponent() {
                       <div className="flex items-center">
                         <div className="relative h-10 w-10 rounded-lg overflow-hidden mr-3">
                           <Image
-                            src={gallery.images[0] || '/placeholder.jpg'}
+                            src={formatImageUrl(gallery.images[0])}
                             alt={gallery.title}
                             fill
                             className="object-cover"
+                            onError={handleImageError}
                           />
                         </div>
                         <span className="font-medium text-gray-900">{gallery.title}</span>
@@ -373,7 +557,7 @@ export function GalleryDashboardComponent() {
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant="outline" className="bg-gray-50">
-                        {gallery.category?.name || gallery.category}
+                        {gallery.categoryDisplay || gallery.category?.name || gallery.categoryName || 'Uncategorized'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
@@ -381,10 +565,11 @@ export function GalleryDashboardComponent() {
                         {gallery.images.slice(0, 3).map((image, index) => (
                           <div key={index} className="relative w-8 h-8 rounded-full border-2 border-white">
                             <Image
-                              src={image}
+                              src={formatImageUrl(image)}
                               alt={`Gallery image ${index + 1}`}
                               fill
                               className="object-cover rounded-full"
+                              onError={handleImageError}
                             />
                           </div>
                         ))}
@@ -394,6 +579,15 @@ export function GalleryDashboardComponent() {
                           </div>
                         )}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge 
+                        variant="outline" 
+                        className="bg-gray-50 cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleViewArtworks(gallery)}
+                      >
+                        {gallery.artworks?.length || 0}
+                      </Badge>
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant={gallery.isFeatured ? 'default' : 'secondary'}>
@@ -413,6 +607,22 @@ export function GalleryDashboardComponent() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => handleAddArtwork(gallery)}
+                          className="hover:bg-green-50 text-green-600"
+                        >
+                          <Palette className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleViewArtworks(gallery)}
+                          className="hover:bg-blue-50 text-blue-600"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleDelete(gallery._id)}
                           className="hover:bg-red-50 text-red-600"
                         >
@@ -424,7 +634,7 @@ export function GalleryDashboardComponent() {
                 ))}
                 {filteredGalleries.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-6 py-16 text-center">
+                    <td colSpan={7} className="px-6 py-16 text-center">
                       <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
                       <h3 className="mt-4 text-lg font-medium text-gray-900">No galleries found</h3>
                       <p className="mt-2 text-gray-500">
@@ -480,7 +690,7 @@ export function GalleryDashboardComponent() {
                   <Input
                     value={image}
                     onChange={(e) => handleImageChange(index, e.target.value)}
-                    placeholder="Enter image URL"
+                    placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
                     required
                   />
                   {index > 0 && (
@@ -495,6 +705,9 @@ export function GalleryDashboardComponent() {
                   )}
                 </div>
               ))}
+              <p className="text-xs text-gray-500">
+                Enter full URLs starting with http:// or https://. URLs starting with www. will be automatically formatted.
+              </p>
               <Button
                 type="button"
                 variant="outline"
@@ -507,13 +720,16 @@ export function GalleryDashboardComponent() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Category ID</label>
+              <label className="text-sm font-medium">Category</label>
               <Input
                 value={formData.category}
                 onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                placeholder="Enter category ID"
+                placeholder="Enter category name or ID"
                 required
               />
+              <p className="text-xs text-gray-500">
+                You can enter a category name (e.g., "Modern Art") or a valid ObjectId
+              </p>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -547,6 +763,28 @@ export function GalleryDashboardComponent() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Artwork Form Modal */}
+      <ArtworkForm
+        isOpen={isArtworkModalOpen}
+        onClose={() => {
+          setIsArtworkModalOpen(false);
+          setSelectedArtwork(null);
+          setSelectedGalleryForArtwork(null);
+        }}
+        onSubmit={handleArtworkSubmit}
+        artwork={selectedArtwork}
+        isSubmitting={isSubmitting}
+      />
+
+      {/* Artwork List Modal */}
+      <ArtworkList
+        isOpen={isArtworkListOpen}
+        onClose={() => setIsArtworkListOpen(false)}
+        gallery={selectedGalleryForList}
+        onDeleteArtwork={handleDeleteArtwork}
+        onEditArtwork={handleEditArtwork}
+      />
     </div>
   );
 } 

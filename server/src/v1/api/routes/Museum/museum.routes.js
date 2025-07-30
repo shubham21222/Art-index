@@ -11,9 +11,13 @@ import {
     addArtwork,
     updateArtwork,
     deleteArtwork,
-    getMuseumStats
+    getMuseumStats,
+    getAllMuseumsWithUsers,
+    deleteMuseumByAdmin,
+    getMuseumsByUser,
+    getUsersWithMuseums
 } from "../../controllers/MuseumController/museum.controller.js";
-import { IsAuthenticated  } from "../../middlewares/authicationmiddleware.js";
+import { IsAuthenticated, authorizeRoles } from "../../middlewares/authicationmiddleware.js";
 
 const router = express.Router();
 
@@ -36,5 +40,11 @@ router.post("/:museumId/events/:eventId/delete", IsAuthenticated, deleteEvent);
 router.post("/:id/artworks/add", IsAuthenticated, addArtwork);
 router.post("/:museumId/artworks/:artworkId/update", IsAuthenticated, updateArtwork);
 router.post("/:museumId/artworks/:artworkId/delete", IsAuthenticated, deleteArtwork);
+
+// Admin routes
+router.get("/admin/all-with-users", IsAuthenticated, authorizeRoles('ADMIN'), getAllMuseumsWithUsers);
+router.delete("/admin/delete/:id", IsAuthenticated, authorizeRoles('ADMIN'), deleteMuseumByAdmin);
+router.get("/admin/user/:userId/museums", IsAuthenticated, authorizeRoles('ADMIN'), getMuseumsByUser);
+router.get("/admin/users-with-museums", IsAuthenticated, authorizeRoles('ADMIN'), getUsersWithMuseums);
 
 export default router; 

@@ -34,6 +34,34 @@ import {
 import Image from 'next/image';
 import { MuseumDetailView } from './MuseumDetailView';
 
+// Helper function to format image URLs
+const formatImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return '/placeholder.jpeg';
+  
+  // If it's already a valid URL, return it
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // If it starts with www, add https://
+  if (url.startsWith('www.')) {
+    return `https://${url}`;
+  }
+  
+  // If it's a relative path, return as is
+  if (url.startsWith('/')) {
+    return url;
+  }
+  
+  // For other cases, treat as invalid and return placeholder
+  return '/placeholder.jpeg';
+};
+
+// Helper function to handle image errors
+const handleImageError = (e) => {
+  e.target.src = '/placeholder.jpeg';
+};
+
 export function MuseumDashboardComponent() {
   const [museums, setMuseums] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -295,10 +323,11 @@ export function MuseumDashboardComponent() {
             <div key={museum._id} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 group hover:shadow-md transition-shadow">
               <div className="relative h-64">
                 <Image
-                  src={museum.profileImage || '/placeholder.jpg'}
+                  src={formatImageUrl(museum.profileImage)}
                   alt={museum.name}
                   fill
                   className="object-cover"
+                  onError={handleImageError}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity" />
               </div>
@@ -395,10 +424,11 @@ export function MuseumDashboardComponent() {
                       <div className="flex items-center">
                         <div className="relative h-10 w-10 rounded-lg overflow-hidden mr-3">
                           <Image
-                            src={museum.profileImage || '/placeholder.jpg'}
+                            src={formatImageUrl(museum.profileImage)}
                             alt={museum.name}
                             fill
                             className="object-cover"
+                            onError={handleImageError}
                           />
                         </div>
                         <span className="font-medium text-gray-900">{museum.name}</span>
@@ -482,115 +512,134 @@ export function MuseumDashboardComponent() {
 
       {/* Dialog for Add/Edit Museum */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-xl">
               {selectedMuseum ? 'Edit Museum' : 'Add New Museum'}
             </DialogTitle>
-            <DialogDescription>
-              {selectedMuseum ? 'Update museum information' : 'Create a new museum'}
+            <DialogDescription className="text-gray-600">
+              {selectedMuseum ? 'Update museum information' : 'Create a new museum with all the details'}
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Name</label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Enter museum name"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter museum description"
-                required
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Profile Image URL</label>
-              <Input
-                value={formData.profileImage}
-                onChange={(e) => setFormData(prev => ({ ...prev, profileImage: e.target.value }))}
-                placeholder="Enter profile image URL"
-              />
-            </div>
-
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Basic Information Section */}
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">Contact Information</h4>
+              <h4 className="text-lg font-semibold text-gray-900 border-b pb-2">Basic Information</h4>
               
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Email</label>
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Museum Name *</label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter museum name"
+                  required
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Description *</label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Enter museum description"
+                  required
+                  rows={4}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Profile Image URL</label>
+                <Input
+                  value={formData.profileImage}
+                  onChange={(e) => setFormData(prev => ({ ...prev, profileImage: e.target.value }))}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500">
+                  Enter full URLs starting with http:// or https://. URLs starting with www. will be automatically formatted.
+                </p>
+              </div>
+            </div>
+
+            {/* Contact Information Section */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-gray-900 border-b pb-2">Contact Information</h4>
+              
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Email Address</label>
                 <Input
                   value={formData.contact.email}
                   onChange={(e) => setFormData(prev => ({ 
                     ...prev, 
                     contact: { ...prev.contact, email: e.target.value }
                   }))}
-                  placeholder="Enter email"
+                  placeholder="museum@example.com"
                   type="email"
+                  className="w-full"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Phone</label>
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Phone Number</label>
                 <Input
                   value={formData.contact.phone}
                   onChange={(e) => setFormData(prev => ({ 
                     ...prev, 
                     contact: { ...prev.contact, phone: e.target.value }
                   }))}
-                  placeholder="Enter phone number"
+                  placeholder="+1 (555) 123-4567"
+                  className="w-full"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Address</label>
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Address</label>
                 <Textarea
                   value={formData.contact.address}
                   onChange={(e) => setFormData(prev => ({ 
                     ...prev, 
                     contact: { ...prev.contact, address: e.target.value }
                   }))}
-                  placeholder="Enter address"
-                  rows={2}
+                  placeholder="Enter full address"
+                  rows={3}
+                  className="w-full"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Website</label>
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Website URL</label>
                 <Input
                   value={formData.contact.website}
                   onChange={(e) => setFormData(prev => ({ 
                     ...prev, 
                     contact: { ...prev.contact, website: e.target.value }
                   }))}
-                  placeholder="Enter website URL"
+                  placeholder="https://www.museum-website.com"
                   type="url"
+                  className="w-full"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2">
+            {/* Form Actions */}
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
+                className="w-full sm:w-auto"
               >
-                {isSubmitting ? 'Saving...' : selectedMuseum ? 'Update Museum' : 'Create Museum'}
+                {isSubmitting ? 'Saving...' : (selectedMuseum ? 'Update Museum' : 'Create Museum')}
               </Button>
             </div>
           </form>
