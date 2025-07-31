@@ -158,7 +158,7 @@ export default async function InstitutionPage({ params, searchParams }) {
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 text-black bg-clip-text">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-black bg-clip-text">
             {slug.replace(/-/g, ' ').split(' ').map(word => 
               word.charAt(0).toUpperCase() + word.slice(1)
             ).join(' ')}

@@ -2,6 +2,7 @@ import React from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import Carousel2 from './components/ResponsiveCarousel2'
+import UserGalleries from './components/UserGalleries'
 import GraffitiAndStreetArtCarousel from './components/GraffitiAndStreetArtCarousel'
 import PhotographyGalleriesCarousel from './components/PhotographyGalleriesCarousel'
 import ContemporaryDesign from './components/ContemporaryDesign'
@@ -60,6 +61,7 @@ const page = () => {
     <>
       <Header/>
       <Carousel2 />
+      <UserGalleries />
       <div className='max-w-[1500px] mx-auto'>
         <GallerySection Component={GraffitiAndStreetArtCarousel} componentName="GraffitiAndStreetArtCarousel" />
         <GallerySection Component={PhotographyGalleriesCarousel} componentName="PhotographyGalleriesCarousel" />

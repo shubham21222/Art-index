@@ -4,9 +4,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Fetch museums from the correct server API
+    // Fetch galleries from the correct server API
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/v1/api';
-    const response = await fetch(`${apiUrl}/museum/all`);
+    const response = await fetch(`${apiUrl}/gallery/all`);
     
     if (!response.ok) {
       throw new Error(`Server responded with ${response.status}`);
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       throw new Error('Invalid response format from server');
     }
 
-    console.log(`Found ${data.items.length} museums from server API`);
+    console.log(`Found ${data.items.length} galleries from server API`);
 
     // Helper function to validate image URLs
     const isValidImageUrl = (url) => {
@@ -36,58 +36,57 @@ export default async function handler(req, res) {
     };
 
     // Map data to a format compatible with the frontend
-    const formattedMuseums = data.items
-      .filter(museum => museum && museum._id && museum.name) // Filter out invalid museums
-      .map((museum) => {
+    const formattedGalleries = data.items
+      .filter(gallery => gallery && gallery._id && gallery.title) // Filter out invalid galleries
+      .map((gallery) => {
         try {
-          // Generate slug from name if not present
-          const slug = museum.slug || museum.name.toLowerCase()
+          // Generate slug from title if not present
+          const slug = gallery.slug || gallery.title.toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
 
-          // Get profile image with validation
-          const profileImage = isValidImageUrl(museum.profileImage) 
-            ? museum.profileImage 
+          // Get profile image with validation - use first image from images array
+          const profileImage = gallery.images && gallery.images.length > 0 && isValidImageUrl(gallery.images[0])
+            ? gallery.images[0]
             : "/placeholder.jpeg";
 
           return {
-            _id: museum._id,
+            _id: gallery._id,
             slug: slug,
-            name: museum.name,
-            description: museum.description || "",
+            name: gallery.title, // Use title as name
+            description: gallery.description || "",
             profileImage: profileImage,
-            contact: museum.contact || {},
-            events: museum.events || [],
-            artworks: museum.artworks || [],
-            isActive: museum.isActive !== false, // Default to true
-            createdBy: museum.createdBy,
-            createdAt: museum.createdAt,
-            updatedAt: museum.updatedAt,
+            contact: gallery.contact || {},
+            artworks: gallery.artworks || [],
+            isActive: gallery.active !== false, // Use active field
+            createdBy: gallery.createdBy,
+            createdAt: gallery.createdAt,
+            updatedAt: gallery.updatedAt,
             // Compatibility fields for existing components
             image: {
               src: profileImage,
               width: 445,
               height: 334
             },
-            city: museum.city || "Unknown",
-            country: museum.country || "Unknown",
-            categories: museum.categories || [],
-            type: "museum"
+            city: gallery.city || "Unknown",
+            country: gallery.country || "Unknown",
+            categories: gallery.categoryName ? [{ name: gallery.categoryName }] : [],
+            type: "gallery"
           };
         } catch (error) {
-          console.error("Error formatting museum:", error, museum);
+          console.error("Error formatting gallery:", error, gallery);
           return null;
         }
       })
-      .filter(museum => museum !== null) // Remove any failed mappings
+      .filter(gallery => gallery !== null) // Remove any failed mappings
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)); // Sort by creation date, newest first
 
-    console.log(`Successfully formatted ${formattedMuseums.length} museums`);
+    console.log(`Successfully formatted ${formattedGalleries.length} galleries`);
 
     // Send formatted data as JSON
-    res.status(200).json({ museums: formattedMuseums });
+    res.status(200).json({ galleries: formattedGalleries });
   } catch (error) {
-    console.error("Error fetching museums from server API:", error);
-    res.status(500).json({ error: "Failed to fetch museums" });
+    console.error("Error fetching galleries from server API:", error);
+    res.status(500).json({ error: "Failed to fetch galleries" });
   }
 } 

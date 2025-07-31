@@ -179,7 +179,7 @@ export default function UserMuseumsAdmin() {
         return (
             <div className="container mx-auto px-6 py-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">User Museums Management</h1>
+                    <h1 className="text-3xl font-bold text-white">User Museums Management</h1>
                 </div>
                 <div className="grid gap-6">
                     {[...Array(5)].map((_, i) => (
@@ -203,7 +203,7 @@ export default function UserMuseumsAdmin() {
     return (
         <div className="container mx-auto px-6 py-8">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">User Museums Management</h1>
+                <h1 className="text-3xl font-bold text-white">User Museums Management</h1>
                 <div className="flex gap-2">
                     <Button
                         variant={view === 'users' ? 'default' : 'outline'}
