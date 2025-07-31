@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -9,12 +9,9 @@ export default function UserGalleries() {
   const [galleries, setGalleries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const hasLoaded = useRef(false);
 
   // Fetch galleries data
   const fetchData = useCallback(async () => {
-    if (hasLoaded.current) return;
-    
     try {
       setLoading(true);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/v1/api';
@@ -30,21 +27,21 @@ export default function UserGalleries() {
       }
       
       const data = await response.json();
+      console.log('Gallery API response:', data);
       
       if (data.status && data.items) {
         const newGalleries = data.items;
-        // Only update if data has actually changed
-        if (JSON.stringify(newGalleries) !== JSON.stringify(galleries)) {
-          setGalleries(newGalleries);
-        }
+        console.log('Setting galleries:', newGalleries.length);
+        setGalleries(newGalleries);
+      } else {
+        console.log('No valid data in response:', data);
       }
-      hasLoaded.current = true;
     } catch (error) {
       console.error('Error fetching galleries:', error);
     } finally {
       setLoading(false);
     }
-  }, [galleries]);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -67,20 +64,30 @@ export default function UserGalleries() {
 
   // Filter out galleries with invalid image URLs and limit to 20 most recent
   const validGalleries = useMemo(() => {
-    console.log('Total galleries from API:', galleries.length);
+    console.log('🔍 Processing galleries - Total from API:', galleries.length);
+    console.log('🔍 Raw galleries data:', galleries);
 
     const processedGalleries = galleries
-      .map(gallery => ({
-        ...gallery,
-        profileImage: isValidImageUrl(gallery.profileImage) ? gallery.profileImage : "/placeholder.jpeg"
-      }))
+      .map(gallery => {
+        const processed = {
+          ...gallery,
+          name: gallery.title, // Map title to name
+          profileImage: gallery.images && gallery.images.length > 0 && isValidImageUrl(gallery.images[0]) ? gallery.images[0] : "/placeholder.jpeg",
+          slug: gallery.slug || gallery.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+          city: gallery.city || "Unknown", // Assuming city might be available
+        };
+        console.log('🔍 Processed gallery:', processed);
+        return processed;
+      })
       .filter(gallery => {
-        return gallery.name && gallery.slug;
+        const isValid = gallery.name && gallery.slug;
+        console.log('🔍 Gallery validation:', { name: gallery.name, slug: gallery.slug, isValid });
+        return isValid;
       })
       .slice(0, 20); // Show only 20 most recent galleries
 
-    console.log('Processed galleries (first 20):', processedGalleries.length);
-    console.log('First few galleries:', processedGalleries.slice(0, 3).map(g => ({ name: g.name, slug: g.slug })));
+    console.log('✅ Final processed galleries:', processedGalleries.length);
+    console.log('✅ First few galleries:', processedGalleries.slice(0, 3).map(g => ({ name: g.name, slug: g.slug })));
 
     return processedGalleries;
   }, [galleries]);
