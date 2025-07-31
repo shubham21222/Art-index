@@ -34,6 +34,7 @@ export const createSponsorBanner = catchAsyncError(async (req, res, next) => {
     contactEmail,
     contactPhone,
     budget,
+    status: "active", // Set status to active by default
     createdBy: req.user._id,
   });
 
@@ -82,7 +83,7 @@ export const getActiveSponsorBanners = catchAsyncError(async (req, res, next) =>
   const query = {
     placement,
     isActive: true,
-    status: "active",
+    status: { $in: ["active", "pending"] }, // Include both active and pending banners
     startDate: { $lte: new Date() },
     endDate: { $gte: new Date() },
   };

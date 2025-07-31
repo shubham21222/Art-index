@@ -98,6 +98,22 @@ export default function SponsorBannersAdmin() {
   };
 
   const handleCreate = async () => {
+    // Validate required fields
+    const requiredFields = ['title', 'description', 'image', 'link', 'sponsorName', 'sponsorWebsite', 'placement', 'startDate', 'endDate', 'contactEmail', 'budget'];
+    const missingFields = requiredFields.filter(field => !formData[field] || formData[field].trim() === '');
+    
+    if (missingFields.length > 0) {
+      alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    // Validate placement enum
+    const validPlacements = ['homepage', 'collect', 'museums', 'artists', 'galleries', 'price-index'];
+    if (!validPlacements.includes(formData.placement)) {
+      alert('Please select a valid placement');
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${BASE_URL}/sponsor-banner/create`, {
@@ -123,11 +139,28 @@ export default function SponsorBannersAdmin() {
         alert(data.message || "Failed to create banner");
       }
     } catch (error) {
+      console.error("Error creating banner:", error);
       alert("Error creating banner");
     }
   };
 
   const handleUpdate = async () => {
+    // Validate required fields
+    const requiredFields = ['title', 'description', 'image', 'link', 'sponsorName', 'sponsorWebsite', 'placement', 'startDate', 'endDate', 'contactEmail', 'budget'];
+    const missingFields = requiredFields.filter(field => !formData[field] || formData[field].trim() === '');
+    
+    if (missingFields.length > 0) {
+      alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    // Validate placement enum
+    const validPlacements = ['homepage', 'collect', 'museums', 'artists', 'galleries', 'price-index'];
+    if (!validPlacements.includes(formData.placement)) {
+      alert('Please select a valid placement');
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${BASE_URL}/sponsor-banner/${selectedBanner._id}`, {
@@ -153,6 +186,7 @@ export default function SponsorBannersAdmin() {
         alert(data.message || "Failed to update banner");
       }
     } catch (error) {
+      console.error("Error updating banner:", error);
       alert("Error updating banner");
     }
   };
@@ -507,40 +541,55 @@ export default function SponsorBannersAdmin() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
+                <Label className="text-white">Sponsor Website</Label>
+                <Input
+                  value={formData.sponsorWebsite}
+                  onChange={(e) => setFormData({ ...formData, sponsorWebsite: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                  placeholder="https://example.com"
+                />
+              </div>
+              <div>
                 <Label className="text-white">Placement</Label>
                 <Select
                   value={formData.placement}
-                  onValueChange={(value) => setFormData({ ...formData, placement: value })}
+                  onValueChange={(value) => {
+                    console.log('Placement selected:', value);
+                    setFormData({ ...formData, placement: value });
+                  }}
                 >
                   <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                     <SelectValue placeholder="Select placement" />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    <SelectItem value="homepage">Homepage</SelectItem>
-                    <SelectItem value="collect">Collect</SelectItem>
-                    <SelectItem value="museums">Museums</SelectItem>
-                    <SelectItem value="artists">Artists</SelectItem>
-                    <SelectItem value="galleries">Galleries</SelectItem>
-                    <SelectItem value="price-index">Price Index</SelectItem>
+                  <SelectContent className="bg-zinc-800 border-zinc-700 text-zinc-200 z-[9999]">
+                    <SelectItem value="homepage" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Homepage</SelectItem>
+                    <SelectItem value="collect" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Collect</SelectItem>
+                    <SelectItem value="museums" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Museums</SelectItem>
+                    <SelectItem value="artists" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Artists</SelectItem>
+                    <SelectItem value="galleries" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Galleries</SelectItem>
+                    <SelectItem value="price-index" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Price Index</SelectItem>
                   </SelectContent>
                 </Select>
+                {/* Debug info */}
+                <p className="text-xs text-zinc-500 mt-1">Current value: {formData.placement || 'None selected'}</p>
               </div>
-              <div>
-                <Label className="text-white">Position</Label>
-                <Select
-                  value={formData.position}
-                  onValueChange={(value) => setFormData({ ...formData, position: value })}
-                >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    <SelectItem value="top">Top</SelectItem>
-                    <SelectItem value="middle">Middle</SelectItem>
-                    <SelectItem value="bottom">Bottom</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            </div>
+
+            <div>
+              <Label className="text-white">Position</Label>
+              <Select
+                value={formData.position}
+                onValueChange={(value) => setFormData({ ...formData, position: value })}
+              >
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                  <SelectValue placeholder="Select position" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700 text-zinc-200 z-50">
+                  <SelectItem value="top" className="text-zinc-200 hover:bg-zinc-700">Top</SelectItem>
+                  <SelectItem value="middle" className="text-zinc-200 hover:bg-zinc-700">Middle</SelectItem>
+                  <SelectItem value="bottom" className="text-zinc-200 hover:bg-zinc-700">Bottom</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -668,40 +717,52 @@ export default function SponsorBannersAdmin() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
+                <Label className="text-white">Sponsor Website</Label>
+                <Input
+                  value={formData.sponsorWebsite}
+                  onChange={(e) => setFormData({ ...formData, sponsorWebsite: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                  placeholder="https://example.com"
+                />
+              </div>
+              <div>
                 <Label className="text-white">Placement</Label>
                 <Select
                   value={formData.placement}
                   onValueChange={(value) => setFormData({ ...formData, placement: value })}
                 >
                   <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                    <SelectValue />
+                    <SelectValue placeholder="Select placement" />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    <SelectItem value="homepage">Homepage</SelectItem>
-                    <SelectItem value="collect">Collect</SelectItem>
-                    <SelectItem value="museums">Museums</SelectItem>
-                    <SelectItem value="artists">Artists</SelectItem>
-                    <SelectItem value="galleries">Galleries</SelectItem>
-                    <SelectItem value="price-index">Price Index</SelectItem>
+                  <SelectContent className="bg-zinc-800 border-zinc-700 text-zinc-200 z-[9999]">
+                    <SelectItem value="homepage" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Homepage</SelectItem>
+                    <SelectItem value="collect" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Collect</SelectItem>
+                    <SelectItem value="museums" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Museums</SelectItem>
+                    <SelectItem value="artists" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Artists</SelectItem>
+                    <SelectItem value="galleries" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Galleries</SelectItem>
+                    <SelectItem value="price-index" className="text-zinc-200 hover:bg-zinc-700 cursor-pointer">Price Index</SelectItem>
                   </SelectContent>
                 </Select>
+                {/* Debug info */}
+                <p className="text-xs text-zinc-500 mt-1">Current value: {formData.placement || 'None selected'}</p>
               </div>
-              <div>
-                <Label className="text-white">Position</Label>
-                <Select
-                  value={formData.position}
-                  onValueChange={(value) => setFormData({ ...formData, position: value })}
-                >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    <SelectItem value="top">Top</SelectItem>
-                    <SelectItem value="middle">Middle</SelectItem>
-                    <SelectItem value="bottom">Bottom</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            </div>
+
+            <div>
+              <Label className="text-white">Position</Label>
+              <Select
+                value={formData.position}
+                onValueChange={(value) => setFormData({ ...formData, position: value })}
+              >
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                  <SelectValue placeholder="Select position" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700 text-zinc-200 z-50">
+                  <SelectItem value="top" className="text-zinc-200 hover:bg-zinc-700">Top</SelectItem>
+                  <SelectItem value="middle" className="text-zinc-200 hover:bg-zinc-700">Middle</SelectItem>
+                  <SelectItem value="bottom" className="text-zinc-200 hover:bg-zinc-700">Bottom</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
