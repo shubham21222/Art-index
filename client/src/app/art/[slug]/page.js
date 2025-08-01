@@ -501,31 +501,7 @@ export default function ArtworkPage({ params }) {
               </div>
 
               {/* Price Section */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-sm text-gray-600">Original Price</p>
-                      <p className="text-3xl font-bold text-gray-900">
-                        {getOriginalPrice()}
-                      </p>
-                    </div>
-                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsContactModalOpen(true)}>
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      I&apos;m Interested
-                    </Button>
-                  </div>
-                  
-                  {/* {artwork.min_print_price && (
-                    <div className="pt-4 border-t">
-                      <p className="text-sm text-gray-600">Print Price</p>
-                      <p className="text-xl font-semibold text-gray-900">
-                        From {formatPrintPrice(artwork.min_print_price)}
-                      </p>
-                    </div>
-                  )} */}
-                </CardContent>
-              </Card>
+             
 
               {/* Price Estimate Section */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6">

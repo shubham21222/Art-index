@@ -1067,7 +1067,7 @@ export default function ArtworkPage() {
                   onClick={handleContactClick}
                   className="bg-black text-white hover:bg-gray-800 w-full text-base sm:text-lg font-semibold py-4 sm:py-3 px-6 sm:px-8 rounded-2xl shadow-lg text-center transition-all duration-200"
                 >
-                  Contact - {getPriceDisplay().hasAdjustment ? getPriceDisplay().estimate : getPriceDisplay().original}
+                  {getPriceDisplay().original === "Price Unavailable" ? "Price upon request" : `Contact - ${getPriceDisplay().hasAdjustment ? getPriceDisplay().estimate : getPriceDisplay().original}`}
                 </Button>
                 
                 {isPriceAvailable() && (
