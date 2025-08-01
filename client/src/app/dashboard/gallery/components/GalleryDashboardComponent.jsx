@@ -27,11 +27,15 @@ import {
   List,
   Palette,
   Eye,
+  Gavel,
+  Upload,
 } from 'lucide-react';
 import Image from 'next/image';
 import { MuseumDetailView } from '../../museums/components/MuseumDetailView';
 import { ArtworkForm } from './ArtworkForm';
 import { ArtworkList } from './ArtworkList';
+import AuctionModal from './AuctionModal';
+import BulkUploadModal from './BulkUploadModal';
 
 // Helper function to format image URLs
 const formatImageUrl = (url) => {
@@ -73,6 +77,11 @@ export function GalleryDashboardComponent() {
   const [selectedGalleryForArtwork, setSelectedGalleryForArtwork] = useState(null);
   const [isArtworkListOpen, setIsArtworkListOpen] = useState(false);
   const [selectedGalleryForList, setSelectedGalleryForList] = useState(null);
+  const [isAuctionModalOpen, setIsAuctionModalOpen] = useState(false);
+  const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
+  const [auctions, setAuctions] = useState([]);
+  const [auctionsLoading, setAuctionsLoading] = useState(false);
+  const [selectedGalleryForAuction, setSelectedGalleryForAuction] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -81,7 +90,7 @@ export function GalleryDashboardComponent() {
     isFeatured: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { token } = useSelector((state) => state.auth);
+  const { token, user } = useSelector((state) => state.auth);
   const isFetching = useRef(false);
 
   const fetchGalleries = useCallback(async () => {
@@ -269,12 +278,10 @@ export function GalleryDashboardComponent() {
   };
 
   const handleArtworkSubmit = async (artworkData) => {
-    setIsSubmitting(true);
-
     try {
       const url = selectedArtwork
-        ? `${process.env.NEXT_PUBLIC_API_URL}/gallery/${selectedGalleryForArtwork._id}/artworks/${selectedArtwork._id}/update`
-        : `${process.env.NEXT_PUBLIC_API_URL}/gallery/${selectedGalleryForArtwork._id}/artworks/add`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/gallery/artwork/update/${selectedGalleryForArtwork._id}/${selectedArtwork._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/gallery/artwork/add/${selectedGalleryForArtwork._id}`;
 
       const res = await fetch(url, {
         method: 'POST',
@@ -289,15 +296,112 @@ export function GalleryDashboardComponent() {
         throw new Error('Failed to save artwork');
       }
 
-      toast.success(selectedArtwork ? 'Artwork updated successfully' : 'Artwork added successfully');
+      toast.success(selectedArtwork ? 'Artwork updated successfully!' : 'Artwork added successfully!');
       setIsArtworkModalOpen(false);
       setSelectedArtwork(null);
       setSelectedGalleryForArtwork(null);
       fetchGalleries();
     } catch (error) {
       toast.error(error.message || 'Failed to save artwork');
+    }
+  };
+
+  // Auction-related functions
+  const fetchAuctions = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      setAuctionsLoading(true);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/all`, {
+        headers: {
+          'Authorization': `${token}`
+        }
+      });
+      
+      if (!res.ok) {
+        throw new Error('Failed to fetch auctions');
+      }
+
+      const data = await res.json();
+      console.log('Auctions API response:', data);
+      
+      // Handle the correct API response structure
+      let auctionData = [];
+      if (data.status && data.items && data.items.formattedAuctions) {
+        auctionData = Array.isArray(data.items.formattedAuctions) ? data.items.formattedAuctions : [];
+      } else if (data.status && data.items) {
+        auctionData = Array.isArray(data.items) ? data.items : [];
+      } else if (data.status && data.data) {
+        auctionData = Array.isArray(data.data) ? data.data : [];
+      } else if (Array.isArray(data)) {
+        auctionData = data;
+      } else {
+        console.warn('Unexpected auctions API response structure:', data);
+        auctionData = [];
+      }
+      
+      // Filter auctions to show only those created by the current user
+      const userAuctions = auctionData.filter(auction => {
+        const currentUserId = user?._id;
+        return auction.createdBy === currentUserId;
+      });
+      
+      setAuctions(userAuctions);
+      console.log('Processed auction data:', userAuctions);
+      console.log('Number of user auctions:', userAuctions.length);
+      console.log('Current user ID:', user?._id);
+    } catch (error) {
+      console.error('Error fetching auctions:', error);
+      toast.error(error.message || 'Failed to fetch auctions');
+      setAuctions([]); // Set empty array on error
     } finally {
-      setIsSubmitting(false);
+      setAuctionsLoading(false);
+    }
+  }, [token, user]);
+
+  useEffect(() => {
+    if (token) {
+      fetchAuctions();
+    }
+  }, [fetchAuctions]);
+
+  const handleCreateAuction = () => {
+    // If there's only one gallery, use it. Otherwise, show a selection modal or use the first one
+    const galleryToUse = galleries.length === 1 ? galleries[0] : galleries[0]; // For now, use first gallery
+    setSelectedGalleryForAuction(galleryToUse);
+    setIsAuctionModalOpen(true);
+  };
+
+  const handleAuctionSuccess = () => {
+    fetchAuctions();
+  };
+
+  const handleDeleteAuction = async (auctionId) => {
+    if (!confirm('Are you sure you want to delete this auction?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token}`
+        },
+        body: JSON.stringify({ auctionId: auctionId })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete auction');
+      }
+
+      const result = await response.json();
+      toast.success(result.message || 'Auction deleted successfully!');
+      fetchAuctions(); // Refresh the auctions list
+    } catch (error) {
+      console.error('Error deleting auction:', error);
+      toast.error(error.message || 'Failed to delete auction');
     }
   };
 
@@ -315,8 +419,10 @@ export function GalleryDashboardComponent() {
       categories: new Set(galleries.map(g => g.categoryDisplay || g.category?.name || g.categoryName || 'Uncategorized')).size,
       totalArtworks: galleries.reduce((sum, gallery) => sum + (gallery.artworks?.length || 0), 0),
       activeArtworks: galleries.reduce((sum, gallery) => sum + (gallery.artworks?.filter(a => a.isActive)?.length || 0), 0),
+      totalAuctions: Array.isArray(auctions) ? auctions.length : 0,
+      activeAuctions: Array.isArray(auctions) ? auctions.filter(a => a.status === 'ACTIVE').length : 0,
   };
-  }, [galleries]);
+  }, [galleries, auctions]);
 
   if (loading) {
     return (
@@ -383,6 +489,24 @@ export function GalleryDashboardComponent() {
             {stats.activeArtworks}
           </p>
         </div>
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Total Auctions</h3>
+            <Gavel className="h-6 w-6 text-purple-600" />
+          </div>
+          <p className="text-3xl font-bold text-gray-900">
+            {stats.totalAuctions}
+          </p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Active Auctions</h3>
+            <Gavel className="h-6 w-6 text-green-600" />
+          </div>
+          <p className="text-3xl font-bold text-gray-900">
+            {stats.activeAuctions}
+          </p>
+        </div>
       </div>
 
       {/* Actions Bar */}
@@ -407,23 +531,32 @@ export function GalleryDashboardComponent() {
               {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
             </Button>
           </div>
-          <Button
-            onClick={() => {
-              setSelectedGallery(null);
-              setFormData({
-                title: '',
-                description: '',
-                images: [''],
-                category: '',
-                isFeatured: false
-              });
-              setIsModalOpen(true);
-            }}
-            className="bg-gray-900 hover:bg-gray-800 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Gallery
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={handleCreateAuction}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <Gavel className="w-4 h-4 mr-2" />
+              Create Auction
+            </Button>
+            <Button
+              onClick={() => {
+                setSelectedGallery(null);
+                setFormData({
+                  title: '',
+                  description: '',
+                  images: [''],
+                  category: '',
+                  isFeatured: false
+                });
+                setIsModalOpen(true);
+              }}
+              className="bg-gray-900 hover:bg-gray-800 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Gallery
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -521,130 +654,146 @@ export function GalleryDashboardComponent() {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Gallery</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Description</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Category</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Images</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Artworks</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Featured</th>
-                  <th className="px-6 py-4 text-right text-sm font-medium text-gray-900">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredGalleries.map((gallery) => (
-                  <tr key={gallery._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="relative h-10 w-10 rounded-lg overflow-hidden mr-3">
-                          <Image
-                            src={formatImageUrl(gallery.images[0])}
-                            alt={gallery.title}
-                            fill
-                            className="object-cover"
-                            onError={handleImageError}
-                          />
-                        </div>
-                        <span className="font-medium text-gray-900">{gallery.title}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-gray-600 max-w-xs truncate">{gallery.description}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className="bg-gray-50">
-                        {gallery.categoryDisplay || gallery.category?.name || gallery.categoryName || 'Uncategorized'}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex -space-x-2">
-                        {gallery.images.slice(0, 3).map((image, index) => (
-                          <div key={index} className="relative w-8 h-8 rounded-full border-2 border-white">
-                            <Image
-                              src={formatImageUrl(image)}
-                              alt={`Gallery image ${index + 1}`}
-                              fill
-                              className="object-cover rounded-full"
-                              onError={handleImageError}
-                            />
-                          </div>
-                        ))}
-                        {gallery.images.length > 3 && (
-                          <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs">
-                            +{gallery.images.length - 3}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
+        <div className="space-y-4">
+          {filteredGalleries.map((gallery) => (
+            <div key={gallery._id} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden">
+                    <Image
+                      src={formatImageUrl(gallery.images[0])}
+                      alt={gallery.title}
+                      fill
+                      className="object-cover"
+                      onError={handleImageError}
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{gallery.title}</h3>
+                    <p className="text-gray-600">{gallery.description}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(gallery)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleAddArtwork(gallery)}
+                    className="text-green-600"
+                  >
+                    <Palette className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewArtworks(gallery)}
+                    className="text-blue-600"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(gallery._id)}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Auctions Section */}
+      {Array.isArray(auctions) && auctions.length > 0 && (
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Your Auctions</h2>
+            {/* <div className="flex space-x-3">
+              <Button
+                onClick={() => setIsBulkUploadModalOpen(true)}
+                className="bg-zinc-800 hover:bg-zinc-700 text-white"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Bulk Upload
+              </Button>
+              <Button
+                onClick={handleCreateAuction}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <Gavel className="w-4 h-4 mr-2" />
+                Create Auction
+              </Button>
+            </div> */}
+          </div>
+          
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {auctions.map((auction) => (
+              <div key={auction._id} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      {auction.product?.title || 'Untitled Auction'}
+                    </h3>
+                    <div className="flex items-center space-x-2">
                       <Badge 
                         variant="outline" 
-                        className="bg-gray-50 cursor-pointer hover:bg-gray-100"
-                        onClick={() => handleViewArtworks(gallery)}
+                        className={`${
+                          auction.status === 'ACTIVE' ? 'bg-green-50 text-green-700 border-green-200' :
+                          auction.status === 'COMPLETED' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          'bg-gray-50 text-gray-700 border-gray-200'
+                        }`}
                       >
-                        {gallery.artworks?.length || 0}
+                        {auction.status}
                       </Badge>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant={gallery.isFeatured ? 'default' : 'secondary'}>
-                        {gallery.isFeatured ? 'Yes' : 'No'}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(gallery)}
-                          className="hover:bg-gray-100"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleAddArtwork(gallery)}
-                          className="hover:bg-green-50 text-green-600"
-                        >
-                          <Palette className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleViewArtworks(gallery)}
-                          className="hover:bg-blue-50 text-blue-600"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(gallery._id)}
-                          className="hover:bg-red-50 text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredGalleries.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-16 text-center">
-                      <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                      <h3 className="mt-4 text-lg font-medium text-gray-900">No galleries found</h3>
-                      <p className="mt-2 text-gray-500">
-                        {searchQuery ? 'Try adjusting your search' : 'Get started by creating a new gallery'}
-                      </p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteAuction(auction._id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        title="Delete Auction"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Starting Bid:</span>
+                      <span className="font-semibold text-gray-900">${auction.startingBid}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Current Bid:</span>
+                      <span className="font-semibold text-green-600">${auction.currentBid || auction.startingBid}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Lot Number:</span>
+                      <span className="font-semibold text-gray-900">{auction.lotNumber}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 text-xs text-gray-500">
+                    <div>Start: {new Date(auction.startDate).toLocaleDateString()}</div>
+                    <div>End: {new Date(auction.endDate).toLocaleDateString()}</div>
+                  </div>
+                  
+                  {auction.description && (
+                    <p className="text-sm text-gray-600 mt-3 line-clamp-2">
+                      {auction.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -784,6 +933,27 @@ export function GalleryDashboardComponent() {
         gallery={selectedGalleryForList}
         onDeleteArtwork={handleDeleteArtwork}
         onEditArtwork={handleEditArtwork}
+      />
+
+      {/* Auction Modal */}
+      <AuctionModal
+        isOpen={isAuctionModalOpen}
+        onClose={() => {
+          setIsAuctionModalOpen(false);
+          setSelectedGalleryForAuction(null);
+        }}
+        onSuccess={handleAuctionSuccess}
+        galleryArtworks={selectedGalleryForAuction?.artworks || []}
+      />
+
+      {/* Bulk Upload Modal */}
+      <BulkUploadModal
+        isOpen={isBulkUploadModalOpen}
+        onClose={() => setIsBulkUploadModalOpen(false)}
+        onSuccess={() => {
+          setIsBulkUploadModalOpen(false);
+          fetchAuctions(); // Refresh auctions after bulk upload
+        }}
       />
     </div>
   );

@@ -521,7 +521,7 @@ export default function ArtworkPage({ params }) {
                   </div>
 
                   <div className="text-center">
-                    {getPriceDisplay().hasAdjustment ? (
+                    {getPriceDisplay().hasAdjustment ? (  
                       <div className="flex justify-center items-center gap-2">
                         <div className="text-2xl font-bold text-gray-900">
                           {getPriceDisplay().original}

@@ -29,7 +29,7 @@ import {
 import { IsAuthenticated ,  authorizeRoles} from  "../../middlewares/authicationmiddleware.js"
 
 router.post("/create", IsAuthenticated ,  authorizeRoles(
-    'ADMIN'
+    'ADMIN', 'GALLERY'
 ) , createAuction);
 
 router.post("/bulkCreate", IsAuthenticated  , createBulkAuction)
