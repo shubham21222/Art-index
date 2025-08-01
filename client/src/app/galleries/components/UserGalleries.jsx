@@ -183,9 +183,9 @@ export default function UserGalleries() {
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          {/* <div className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
             🎨 Community Galleries
-          </div>
+          </div> */}
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Newly Added Galleries</h2>
           <p className="text-gray-900 text-lg mt-2">Discover galleries created by our community</p>
         </div>
@@ -232,11 +232,11 @@ export default function UserGalleries() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                         
                         {/* Community Badge */}
-                        <div className="absolute top-4 left-4">
+                        {/* <div className="absolute top-4 left-4">
                           <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">
                             🎨 Community Gallery
                           </span>
-                        </div>
+                        </div> */}
 
                         {/* Stats Overlay */}
                         <div className="absolute bottom-4 left-4 right-4">

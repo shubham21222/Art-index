@@ -3,9 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Mail, Phone, MapPin, Globe, ArrowLeft } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, ArrowLeft, X, Heart, Share2, Eye, Star, Tag, Info, DollarSign, MapPinIcon, Palette, Ruler, Calendar } from 'lucide-react';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
+import ContactModal from '@/app/components/ContactModal';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 export default function UserGalleryPage({ params }) {
   const { slug } = params;
@@ -13,6 +18,9 @@ export default function UserGalleryPage({ params }) {
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,6 +83,42 @@ export default function UserGalleryPage({ params }) {
   // Get image source with fallback
   const getImageSrc = (url, fallback = "/placeholder.jpeg") => {
     return isValidImageUrl(url) ? url : fallback;
+  };
+
+  // Handle artwork click to open modal
+  const handleArtworkClick = (artwork) => {
+    setSelectedArtwork(artwork);
+    setIsArtworkModalOpen(true);
+  };
+
+  // Handle contact button click
+  const handleContactClick = () => {
+    setIsContactModalOpen(true);
+  };
+
+  // Handle contact modal close
+  const handleContactClose = () => {
+    setIsContactModalOpen(false);
+  };
+
+  // Handle artwork modal close
+  const handleArtworkModalClose = () => {
+    setIsArtworkModalOpen(false);
+    setSelectedArtwork(null);
+  };
+
+  // Handle share artwork
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: selectedArtwork?.title || 'Artwork',
+        text: `Check out this artwork: ${selectedArtwork?.title}`,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+    }
   };
 
   // Placeholder component for missing images
@@ -144,9 +188,9 @@ export default function UserGalleryPage({ params }) {
 
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <div className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          {/* <div className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
             🎨 Community Gallery
-          </div>
+          </div> */}
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-black bg-clip-text">
             {galleryData?.title || slug.replace(/-/g, ' ').split(' ').map(word => 
               word.charAt(0).toUpperCase() + word.slice(1)
@@ -225,6 +269,7 @@ export default function UserGalleryPage({ params }) {
                 <div 
                   key={artwork._id || `artwork-${index}`} 
                   className="group cursor-pointer"
+                  onClick={() => handleArtworkClick(artwork)}
                 >
                   <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100">
                     <div className="relative w-full h-[280px] overflow-hidden">
@@ -311,6 +356,176 @@ export default function UserGalleryPage({ params }) {
           </div>
         </section>
       </div>
+
+      {/* Artwork Modal */}
+      <Dialog open={isArtworkModalOpen} onOpenChange={handleArtworkModalClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          {selectedArtwork && (
+            <div className="space-y-6">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">{selectedArtwork.title}</h2>
+                <button
+                  onClick={handleArtworkModalClose}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Artwork Image */}
+              <div className="relative w-full h-[500px] rounded-lg overflow-hidden bg-gray-100">
+                {selectedArtwork.images && selectedArtwork.images.length > 0 ? (
+                  <Image
+                    src={getImageSrc(selectedArtwork.images[0])}
+                    alt={selectedArtwork.title}
+                    fill
+                    style={{ objectFit: 'contain' }}
+                    className="rounded-lg"
+                    onError={handleImageError}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+                  />
+                ) : (
+                  <ImagePlaceholder type="artwork" className="rounded-lg" />
+                )}
+              </div>
+
+              {/* Artwork Details */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column - Artwork Info */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{selectedArtwork.title}</h3>
+                    {selectedArtwork.artist && (
+                      <p className="text-lg text-gray-600">
+                        by {typeof selectedArtwork.artist === 'string' ? selectedArtwork.artist : selectedArtwork.artist.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Artwork Details Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {selectedArtwork.category && (
+                      <div className="flex items-center gap-2">
+                        <Tag className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">{selectedArtwork.category}</span>
+                      </div>
+                    )}
+                    {selectedArtwork.medium && (
+                      <div className="flex items-center gap-2">
+                        <Palette className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">{selectedArtwork.medium}</span>
+                      </div>
+                    )}
+                    {selectedArtwork.dimensions && selectedArtwork.dimensions.displayText && (
+                      <div className="flex items-center gap-2">
+                        <Ruler className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">{selectedArtwork.dimensions.displayText}</span>
+                      </div>
+                    )}
+                    {selectedArtwork.date && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">{selectedArtwork.date}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  {selectedArtwork.description && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                      <p className="text-gray-600 text-sm leading-relaxed">{selectedArtwork.description}</p>
+                    </div>
+                  )}
+
+                  {/* Additional Info */}
+                  {selectedArtwork.additionalInfo && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">Additional Information</h4>
+                      <p className="text-gray-600 text-sm leading-relaxed">{selectedArtwork.additionalInfo}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column - Pricing and Actions */}
+                <div className="space-y-6">
+                  {/* Pricing */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4">Pricing</h4>
+                    {selectedArtwork.price ? (
+                      <div className="space-y-2">
+                        <div className="text-2xl font-bold text-green-600">
+                          ${selectedArtwork.price.min}
+                          {selectedArtwork.price.max && ` - $${selectedArtwork.price.max}`}
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {selectedArtwork.price.currency || 'USD'}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <DollarSign className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-600">Contact for pricing</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-3">
+                    <Button
+                      onClick={handleContactClick}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      Contact for Price
+                    </Button>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={handleShare}
+                        className="flex-1"
+                      >
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        <Heart className="w-4 h-4 mr-2" />
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Condition Info */}
+                  {selectedArtwork.condition && (
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Condition</h4>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <div>Framed: {selectedArtwork.condition.framed ? 'Yes' : 'No'}</div>
+                        <div>Signature: {selectedArtwork.condition.signature}</div>
+                        {selectedArtwork.condition.certificateOfAuthenticity && (
+                          <div>Certificate of Authenticity: Yes</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Contact Modal */}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={handleContactClose}
+        artwork={selectedArtwork}
+      />
+
       <Footer />
     </>
   );

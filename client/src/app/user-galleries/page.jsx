@@ -122,9 +122,9 @@ export default function UserGalleriesPage() {
 
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          {/* <div className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
             🎨 Community Galleries
-          </div>
+          </div> */}
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-black">
             Newly Added Galleries
           </h1>
@@ -195,11 +195,11 @@ export default function UserGalleriesPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                     
                     {/* Community Badge */}
-                    <div className="absolute top-4 left-4">
+                    {/* <div className="absolute top-4 left-4">
                       <Badge className="bg-purple-600 text-white">
                         🎨 Community Gallery
                       </Badge>
-                    </div>
+                    </div> */}
 
                     {/* Stats Overlay */}
                     <div className="absolute bottom-4 left-4 right-4">
