@@ -4,7 +4,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v
 
 export async function GET(request, { params }) {
   try {
-    const { placement } = params;
+    const { placement } = await params;
     const { searchParams } = new URL(request.url);
     const position = searchParams.get('position') || '';
     

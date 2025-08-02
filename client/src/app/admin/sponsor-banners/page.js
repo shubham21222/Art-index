@@ -35,7 +35,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v
 
 export default function SponsorBannersAdmin() {
   const [banners, setBanners] = useState([]);
-  const [stats, setStats] = useState({});
+  const [stats, setStats] = useState({ overall: {} });
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -70,11 +70,15 @@ export default function SponsorBannersAdmin() {
         },
       });
       const data = await response.json();
-      if (data.success) {
-        setBanners(data.data);
+      console.log('Banners API response:', data); // Debug log
+      if (data.status && data.items) {
+        setBanners(data.items);
+      } else {
+        setBanners([]); // Set empty array if no data
       }
     } catch (error) {
       console.error("Error fetching banners:", error);
+      setBanners([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -89,11 +93,15 @@ export default function SponsorBannersAdmin() {
         },
       });
       const data = await response.json();
-      if (data.success) {
-        setStats(data.data);
+      console.log('Stats API response:', data); // Debug log
+      if (data.status && data.items) {
+        setStats(data.items);
+      } else {
+        setStats({}); // Set empty object if no data
       }
     } catch (error) {
       console.error("Error fetching stats:", error);
+      setStats({}); // Set empty object on error
     }
   };
 
@@ -406,7 +414,7 @@ export default function SponsorBannersAdmin() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {banners.map((banner) => (
+            {banners && banners.length > 0 ? banners.map((banner) => (
               <div
                 key={banner._id}
                 className="flex items-center justify-between p-4 bg-zinc-800 border border-zinc-700 rounded-lg hover:border-zinc-600 transition-colors"
@@ -420,8 +428,8 @@ export default function SponsorBannersAdmin() {
                     />
                   </div>
                   <div>
-                    <h3 className="text-white font-medium">{banner.title}</h3>
-                    <p className="text-zinc-400 text-sm">{banner.sponsorName}</p>
+                    <h3 className="text-white font-medium">{banner.title || 'Untitled'}</h3>
+                    <p className="text-zinc-400 text-sm">{banner.sponsorName || 'Unknown Sponsor'}</p>
                     <div className="flex items-center gap-2 mt-1">
                       {getStatusBadge(banner)}
                       {getPlacementBadge(banner.placement)}
@@ -479,7 +487,11 @@ export default function SponsorBannersAdmin() {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-8">
+                <p className="text-zinc-400">No sponsor banners found.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

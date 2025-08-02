@@ -429,7 +429,7 @@ export const approvePartnership = async (req, res) => {
         const userData = {
             name: `${partnership.firstName} ${partnership.lastName}`,
             email: partnership.email,
-            role: partnership.partnershipType.toUpperCase(), // AUCTIONS, FAIRS, MUSEUMS, GALLERIES
+            role: partnership.partnershipType === 'sponsors' ? 'SPONSOR' : partnership.partnershipType.toUpperCase(), // SPONSOR, AUCTIONS, FAIRS, MUSEUMS, GALLERIES
             partnershipType: partnership.partnershipType,
             isPartner: true,
             partnerApprovedAt: new Date()
@@ -441,7 +441,7 @@ export const approvePartnership = async (req, res) => {
         
         if (user) {
             // Update existing user
-            user.role = partnership.partnershipType.toUpperCase();
+            user.role = partnership.partnershipType === 'sponsors' ? 'SPONSOR' : partnership.partnershipType.toUpperCase();
             user.partnershipType = partnership.partnershipType;
             user.isPartner = true;
             user.partnerApprovedAt = new Date();

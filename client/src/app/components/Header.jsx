@@ -126,6 +126,8 @@ export default function Header() {
                 return '/dashboard/fairs';
             case 'MUSEUMS':
                 return '/dashboard/museums';
+            case 'SPONSOR':
+                return '/dashboard/sponsor';
             case 'ADMIN':
                 return '/admin';
             default:
@@ -145,6 +147,8 @@ export default function Header() {
                 return 'Fairs Dashboard';
             case 'MUSEUMS':
                 return 'Museums Dashboard';
+            case 'SPONSOR':
+                return 'Sponsor Dashboard';
             case 'ADMIN':
                 return 'Admin Dashboard';
             default:
@@ -188,7 +192,7 @@ export default function Header() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                    {(role === 'GALLERY' || role === 'GALLERIES' || role === 'AUCTIONS' || role === 'FAIRS' || role === 'MUSEUMS' || role === 'ADMIN') && (
+                    {(role === 'GALLERY' || role === 'GALLERIES' || role === 'AUCTIONS' || role === 'FAIRS' || role === 'MUSEUMS' || role === 'SPONSOR' || role === 'ADMIN') && (
                         <DropdownMenuItem asChild>
                             <Link href={dashboardLink} className="flex items-center cursor-pointer">
                                 <LayoutDashboard className="w-4 h-4 mr-2" />

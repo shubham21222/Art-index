@@ -15,6 +15,8 @@ import ArtworkPricing from "./routes/ArtworkPricing/artworkPricing.routes.js";
 import offerRoutes from './routes/Offer/offer.routes.js';
 import SponsorBanner from './routes/SponsorBanner/sponsorBanner.routes.js';
 import Newsletter from './routes/Newsletter/index.js';
+import Users from './routes/users/users.routes.js';
+import Dashboard from './routes/dashboard/dashboard.routes.js';
 
 import google from "./routes/googleRoutes/google.routes.js";
 import Gallery from "./routes/gallery/gallery.routes.js";
@@ -83,6 +85,12 @@ router.use('/sponsor-banner', SponsorBanner);
 
 // Add API routes here for NEWSLETTER //
 router.use('/newsletter', Newsletter);
+
+// Add API routes here for USERS //
+router.use('/users', Users);
+
+// Add API routes here for DASHBOARD //
+router.use('/dashboard', Dashboard);
 
 
 export default router;

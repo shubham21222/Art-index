@@ -155,6 +155,7 @@ const PartnershipForm = () => {
                                         <SelectItem value="fairs">For Fairs</SelectItem>
                                         <SelectItem value="museums">For Museums</SelectItem>
                                         <SelectItem value="galleries">For Galleries</SelectItem>
+                                        <SelectItem value="sponsors">For Sponsors</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

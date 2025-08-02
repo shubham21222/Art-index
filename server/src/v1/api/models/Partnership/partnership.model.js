@@ -30,7 +30,7 @@ const partnershipSchema = new mongoose.Schema({
     partnershipType: {
         type: String,
         required: [true, 'Partnership type is required'],
-        enum: ['auctions', 'fairs', 'museums', 'galleries']
+        enum: ['auctions', 'fairs', 'museums', 'galleries', 'sponsors']
     },
     status: {
         type: String,

@@ -1,6 +1,7 @@
 import SponsorBanner from "../../models/SponsorBanner/sponsorBanner.model.js";
 import { catchAsyncError } from "../../middlewares/catchAsyncError.js";
 import ErrorHandler from "../../Utils/errorRes.js";
+import mongoose from "mongoose";
 
 // Create a new sponsor banner
 export const createSponsorBanner = catchAsyncError(async (req, res, next) => {
@@ -45,13 +46,18 @@ export const createSponsorBanner = catchAsyncError(async (req, res, next) => {
   });
 });
 
-// Get all sponsor banners (admin)
+// Get all sponsor banners (admin or sponsor)
 export const getAllSponsorBanners = catchAsyncError(async (req, res, next) => {
   const { page = 1, limit = 10, status, placement } = req.query;
 
   const query = {};
   if (status) query.status = status;
   if (placement) query.placement = placement;
+
+  // If user is a sponsor, only show their own banners
+  if (req.user.role === "SPONSOR") {
+    query.createdBy = req.user._id;
+  }
 
   const skip = (page - 1) * limit;
 
@@ -65,7 +71,7 @@ export const getAllSponsorBanners = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: sponsorBanners,
+    items: sponsorBanners,
     pagination: {
       currentPage: parseInt(page),
       totalPages: Math.ceil(total / limit),
@@ -82,8 +88,7 @@ export const getActiveSponsorBanners = catchAsyncError(async (req, res, next) =>
 
   const query = {
     placement,
-    isActive: true,
-    status: { $in: ["active", "pending"] }, // Include both active and pending banners
+    status: "active", // Only show banners with status "active"
     startDate: { $lte: new Date() },
     endDate: { $gte: new Date() },
   };
@@ -113,6 +118,11 @@ export const getSponsorBannerById = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Sponsor banner not found", 404));
   }
 
+  // If user is a sponsor, ensure they can only view their own banners
+  if (req.user.role === "SPONSOR" && sponsorBanner.createdBy._id.toString() !== req.user._id.toString()) {
+    return next(new ErrorHandler("You can only view your own banners", 403));
+  }
+
   res.status(200).json({
     success: true,
     data: sponsorBanner,
@@ -123,7 +133,18 @@ export const getSponsorBannerById = catchAsyncError(async (req, res, next) => {
 export const updateSponsorBanner = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
 
-  const sponsorBanner = await SponsorBanner.findByIdAndUpdate(
+  const sponsorBanner = await SponsorBanner.findById(id);
+
+  if (!sponsorBanner) {
+    return next(new ErrorHandler("Sponsor banner not found", 404));
+  }
+
+  // If user is a sponsor, ensure they can only update their own banners
+  if (req.user.role === "SPONSOR" && sponsorBanner.createdBy.toString() !== req.user._id.toString()) {
+    return next(new ErrorHandler("You can only update your own banners", 403));
+  }
+
+  const updatedBanner = await SponsorBanner.findByIdAndUpdate(
     id,
     req.body,
     {
@@ -132,14 +153,10 @@ export const updateSponsorBanner = catchAsyncError(async (req, res, next) => {
     }
   );
 
-  if (!sponsorBanner) {
-    return next(new ErrorHandler("Sponsor banner not found", 404));
-  }
-
   res.status(200).json({
     success: true,
     message: "Sponsor banner updated successfully",
-    data: sponsorBanner,
+    data: updatedBanner,
   });
 });
 
@@ -147,11 +164,18 @@ export const updateSponsorBanner = catchAsyncError(async (req, res, next) => {
 export const deleteSponsorBanner = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
 
-  const sponsorBanner = await SponsorBanner.findByIdAndDelete(id);
+  const sponsorBanner = await SponsorBanner.findById(id);
 
   if (!sponsorBanner) {
     return next(new ErrorHandler("Sponsor banner not found", 404));
   }
+
+  // If user is a sponsor, ensure they can only delete their own banners
+  if (req.user.role === "SPONSOR" && sponsorBanner.createdBy.toString() !== req.user._id.toString()) {
+    return next(new ErrorHandler("You can only delete your own banners", 403));
+  }
+
+  await SponsorBanner.findByIdAndDelete(id);
 
   res.status(200).json({
     success: true,
@@ -202,7 +226,14 @@ export const trackClick = catchAsyncError(async (req, res, next) => {
 
 // Get sponsor banner statistics
 export const getSponsorBannerStats = catchAsyncError(async (req, res, next) => {
+  // Build match stage based on user role
+  const matchStage = {};
+  if (req.user.role === "SPONSOR") {
+    matchStage.createdBy = new mongoose.Types.ObjectId(req.user._id);
+  }
+
   const stats = await SponsorBanner.aggregate([
+    ...(Object.keys(matchStage).length > 0 ? [{ $match: matchStage }] : []),
     {
       $group: {
         _id: null,
@@ -212,7 +243,6 @@ export const getSponsorBannerStats = catchAsyncError(async (req, res, next) => {
             $cond: [
               {
                 $and: [
-                  { $eq: ["$isActive", true] },
                   { $eq: ["$status", "active"] },
                   { $lte: ["$startDate", new Date()] },
                   { $gte: ["$endDate", new Date()] },
@@ -231,6 +261,7 @@ export const getSponsorBannerStats = catchAsyncError(async (req, res, next) => {
   ]);
 
   const placementStats = await SponsorBanner.aggregate([
+    ...(Object.keys(matchStage).length > 0 ? [{ $match: matchStage }] : []),
     {
       $group: {
         _id: "$placement",
@@ -266,7 +297,14 @@ export const toggleBannerStatus = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Sponsor banner not found", 404));
   }
 
+  // If user is a sponsor, ensure they can only toggle their own banners
+  if (req.user.role === "SPONSOR" && sponsorBanner.createdBy.toString() !== req.user._id.toString()) {
+    return next(new ErrorHandler("You can only toggle your own banners", 403));
+  }
+
+  // Toggle both isActive and status
   sponsorBanner.isActive = !sponsorBanner.isActive;
+  sponsorBanner.status = sponsorBanner.isActive ? "active" : "paused";
   await sponsorBanner.save();
 
   res.status(200).json({

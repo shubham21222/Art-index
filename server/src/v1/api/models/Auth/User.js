@@ -45,7 +45,7 @@ const UserSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ["USER", "ADMIN" , "MUSICIAN", "GALLERY", "AUCTIONS", "FAIRS", "MUSEUMS", "GALLERIES"],
+        enum: ["USER", "ADMIN" , "MUSICIAN", "GALLERY", "AUCTIONS", "FAIRS", "MUSEUMS", "GALLERIES", "SPONSOR"],
         default: "USER",
     },
 
@@ -194,7 +194,7 @@ const UserSchema = new mongoose.Schema({
     
     partnershipType: {
         type: String,
-        enum: ['auctions', 'fairs', 'museums', 'galleries'],
+        enum: ['auctions', 'fairs', 'museums', 'galleries', 'sponsors'],
         required: false
     },
     

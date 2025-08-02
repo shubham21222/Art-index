@@ -89,6 +89,8 @@ export default function AdminLayout({ children }) {
     // { title: "Settings", path: "/admin/settings", icon: Settings },
     { title: "Partnerships", path: "/admin/partnerships", icon: Users },
     { title: "Sponsor Banners", path: "/admin/sponsor-banners", icon: Megaphone },
+    { title: "Sponsors", path: "/admin/sponsors", icon: Users },
+    { title: "Users", path: "/admin/users", icon: Users },
     { title: "Newsletter", path: "/admin/newsletter", icon: FileText },
     { title: "User Museums", path: "/admin/user-museums", icon: Building2 },
     // { title: "Artwork Pricing", path: "/admin/artwork-pricing", icon: DollarSign },

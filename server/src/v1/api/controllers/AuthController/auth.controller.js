@@ -895,13 +895,129 @@ export const createPassword = async (req, res) => {
     }
 };
 
+// Get all sponsors (admin only)
+export const getAllSponsors = async (req, res, next) => {
+    try {
+        const sponsors = await User.find({ role: "SPONSOR" }).select('-password');
+        return success(res, 'Sponsors retrieved successfully', { items: sponsors });
+    } catch (error) {
+        return onError(res, error);
+    }
+};
 
+// Get all users with filtering and pagination (admin only)
+export const getAllUsersAdmin = async (req, res, next) => {
+    try {
+        const { page = 1, limit = 10, role, search } = req.query;
+        const skip = (page - 1) * limit;
 
+        let query = {};
+        
+        // Filter by role if specified
+        if (role && role !== 'all') {
+            query.role = role.toUpperCase();
+        }
 
+        // Search functionality
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } },
+                { mobile: { $regex: search, $options: 'i' } }
+            ];
+        }
 
+        const users = await User.find(query)
+            .select('-password')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(parseInt(limit));
 
+        const total = await User.countDocuments(query);
 
+        return success(res, 'Users retrieved successfully', {
+            items: users,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(total / limit),
+                totalItems: total,
+                itemsPerPage: parseInt(limit),
+            }
+        });
+    } catch (error) {
+        return onError(res, error);
+    }
+};
 
+// Get user statistics (admin only)
+export const getUserStats = async (req, res, next) => {
+    try {
+        const stats = await User.aggregate([
+            {
+                $group: {
+                    _id: '$role',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
 
+        const totalUsers = await User.countDocuments();
+        const totalAdmins = await User.countDocuments({ role: 'ADMIN' });
+        const totalSponsors = await User.countDocuments({ role: 'SPONSOR' });
+        const totalGalleries = await User.countDocuments({ role: { $in: ['GALLERY', 'GALLERIES'] } });
+        const totalMuseums = await User.countDocuments({ role: 'MUSEUMS' });
+        const totalAuctions = await User.countDocuments({ role: 'AUCTIONS' });
+        const totalFairs = await User.countDocuments({ role: 'FAIRS' });
+        const totalRegularUsers = await User.countDocuments({ role: 'USER' });
 
+        return success(res, 'User statistics retrieved successfully', {
+            total: totalUsers,
+            byRole: stats,
+            breakdown: {
+                admins: totalAdmins,
+                sponsors: totalSponsors,
+                galleries: totalGalleries,
+                museums: totalMuseums,
+                auctions: totalAuctions,
+                fairs: totalFairs,
+                regularUsers: totalRegularUsers
+            }
+        });
+    } catch (error) {
+        return onError(res, error);
+    }
+};
 
+// Delete user (admin only)
+export const deleteUser = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        
+        if (!validateMongoDbId(id)) {
+            return badRequest(res, 'Invalid user ID');
+        }
+
+        const user = await User.findById(id);
+        if (!user) {
+            return notFound(res, 'User not found');
+        }
+
+        // Prevent admin from deleting themselves
+        if (user._id.toString() === req.user._id.toString()) {
+            return badRequest(res, 'You cannot delete your own account');
+        }
+
+        // Prevent deletion of the last admin
+        if (user.role === 'ADMIN') {
+            const adminCount = await User.countDocuments({ role: 'ADMIN' });
+            if (adminCount <= 1) {
+                return badRequest(res, 'Cannot delete the last admin user');
+            }
+        }
+
+        await User.findByIdAndDelete(id);
+        return success(res, 'User deleted successfully');
+    } catch (error) {
+        return onError(res, error);
+    }
+};

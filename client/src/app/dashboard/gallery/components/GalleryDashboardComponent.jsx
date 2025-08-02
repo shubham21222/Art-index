@@ -729,7 +729,7 @@ export function GalleryDashboardComponent() {
                 onClick={handleCreateAuction}
                 className="bg-purple-600 hover:bg-purple-700 text-white"
               >
-                <Gavel className="w-4 h-4 mr-2" />
+                <Gavel className="w-4 h-4 mr-2" />  
                 Create Auction
               </Button>
             </div> */}

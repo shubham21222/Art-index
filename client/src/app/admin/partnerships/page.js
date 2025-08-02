@@ -147,7 +147,8 @@ const PartnershipsAdmin = () => {
             auctions: 'bg-blue-100 text-blue-800',
             fairs: 'bg-purple-100 text-purple-800',
             museums: 'bg-indigo-100 text-indigo-800',
-            galleries: 'bg-pink-100 text-pink-800'
+            galleries: 'bg-pink-100 text-pink-800',
+            sponsors: 'bg-orange-100 text-orange-800'
         };
         return <Badge className={variants[type]}>{type.toUpperCase()}</Badge>;
     };
