@@ -8,7 +8,7 @@ import OtherWorks from "./components/OtherWorks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import {
+import {  
   Heart,
   Share2,
   Download,
@@ -87,7 +87,7 @@ export default function ArtworkPage() {
     if (pricing?.listPrice) {
       return formatPrice(pricing.listPrice);
     }
-    return "Price Unavailable";
+    return "Price upon request";
   };
 
   // Helper function to get the estimate price (adjusted)
@@ -125,7 +125,7 @@ export default function ArtworkPage() {
     const priceDisplay = getPriceDisplay();
     const priceString = priceDisplay.estimate || priceDisplay.original;
     
-    if (priceString === "Price Unavailable") return null;
+    if (priceString === "Price upon request") return null;
     
     // Extract numeric value from price string (e.g., "$1,000" -> 1000)
     const numericMatch = priceString.replace(/[$,]/g, '').match(/\d+/);
@@ -1030,33 +1030,21 @@ export default function ArtworkPage() {
                       <h3 className="text-lg font-semibold text-gray-900">
                         Price Estimate
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      {/* <p className="text-sm text-gray-600">
                         Current market valuation
-                      </p>
+                      </p> */}
                     </div>
                   </div>
 
                   <div className="text-center">
-                    {getPriceDisplay().hasAdjustment ? (
-                      <div className="flex justify-center items-center gap-2">
-                        <div className="text-2xl font-bold text-gray-900">
-                          {getPriceDisplay().original}
-                        </div>
-                        <span className="text-2xl font-bold text-gray-900">-</span>
-                        <div className="text-2xl font-bold text-gray-900">
-                          {getPriceDisplay().estimate}
-                        </div>
+                    <div className="space-y-2">
+                      <div className="text-2xl font-bold text-gray-900">
+                        {getPriceDisplay().hasAdjustment ? getPriceDisplay().estimate : getPriceDisplay().original}
                       </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="text-2xl font-bold text-gray-900">
-                          {getPriceDisplay().original}
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          List Price
-                        </p>
-                      </div>
-                    )}
+                      <p className="text-sm text-gray-500">
+                        {getPriceDisplay().hasAdjustment ? "Current market valuation" : "List Price"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1067,7 +1055,7 @@ export default function ArtworkPage() {
                   onClick={handleContactClick}
                   className="bg-black text-white hover:bg-gray-800 w-full text-base sm:text-lg font-semibold py-4 sm:py-3 px-6 sm:px-8 rounded-2xl shadow-lg text-center transition-all duration-200"
                 >
-                  {getPriceDisplay().original === "Price Unavailable" ? "Price upon request" : `Contact - ${getPriceDisplay().hasAdjustment ? getPriceDisplay().estimate : getPriceDisplay().original}`}
+                  {getPriceDisplay().original === "Price upon request" ? "Price upon request" : `Contact - ${getPriceDisplay().hasAdjustment ? getPriceDisplay().estimate : getPriceDisplay().original}`}
                 </Button>
                 
                 {isPriceAvailable() && (
