@@ -16,7 +16,8 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
     minBidIncrement: "10",
     startDate: "",
     endDate: "",
-    selectionMethod: "manual" // Only manual and excel options
+    selectionMethod: "manual", // Only manual and excel options
+    images: [""] // Add images array for manual entry
   });
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -103,6 +104,11 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
                   });
                 }
 
+                // Handle multiple image URLs (comma-separated)
+                const imageUrls = product['Image URL'] 
+                  ? product['Image URL'].split(',').map(url => url.trim()).filter(url => url !== '')
+                  : [];
+                
                 products.push({
                   title: product['Product Title'],
                   description: product['Description'] || '',
@@ -117,7 +123,7 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
                   internalID: product['Internal ID'] || `AUCTION_${Date.now()}_${i}`,
                   type: product['Type'] || '',
                   auctionType: product['Auction Type'] || 'TIMED',
-                  image: product['Image URL'] ? [product['Image URL']] : [],
+                  image: imageUrls,
                   details: detailsArray,
                   stock: parseInt(product['Stock'] || '1'),
                   count: 1,
@@ -156,7 +162,7 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
         'Medium': 'Oil on Canvas',
         'Dimensions': '72.5" x 92" cm',
         'Stock': '1',
-        'Image URL': 'https://example.com/starry-night.jpg',
+        'Image URL': 'https://example.com/starry-night.jpg,https://example.com/starry-night-detail.jpg',
         'Sort By Price': 'High Price'
       },
       {
@@ -176,7 +182,7 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
         'Medium': 'Oil on Canvas',
         'Dimensions': '24" x 33" cm',
         'Stock': '1',
-        'Image URL': 'https://example.com/persistence-memory.jpg',
+        'Image URL': 'https://example.com/persistence-memory.jpg,https://example.com/persistence-memory-detail.jpg',
         'Sort By Price': 'High Price'
       },
       {
@@ -196,7 +202,7 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
         'Medium': 'Oil on Canvas',
         'Dimensions': '44.5" x 39" cm',
         'Stock': '1',
-        'Image URL': 'https://example.com/pearl-earring.jpg',
+        'Image URL': 'https://example.com/pearl-earring.jpg,https://example.com/pearl-earring-detail.jpg',
         'Sort By Price': 'High Price'
       }
     ];
@@ -214,13 +220,19 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      let auctionData;
+          try {
+        let auctionData;
 
       if (formData.selectionMethod === 'manual') {
         // Validate manual entry
         if (!formData.title || !formData.artist || !formData.category || !formData.startingBid || !formData.startDate || !formData.endDate) {
           throw new Error('Please fill in all required fields');
+        }
+        
+        // Validate that at least one image URL is provided
+        const validImages = formData.images.filter(img => img.trim() !== '');
+        if (validImages.length === 0) {
+          throw new Error('Please provide at least one image URL');
         }
 
         // Create product data for manual entry
@@ -238,7 +250,7 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
           internalID: `AUCTION_${Date.now()}`,
           type: formData.category,
           auctionType: "TIMED",
-          image: [],
+          image: formData.images.filter(img => img.trim() !== ''), // Filter out empty image URLs
           details: [
             { key: 'Artist', value: formData.artist },
             { key: 'Description', value: formData.description || '' }
@@ -258,9 +270,13 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
           status: "ACTIVE"
         };
       } else {
-        // Handle Excel file upload
+        // Validate Excel upload
         if (!formData.excelFile) {
           throw new Error('Please select an Excel file');
+        }
+        
+        if (!formData.category || !formData.startDate || !formData.endDate) {
+          throw new Error('Please fill in category, start date, and end date');
         }
 
         // Parse Excel file and create auction data
@@ -325,7 +341,8 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
       minBidIncrement: "10",
       startDate: "",
       endDate: "",
-      selectionMethod: "manual"
+      selectionMethod: "manual",
+      images: [""]
     });
     setSearchQuery("");
     setFormData(prev => ({ ...prev, excelFile: null }));
@@ -441,6 +458,71 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
                   placeholder="Enter artwork description..."
                 />
               </div>
+
+              {/* Images */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Image URLs
+                </label>
+                <div className="space-y-2">
+                  {formData.images.map((image, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="url"
+                        value={image}
+                        onChange={(e) => {
+                          const newImages = [...formData.images];
+                          newImages[index] = e.target.value;
+                          setFormData(prev => ({ ...prev, images: newImages }));
+                        }}
+                        className="flex-1 p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
+                        placeholder="Enter image URL..."
+                      />
+                      {formData.images.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newImages = formData.images.filter((_, i) => i !== index);
+                            setFormData(prev => ({ ...prev, images: newImages }));
+                          }}
+                          className="px-3 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, images: [...prev.images, ""] }))}
+                    className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white hover:bg-zinc-700 transition-colors"
+                  >
+                    + Add Another Image
+                  </button>
+                  
+                  {/* Image Preview */}
+                  {formData.images.some(img => img.trim() !== '') && (
+                    <div className="mt-4">
+                      <p className="text-sm text-zinc-400 mb-2">Image Preview:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {formData.images.filter(img => img.trim() !== '').map((image, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={image}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg border border-zinc-700"
+                              onError={(e) => {
+                                e.target.src = '/placeholder.jpeg';
+                                e.target.alt = 'Image not found';
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </>
           )}
 
@@ -458,7 +540,9 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
                   <li>• Upload an Excel (.xlsx) or CSV file with auction data</li>
                   <li>• Each row represents one auction product</li>
                   <li>• Required columns: Product Title, Artist, Starting Bid</li>
-                  <li>• Optional columns: Price, Estimate Price, Description, etc.</li>
+                  <li>• Optional columns: Price, Estimate Price, Description, Image URL, etc.</li>
+                  <li>• Image URL: Use comma-separated URLs for multiple images</li>
+                  <li>• You still need to set category, start date, and end date below</li>
                   <li>• All auctions will use the same category, start date, and end date</li>
                 </ul>
               </div>
@@ -513,122 +597,112 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* Category */}
-          {/* This section is now redundant if selectionMethod is 'manual' */}
-          {formData.selectionMethod === 'manual' && (
+          {/* Category - Show for both manual and Excel */}
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Category *
+            </label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+              className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
+              required
+            >
+              <option value="">Select a category</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Bidding Details - Show for both manual and Excel */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-white mb-2">
-                Category *
+                Starting Bid ($) {formData.selectionMethod === 'manual' ? '*' : '(from Excel)'}
               </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
-                required
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Bidding Details - Only show for manual form */}
-          {formData.selectionMethod === 'manual' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Starting Bid ($) *
-                </label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                  <input
-                    type="number"
-                    value={formData.startingBid}
-                    onChange={(e) => setFormData(prev => ({ ...prev, startingBid: e.target.value }))}
-                    className="w-full pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Minimum Bid Increment ($)
-                </label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
                 <input
                   type="number"
-                  value={formData.minBidIncrement}
-                  onChange={(e) => setFormData(prev => ({ ...prev, minBidIncrement: e.target.value }))}
-                  className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
-                  placeholder="10"
-                  min="1"
-                  step="1"
+                  value={formData.startingBid}
+                  onChange={(e) => setFormData(prev => ({ ...prev, startingBid: e.target.value }))}
+                  className="w-full pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  required={formData.selectionMethod === 'manual'}
+                  disabled={formData.selectionMethod === 'excel'}
                 />
               </div>
             </div>
-          )}
 
-          {/* Date and Time */}
-          {/* This section is now redundant if selectionMethod is 'manual' */}
-          {formData.selectionMethod === 'manual' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Start Date & Time *
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                  <input
-                    type="datetime-local"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                    className="w-full pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  End Date & Time *
-                </label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                  <input
-                    type="datetime-local"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                    className="w-full pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Description */}
-          {/* This section is now redundant if selectionMethod is 'manual' */}
-          {formData.selectionMethod === 'manual' && (
             <div>
               <label className="block text-sm font-medium text-white mb-2">
-                Description
+                Minimum Bid Increment ($)
               </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              <input
+                type="number"
+                value={formData.minBidIncrement}
+                onChange={(e) => setFormData(prev => ({ ...prev, minBidIncrement: e.target.value }))}
                 className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
-                rows="4"
-                placeholder="Enter auction description..."
+                placeholder="10"
+                min="1"
+                step="1"
               />
             </div>
-          )}
+          </div>
+
+          {/* Date and Time - Show for both manual and Excel */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Start Date & Time *
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                <input
+                  type="datetime-local"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="w-full pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                End Date & Time *
+              </label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                <input
+                  type="datetime-local"
+                  value={formData.endDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                  className="w-full pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Description - Show for both manual and Excel */}
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Auction Description
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-white"
+              rows="4"
+              placeholder="Enter auction description..."
+            />
+          </div>
 
           {/* Actions */}
           <div className="flex justify-end space-x-4 pt-6 border-t border-zinc-800">
