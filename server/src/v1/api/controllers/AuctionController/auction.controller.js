@@ -401,6 +401,11 @@ export const getAuctions = async (req, res) => {
             return success(res, 'No auctions found.', []);
         }
 
+        // Debug: Log first auction to see category structure
+        if (auctions.length > 0) {
+            console.log('First auction category:', auctions[0].category);
+        }
+
         // Format the startDate and endDate after aggregation
         const formattedAuctions = auctions.map(auction => {
             const currentBid = auction.currentBid || auction.startingBid;
@@ -2354,6 +2359,8 @@ export const createBulkAuction = async (req, res) => {
         if (!categoryExists) {
             categoryExists = await categoryModel.create({ name: category });
         }
+        
+        console.log('Category found/created:', categoryExists);
 
         // Generate sequential lot numbers for all products
         const lotNumbers = await generateSequentialLotNumbers(products.length);

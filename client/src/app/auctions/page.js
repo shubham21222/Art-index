@@ -182,7 +182,7 @@ const AuctionsPage = () => {
                 <div className="ml-4">
                   <p className="text-sm text-gray-600">Total Bidders</p>
                   <p className="text-2xl font-bold text-black">
-                    {auctions.reduce((sum, auction) => sum + (auction.participants?.length || 0), 0)}
+                    {auctions.reduce((sum, auction) => sum + (auction.bids?.length || 0), 0)}
                   </p>
                 </div>
               </div>
@@ -313,7 +313,7 @@ const AuctionsPage = () => {
                             <div className="text-right">
                               <p className="text-sm text-gray-600">Bidders</p>
                               <p className="text-black font-medium">
-                                {auction.participants?.length || 0}
+                                {auction.bids?.length || 0}
                               </p>
                             </div>
                           </div>
@@ -398,7 +398,7 @@ const AuctionsPage = () => {
                             {new Date(auction.endDate).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                            {auction.participants?.length || 0}
+                            {auction.bids?.length || 0}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(auction.status)}`}>

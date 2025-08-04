@@ -173,23 +173,25 @@ const AuctionHighlights = () => {
                       exit={{ opacity: 0 }}
                       className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center"
                     >
-                      <motion.button
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.1 }}
-                        className="px-6 py-3 bg-white text-black font-semibold rounded-full hover:bg-gray-100 transition-colors"
-                      >
-                        Place Bid
-                      </motion.button>
+                      <Link href={`/auction/${auction._id}`}>
+                        <motion.button
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.1 }}
+                          className="px-6 py-3 bg-white text-black font-semibold rounded-full hover:bg-gray-100 transition-colors"
+                        >
+                          Place Bid
+                        </motion.button>
+                      </Link>
                     </motion.div>
                   )}
 
                   {/* Badges */}
-                  <div className="absolute top-4 left-4 flex flex-col space-y-2">
+                  {/* <div className="absolute top-4 left-4 flex flex-col space-y-2">
                     <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-black text-xs font-semibold rounded-full">
                       {auction.category?.name || 'Uncategorized'}
                     </span>
-                  </div>
+                  </div> */}
 
                   {/* Lot Number */}
                   <div className="absolute top-4 right-4">
@@ -265,13 +267,15 @@ const AuctionHighlights = () => {
                         View Auction
                       </motion.button>
                     </Link>
-                    <motion.button
-                      className="p-2 rounded-full bg-gray-100 group-hover:bg-gray-200 transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <ArrowRight className="w-4 h-4 text-black" />
-                    </motion.button>
+                    <Link href={`/auction/${auction._id}`}>
+                      <motion.button
+                        className="p-2 rounded-full bg-gray-100 group-hover:bg-gray-200 transition-colors"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <ArrowRight className="w-4 h-4 text-black" />
+                      </motion.button>
+                    </Link>
                   </div>
                 </div>
               </div>

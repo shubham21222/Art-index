@@ -338,10 +338,10 @@ const AuctionDetailPage = () => {
             >
               {/* Header */}
               <div>
-                <div className="flex items-center space-x-2 mb-2">
+                {/* <div className="flex items-center space-x-2 mb-2">
                   <Tag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-500">{auction.category?.name || 'Uncategorized'}</span>
-                </div>
+                </div> */}
                 <h1 className="text-3xl font-bold text-black mb-2">
                   {auction.product?.title || 'Untitled Artwork'}
                 </h1>
