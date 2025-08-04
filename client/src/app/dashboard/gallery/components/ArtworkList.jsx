@@ -218,10 +218,10 @@ export function ArtworkList({
                 <p className="text-gray-500 mb-4">
                   Start building your gallery collection by adding artworks.
                 </p>
-                <Button onClick={onAddArtwork} className="bg-green-600 hover:bg-green-700">
+                {/* <Button onClick={onAddArtwork} className="bg-green-600 hover:bg-green-700">
                   <Plus className="w-4 h-4 mr-2" />
                   Add First Artwork
-                </Button>
+                </Button> */}
               </div>
             )}
           </div>

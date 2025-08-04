@@ -280,8 +280,8 @@ export function GalleryDashboardComponent() {
   const handleArtworkSubmit = async (artworkData) => {
     try {
       const url = selectedArtwork
-        ? `${process.env.NEXT_PUBLIC_API_URL}/gallery/artwork/update/${selectedGalleryForArtwork._id}/${selectedArtwork._id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/gallery/artwork/add/${selectedGalleryForArtwork._id}`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/gallery/${selectedGalleryForArtwork._id}/artworks/${selectedArtwork._id}/update`
+        : `${process.env.NEXT_PUBLIC_API_URL}/gallery/${selectedGalleryForArtwork._id}/artworks/add`;
 
       const res = await fetch(url, {
         method: 'POST',
