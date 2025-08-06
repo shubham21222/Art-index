@@ -61,6 +61,16 @@ const EventSchema = new mongoose.Schema({
 
 const MuseumSchema = new mongoose.Schema(
   {
+    internalID: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    slug: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     name: {
       type: String,
       required: true,

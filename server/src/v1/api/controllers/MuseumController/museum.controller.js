@@ -25,10 +25,44 @@ export const createMuseum = async (req, res) => {
             createdBy: req.user?._id || null,
         };
 
+        // Generate unique internalID and slug if they don't exist
+        if (!museumData.internalID) {
+            museumData.internalID = `MUSEUM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+        
+        if (!museumData.slug) {
+            const nameSlug = museumData.name 
+                ? museumData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+                : `museum-${Date.now()}`;
+            museumData.slug = nameSlug;
+        }
+
         const museum = await MuseumModel.create(museumData);
         return created(res, "Museum created successfully", museum);
     } catch (error) {
         console.log(error);
+        
+        // Handle duplicate key error specifically
+        if (error.code === 11000) {
+            // If it's a duplicate key error, try again with a different internalID/slug
+            try {
+                const museumData = {
+                    ...req.body,
+                    createdBy: req.user?._id || null,
+                    internalID: `MUSEUM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    slug: req.body.name 
+                        ? `${req.body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${Date.now()}`
+                        : `museum-${Date.now()}`
+                };
+                
+                const museum = await MuseumModel.create(museumData);
+                return created(res, "Museum created successfully", museum);
+            } catch (retryError) {
+                console.log("Retry error:", retryError);
+                return unknownError(res, retryError.message);
+            }
+        }
+        
         return unknownError(res, error.message);
     }
 };
