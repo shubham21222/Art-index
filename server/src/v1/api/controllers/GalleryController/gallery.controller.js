@@ -82,6 +82,196 @@ export const createBulkGalleries = async (req, res) => {
     }
 };
 
+// Admin create gallery function
+export const adminCreateGallery = async (req, res) => {
+    try {
+        const { title, description, images, category, categoryName, artist, isFeatured, active, createdBy } = req.body;
+
+        // Validation: Check required fields
+        if (!title) {
+            return badRequest(res, "Gallery title is required.");
+        }
+
+        // Handle category field - if it's a valid ObjectId, use it as category, otherwise use as categoryName
+        let finalCategory = null;
+        let finalCategoryName = null;
+        
+        if (category) {
+            if (typeof category === 'string') {
+                // Check if it's a valid ObjectId
+                if (mongoose.Types.ObjectId.isValid(category)) {
+                    finalCategory = category;
+                } else {
+                    finalCategoryName = category;
+                }
+            } else {
+                finalCategory = category;
+            }
+        } else if (categoryName) {
+            finalCategoryName = categoryName;
+        }
+
+        // Create gallery payload
+        const galleryData = {
+            title,
+            description: description || "",
+            images: images || [],
+            category: finalCategory,
+            categoryName: finalCategoryName,
+            artist: artist || null,
+            isFeatured: isFeatured || false,
+            active: active !== undefined ? active : true,
+            createdBy: createdBy || req.user?._id, // Use provided createdBy or admin's ID
+        };
+
+        const newGallery = await GalleryModel.create(galleryData);
+
+        // Populate the created gallery with user details
+        const populatedGallery = await GalleryModel.findById(newGallery._id)
+            .populate("createdBy", "name email role")
+            .populate("artist", "name email role")
+            .lean();
+
+        // Format the response
+        const formattedGallery = {
+            ...populatedGallery,
+            categoryDisplay: populatedGallery.category?.name || populatedGallery.categoryName || "Uncategorized",
+            createdByUser: populatedGallery.createdBy ? {
+                _id: populatedGallery.createdBy._id,
+                name: populatedGallery.createdBy.name,
+                email: populatedGallery.createdBy.email,
+                role: populatedGallery.createdBy.role
+            } : null,
+            artistUser: populatedGallery.artist ? {
+                _id: populatedGallery.artist._id,
+                name: populatedGallery.artist.name,
+                email: populatedGallery.artist.email,
+                role: populatedGallery.artist.role
+            } : null,
+            totalArtworks: populatedGallery.artworks ? populatedGallery.artworks.length : 0,
+            activeArtworks: populatedGallery.artworks ? populatedGallery.artworks.filter(art => art.isActive).length : 0
+        };
+
+        return success(res, "Gallery created successfully by admin", formattedGallery);
+    } catch (error) {
+        console.log("Error creating gallery as admin:", error);
+        return unknownError(res, error.message);
+    }
+};
+
+// Admin update gallery artworks function
+export const adminUpdateGalleryArtworks = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { artworks } = req.body;
+
+        if (!Array.isArray(artworks)) {
+            return badRequest(res, "Artworks must be an array");
+        }
+
+        const gallery = await GalleryModel.findById(id);
+        if (!gallery) {
+            return notFound(res, "Gallery not found");
+        }
+
+        // Update the artworks array
+        gallery.artworks = artworks;
+        await gallery.save();
+
+        // Populate the updated gallery with user details
+        const populatedGallery = await GalleryModel.findById(gallery._id)
+            .populate("createdBy", "name email role")
+            .populate("artist", "name email role")
+            .lean();
+
+        // Format the response
+        const formattedGallery = {
+            ...populatedGallery,
+            categoryDisplay: populatedGallery.category?.name || populatedGallery.categoryName || "Uncategorized",
+            createdByUser: populatedGallery.createdBy ? {
+                _id: populatedGallery.createdBy._id,
+                name: populatedGallery.createdBy.name,
+                email: populatedGallery.createdBy.email,
+                role: populatedGallery.createdBy.role
+            } : null,
+            artistUser: populatedGallery.artist ? {
+                _id: populatedGallery.artist._id,
+                name: populatedGallery.artist.name,
+                email: populatedGallery.artist.email,
+                role: populatedGallery.artist.role
+            } : null,
+            totalArtworks: populatedGallery.artworks ? populatedGallery.artworks.length : 0,
+            activeArtworks: populatedGallery.artworks ? populatedGallery.artworks.filter(art => art.isActive).length : 0
+        };
+
+        return success(res, "Gallery artworks updated successfully", formattedGallery);
+    } catch (error) {
+        console.log("Error updating gallery artworks as admin:", error);
+        return unknownError(res, error.message);
+    }
+};
+
+// Admin update gallery function
+export const adminUpdateGallery = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, images, category, categoryName, artist, isFeatured, active, createdBy } = req.body;
+
+        if (!title) {
+            return badRequest(res, "Gallery title is required.");
+        }
+
+        const gallery = await GalleryModel.findById(id);
+        if (!gallery) {
+            return notFound(res, "Gallery not found");
+        }
+
+        // Update gallery fields
+        gallery.title = title;
+        gallery.description = description || "";
+        gallery.images = images || [];
+        gallery.category = category || null;
+        gallery.categoryName = categoryName || null;
+        gallery.artist = artist || null;
+        gallery.isFeatured = isFeatured || false;
+        gallery.active = active !== undefined ? active : true;
+        gallery.createdBy = createdBy || req.user?._id;
+
+        await gallery.save();
+
+        // Populate the updated gallery with user details
+        const populatedGallery = await GalleryModel.findById(gallery._id)
+            .populate("createdBy", "name email role")
+            .populate("artist", "name email role")
+            .lean();
+
+        // Format the response
+        const formattedGallery = {
+            ...populatedGallery,
+            categoryDisplay: populatedGallery.category?.name || populatedGallery.categoryName || "Uncategorized",
+            createdByUser: populatedGallery.createdBy ? {
+                _id: populatedGallery.createdBy._id,
+                name: populatedGallery.createdBy.name,
+                email: populatedGallery.createdBy.email,
+                role: populatedGallery.createdBy.role
+            } : null,
+            artistUser: populatedGallery.artist ? {
+                _id: populatedGallery.artist._id,
+                name: populatedGallery.artist.name,
+                email: populatedGallery.artist.email,
+                role: populatedGallery.artist.role
+            } : null,
+            totalArtworks: populatedGallery.artworks ? populatedGallery.artworks.length : 0,
+            activeArtworks: populatedGallery.artworks ? populatedGallery.artworks.filter(art => art.isActive).length : 0
+        };
+
+        return success(res, "Gallery updated successfully", formattedGallery);
+    } catch (error) {
+        console.log("Error updating gallery as admin:", error);
+        return unknownError(res, error.message);
+    }
+};
+
 
 
 

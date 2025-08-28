@@ -23,7 +23,9 @@ import {
     deleteCatalog,
     updateCatalog,
     addcalender,
-    updateAuctionStartDateTime
+    updateAuctionStartDateTime,
+    deleteAllAuctionsByCategory,
+    deleteAllAuctionsAndCatalogs
     // stripeWebhook
 } from "../../controllers/AuctionController/auction.controller.js";
 import { IsAuthenticated ,  authorizeRoles} from  "../../middlewares/authicationmiddleware.js"
@@ -98,6 +100,10 @@ router.get("/getBidIncrement" , getBidIncrement)
 router.get("/getWinners" , getWinners)
 
 router.post("/deleteCatalog" ,  IsAuthenticated ,  deleteCatalog)
+
+router.post("/deleteAllByCategory" ,  IsAuthenticated ,  deleteAllAuctionsByCategory)
+
+router.post("/deleteAllAuctionsAndCatalogs" ,  IsAuthenticated ,  deleteAllAuctionsAndCatalogs)
 
 router.post("/addCalender" , IsAuthenticated , addcalender)
 

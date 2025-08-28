@@ -480,7 +480,7 @@ export default function UserGalleryPage({ params }) {
                       Contact for Price
                     </Button>
                     
-                    <div className="flex gap-2">
+                    {/* <div className="flex gap-2">
                       <Button
                         variant="outline"
                         onClick={handleShare}
@@ -496,7 +496,7 @@ export default function UserGalleryPage({ params }) {
                         <Heart className="w-4 h-4 mr-2" />
                         Save
                       </Button>
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* Condition Info */}

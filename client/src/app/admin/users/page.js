@@ -56,6 +56,7 @@ import { Label } from '@/components/ui/label';
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
@@ -79,10 +80,22 @@ export default function AdminUsersPage() {
   });
   const { token } = useSelector((state) => state.auth);
 
+  // Debug effect to log token changes
   useEffect(() => {
-    fetchUsers();
-    fetchStats();
-  }, [searchQuery, roleFilter, pagination.currentPage]);
+    console.log('Token state:', { hasToken: !!token, tokenLength: token?.length });
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      fetchUsers();
+      fetchStats();
+    }
+  }, [searchQuery, roleFilter, pagination.currentPage, token]);
+
+  // Debug effect to log stats changes
+  useEffect(() => {
+    console.log('Stats state changed:', stats);
+  }, [stats]);
 
   const fetchUsers = async () => {
     try {
@@ -93,11 +106,16 @@ export default function AdminUsersPage() {
         ...(searchQuery && { search: searchQuery }),
       });
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/all?${params}`, {
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/users/all?${params}`;
+      console.log('Fetching users from:', apiUrl);
+
+      const res = await fetch(apiUrl, {
         headers: {
           'Authorization': `${token}`
         }
       });
+      
+      console.log('Users response status:', res.status);
       
       if (!res.ok) {
         throw new Error('Failed to fetch users');
@@ -105,18 +123,41 @@ export default function AdminUsersPage() {
 
       const data = await res.json();
       console.log('Users API response:', data); // Debug log
+      console.log('Response structure:', {
+        status: data.status,
+        hasItems: !!data.items,
+        itemsType: typeof data.items,
+        isArray: Array.isArray(data.items),
+        itemsKeys: data.items ? Object.keys(data.items) : 'no items'
+      });
+      
       if (data.status && data.items) {
-        const userList = data.items.items || data.items;
+        // The server returns: { items: users, pagination: {...} }
+        // So data.items.items is the users array, data.items.pagination is pagination
+        const userList = data.items.items || [];
+        const paginationData = data.items.pagination;
+        
         console.log('User list:', userList); // Debug log
+        console.log('User list length:', userList.length);
+        console.log('Pagination data:', paginationData);
+        
         setUsers(userList);
-        setPagination(prev => ({
-          ...prev,
-          currentPage: data.items.pagination?.currentPage || 1,
-          totalPages: data.items.pagination?.totalPages || 1,
-          totalItems: data.items.pagination?.totalItems || 0,
-        }));
+        
+        // Handle pagination data
+        if (paginationData) {
+          setPagination(prev => ({
+            ...prev,
+            currentPage: paginationData.currentPage || 1,
+            totalPages: paginationData.totalPages || 1,
+            totalItems: paginationData.totalItems || 0,
+          }));
+        }
+      } else {
+        console.log('No valid data structure found in response');
+        setUsers([]);
       }
     } catch (error) {
+      console.error('Fetch users error:', error);
       toast.error(error.message || 'Failed to fetch users');
     } finally {
       setLoading(false);
@@ -125,21 +166,62 @@ export default function AdminUsersPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/stats`, {
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/users/stats`;
+      console.log('Fetching stats from:', apiUrl);
+      
+      const res = await fetch(apiUrl, {
         headers: {
           'Authorization': `${token}`
         }
       });
       
+      console.log('Stats response status:', res.status);
+      
       if (res.ok) {
         const data = await res.json();
         console.log('Stats API response:', data); // Debug log
         if (data.status && data.items) {
-          setStats(data.items.breakdown || {});
+          // The API returns the breakdown directly in data.items
+          const breakdown = data.items.breakdown || {};
+          console.log('Stats breakdown:', breakdown); // Debug log
+          console.log('Stats structure:', {
+            hasBreakdown: !!data.items.breakdown,
+            breakdownKeys: breakdown ? Object.keys(breakdown) : 'no breakdown',
+            total: data.items.total,
+            admins: breakdown.admins
+          });
+          
+          // Set stats with the correct data structure
+          setStats({
+            total: data.items.total || 0,
+            admins: breakdown.admins || 0,
+            sponsors: breakdown.sponsors || 0,
+            galleries: breakdown.galleries || 0,
+            museums: breakdown.museums || 0,
+            auctions: breakdown.auctions || 0,
+            fairs: breakdown.fairs || 0,
+            regularUsers: breakdown.regularUsers || 0,
+          });
+        } else {
+          console.log('No valid stats data structure found');
+          setStats({
+            total: 0,
+            admins: 0,
+            sponsors: 0,
+            galleries: 0,
+            museums: 0,
+            auctions: 0,
+            fairs: 0,
+            regularUsers: 0,
+          });
         }
+      } else {
+        console.log('Stats response not ok:', res.status);
       }
     } catch (error) {
       console.error('Failed to fetch stats:', error);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -150,6 +232,9 @@ export default function AdminUsersPage() {
 
     setIsDeleting(true);
     try {
+      console.log('Attempting to delete user:', userId);
+      console.log('API URL:', `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`);
+      
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
         method: 'DELETE',
         headers: {
@@ -157,15 +242,23 @@ export default function AdminUsersPage() {
         }
       });
 
+      console.log('Delete response status:', res.status);
+      console.log('Delete response headers:', res.headers);
+
       if (!res.ok) {
         const data = await res.json();
+        console.log('Delete error response:', data);
         throw new Error(data.message || data.error || 'Failed to delete user');
       }
+
+      const successData = await res.json();
+      console.log('Delete success response:', successData);
 
       toast.success('User deleted successfully');
       fetchUsers();
       fetchStats();
     } catch (error) {
+      console.error('Delete user error:', error);
       toast.error(error.message || 'Failed to delete user');
     } finally {
       setIsDeleting(false);
@@ -249,7 +342,12 @@ export default function AdminUsersPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">{stats.total}</div>
+            <div className="text-2xl font-bold text-black">
+              {statsLoading ? 'Loading...' : (stats.total !== undefined ? stats.total : 'N/A')}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {statsLoading ? 'Fetching data...' : `Total users: ${stats.total || 'Not loaded'}`}
+            </div>
           </CardContent>
         </Card>
 
@@ -259,7 +357,9 @@ export default function AdminUsersPage() {
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.admins}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {statsLoading ? 'Loading...' : (stats.admins !== undefined ? stats.admins : 'N/A')}
+            </div>
           </CardContent>
         </Card>
 
@@ -269,7 +369,9 @@ export default function AdminUsersPage() {
             <Megaphone className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.sponsors}</div>
+            <div className="text-2xl font-bold text-orange-600">
+              {statsLoading ? 'Loading...' : (stats.sponsors !== undefined ? stats.sponsors : 'N/A')}
+            </div>
           </CardContent>
         </Card>
 
@@ -279,7 +381,9 @@ export default function AdminUsersPage() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.galleries}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {statsLoading ? 'Loading...' : (stats.galleries !== undefined ? stats.galleries : 'N/A')}
+            </div>
           </CardContent>
         </Card>
       </div>

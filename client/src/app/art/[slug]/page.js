@@ -473,14 +473,14 @@ export default function ArtworkPage({ params }) {
                   <Heart className={`w-4 h-4 mr-2 ${isFavorited ? 'fill-current' : ''}`} />
                   {isFavorited ? 'Favorited' : 'Favorite'}
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleShare}>
+                {/* <Button variant="outline" size="sm" onClick={handleShare}>
                   <Share2 className="w-4 h-4 mr-2" />
                   Share
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleViewInRoom}>
+                </Button> */}
+                {/* <Button variant="outline" size="sm" onClick={handleViewInRoom}>
                   <Eye className="w-4 h-4 mr-2" />
                   View in Room
-                </Button>
+                </Button> */}
               </div>
             </div>
 

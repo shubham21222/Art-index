@@ -281,7 +281,14 @@ export default function ArtsyPage() {
                             { name: 'Takashi Murakami', img: 'https://files.artsy.net/images/takashi_murakami.png' },
                         ].map((artist) => (
                             <div key={artist.name} className="text-center">
-                                <div className="relative w-20 h-20 mx-auto mb-2">
+                                <div 
+                                    className="relative w-20 h-20 mx-auto mb-2 cursor-pointer hover:opacity-80 transition-opacity"
+                                    onClick={() => {
+                                        setSearchTerm(artist.name);
+                                        searchArtworks(artist.name);
+                                        setShowSuggestions(false);
+                                    }}
+                                >
                                     <Image
                                         src={artist.img}
                                         alt={artist.name}
@@ -290,7 +297,16 @@ export default function ArtsyPage() {
                                         className="rounded-full"
                                     />
                                 </div>
-                                <p className="text-lg font-semibold">{artist.name}</p>
+                                <p 
+                                    className="text-lg font-semibold cursor-pointer hover:text-gray-600 transition-colors"
+                                    onClick={() => {
+                                        setSearchTerm(artist.name);
+                                        searchArtworks(artist.name);
+                                        setShowSuggestions(false);
+                                    }}
+                                >
+                                    {artist.name}
+                                </p>
                             </div>
                         ))}
                     </div>

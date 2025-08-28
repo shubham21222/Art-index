@@ -45,6 +45,7 @@ export const submitPartnership = async (req, res) => {
         await partnership.save();
 
         // Send thank you email to user
+        console.log('Preparing email content for partnership type:', partnershipType);
         const emailContent = `
             <!DOCTYPE html>
             <html lang="en">
@@ -324,17 +325,29 @@ export const submitPartnership = async (req, res) => {
         `;
 
         try {
+            console.log('Attempting to send email for partnership type:', partnershipType);
+            console.log('Email details:', { to: email, subject: 'Partnership Request Received - Art Index' });
+            
             await sendEmail({
                 to: email,
                 subject: 'Partnership Request Received - Art Index',
                 html: emailContent
             });
 
+            console.log('Email sent successfully for partnership type:', partnershipType);
+            
             // Update email sent status
             partnership.emailSent = true;
             await partnership.save();
+            console.log('Email sent status updated in database');
         } catch (emailError) {
-            console.error('Failed to send confirmation email:', emailError);
+            console.error('Failed to send confirmation email for partnership type:', partnershipType);
+            console.error('Email error details:', {
+                message: emailError.message,
+                stack: emailError.stack,
+                partnershipType: partnershipType,
+                email: email
+            });
             // Continue with the request even if email fails
         }
 
@@ -628,18 +641,29 @@ export const rejectPartnership = async (req, res) => {
         const { rejectionReason } = req.body;
         const adminId = req.user.id;
 
+        console.log('Reject partnership request received:', { id, rejectionReason, adminId });
+
         if (!rejectionReason) {
             return badRequest(res, 'Rejection reason is required');
         }
 
         const partnership = await Partnership.findById(id);
         if (!partnership) {
+            console.log('Partnership not found for ID:', id);
             return notFound(res, 'Partnership request not found');
         }
 
         if (partnership.status !== 'pending') {
+            console.log('Partnership already processed:', { id, status: partnership.status });
             return badRequest(res, 'Partnership request has already been processed');
         }
+
+        console.log('Processing rejection for partnership:', {
+            id: partnership._id,
+            email: partnership.email,
+            name: `${partnership.firstName} ${partnership.lastName}`,
+            type: partnership.partnershipType
+        });
 
         // Update partnership status
         partnership.status = 'rejected';
@@ -648,6 +672,7 @@ export const rejectPartnership = async (req, res) => {
         partnership.rejectionReason = rejectionReason;
 
         await partnership.save();
+        console.log('Partnership status updated to rejected');
 
         // Send rejection email
         const emailContent = `<!DOCTYPE html>
@@ -756,18 +781,42 @@ export const rejectPartnership = async (req, res) => {
 </html>`;
 
         try {
-            await sendEmail({
+            console.log('Sending rejection email to:', partnership.email);
+            console.log('Email content length:', emailContent.length);
+            
+            const emailResult = await sendEmail({
                 to: partnership.email,
                 subject: 'Partnership Request Update - Art Index',
                 html: emailContent
             });
+
+            console.log('Email sent successfully:', emailResult);
+
+            // Update rejection email sent status
+            partnership.rejectionEmailSent = true;
+            await partnership.save();
+            console.log('Rejection email sent status updated in database');
         } catch (emailError) {
             console.error('Failed to send rejection email:', emailError);
+            console.error('Email error details:', {
+                message: emailError.message,
+                stack: emailError.stack,
+                partnershipId: partnership._id,
+                email: partnership.email
+            });
             // Continue with the rejection even if email fails
         }
 
+        console.log('Partnership rejection completed successfully');
         return success(res, 'Partnership rejected successfully. Notification email sent.', partnership);
     } catch (error) {
+        console.error('Error in rejectPartnership:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            params: req.params,
+            body: req.body
+        });
         return unknownError(res, error.message);
     }
 };

@@ -918,7 +918,7 @@ export const getAuctionById = async (req, res) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return validation(res, 'Invalid auction ID.');
+            return badRequest(res, 'Invalid auction ID.');
         }
 
         const findAuction = await auctionModel.aggregate([
@@ -1295,7 +1295,7 @@ export const updateAuction = async (req, res) => {
         const { product, startingBid, auctionType, endDate, startDate, category, status, shipping_status } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return validation(res, 'Invalid auction ID.');
+            return badRequest(res, 'Invalid auction ID.');
         }
 
         const findAuction = await auctionModel.findById(id).select('product startingBid auctionType endDate startDate category status shipping_status lotNumber');
@@ -2587,13 +2587,89 @@ export const addcalender = async (req, res) => {
 
 
 
+// Delete all auctions by category
+export const deleteAllAuctionsByCategory = async (req, res) => {
+    try {
+        const { categoryId } = req.body;
+
+        if (!categoryId) {
+            return badRequest(res, 'Category ID is required.');
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+            return badRequest(res, 'Invalid category ID.');
+        }
+
+        // Find all auctions with the specified category
+        const auctionsToDelete = await auctionModel.find({ 
+            category: categoryId 
+        });
+
+        if (auctionsToDelete.length === 0) {
+            return notFound(res, 'No auctions found for this category.');
+        }
+
+        // Extract product IDs for cleanup (auctions don't have auctionProduct field)
+        const productIds = auctionsToDelete.map(auction => auction.product).filter(Boolean);
+
+        // Delete related data
+        const productDeleteResult = await AuctionProduct.deleteMany({ _id: { $in: productIds } });
+
+        // Delete the auctions themselves
+        const auctionDeleteResult = await auctionModel.deleteMany({ 
+            category: categoryId 
+        });
+
+        return success(res, 'Successfully deleted all auctions and related data for this category', {
+            auctionsDeleted: auctionDeleteResult.deletedCount,
+            productsDeleted: productDeleteResult.deletedCount,
+            categoryId: categoryId
+        });
+
+    } catch (error) {
+        console.error('Error deleting all auctions by category:', error);
+        return unknownError(res, error.message);
+    }
+};
+
+// Delete all auctions and catalogs
+export const deleteAllAuctionsAndCatalogs = async (req, res) => {
+    try {
+        // Find all auctions
+        const allAuctions = await auctionModel.find({});
+
+        if (allAuctions.length === 0) {
+            return notFound(res, 'No auctions found to delete.');
+        }
+
+        // Extract all product IDs for cleanup
+        const productIds = allAuctions.map(auction => auction.product).filter(Boolean);
+
+        // Delete related data
+        const productDeleteResult = await AuctionProduct.deleteMany({ _id: { $in: productIds } });
+
+        // Delete all auctions
+        const auctionDeleteResult = await auctionModel.deleteMany({});
+
+        return success(res, 'Successfully deleted all auctions and catalogs', {
+            auctionsDeleted: auctionDeleteResult.deletedCount,
+            productsDeleted: productDeleteResult.deletedCount,
+            totalDeleted: auctionDeleteResult.deletedCount + productDeleteResult.deletedCount
+        });
+
+    } catch (error) {
+        console.error('Error deleting all auctions and catalogs:', error);
+        return unknownError(res, error.message);
+    }
+};
+
 export const updateAuctionStartDateTime = async (req, res) => {
     try {
         const { id } = req.params;
         const { startDate, endDate, auctionType } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return validation(res, 'Invalid auction ID.');
+            return badRequest(res, 'Invalid auction ID.');
         }
 
         // Validate start date

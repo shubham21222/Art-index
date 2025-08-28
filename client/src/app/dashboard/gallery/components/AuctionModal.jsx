@@ -556,14 +556,14 @@ export default function AuctionModal({ isOpen, onClose, onSuccess }) {
                     <p className="text-sm text-zinc-400">Get the Excel template with sample data</p>
                   </div>
                 </div>
-                <button
+                {/* <button
                   type="button"
                   onClick={downloadSampleFile}
                   className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Download
-                </button>
+                </button> */}
               </div>
               
               <div className="border-2 border-dashed border-zinc-700 rounded-lg p-6 text-center hover:border-zinc-600 transition-colors">

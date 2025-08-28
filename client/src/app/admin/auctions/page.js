@@ -143,6 +143,82 @@ export default function AdminAuctions() {
     }
   };
 
+  const handleDeleteAllAuctionsByCategory = async (categoryId, categoryName) => {
+    if (!confirm(`Are you sure you want to delete ALL auctions in the "${categoryName}" catalog? This action cannot be undone and will delete ${catalogs.find(cat => cat.id === categoryId)?.auctions?.length || 0} auctions.`)) return;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/deleteAllByCategory`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token}`
+        },
+        body: JSON.stringify({ categoryId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete all auctions in this catalog');
+      }
+
+      const result = await response.json();
+      toast.success(`Successfully deleted ${result.data?.auctionsDeleted || 0} auctions from "${categoryName}" catalog`);
+      fetchAuctions();
+    } catch (error) {
+      toast.error('Failed to delete all auctions in this catalog');
+      console.error('Error deleting all auctions by category:', error);
+    }
+  };
+
+  const handleDeleteAllAuctions = async () => {
+    if (!confirm(`Are you sure you want to delete ALL auctions across ALL catalogs? This action cannot be undone and will delete ${auctions.length} auctions.`)) return;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/deleteAllAuctionsAndCatalogs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete all auctions and catalogs');
+      }
+
+      const result = await response.json();
+      toast.success(`Successfully deleted all auctions and catalogs (${result.data?.totalDeleted || 0} items deleted)`);
+      fetchAuctions();
+    } catch (error) {
+      toast.error('Failed to delete all auctions and catalogs');
+      console.error('Error deleting all auctions and catalogs:', error);
+    }
+  };
+
+  const handleDeleteAllCatalogs = async () => {
+    if (!confirm(`Are you sure you want to delete ALL catalogs? This action cannot be undone and will delete ${catalogs.length} catalogs and all their auctions.`)) return;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auction/deleteAllAuctionsAndCatalogs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete all catalogs');
+      }
+
+      const result = await response.json();
+      toast.success(`Successfully deleted all catalogs and their auctions (${result.data?.totalDeleted || 0} items deleted)`);
+      fetchAuctions();
+    } catch (error) {
+      toast.error('Failed to delete all catalogs');
+      console.error('Error deleting all catalogs:', error);
+    }
+  };
+
   const handleEditAuction = (auction) => {
     setSelectedAuction(auction);
     setIsEditModalOpen(true);
@@ -212,6 +288,22 @@ export default function AdminAuctions() {
           >
             <Upload className="w-4 h-4 mr-2" />
             Bulk Upload
+          </button>
+          <button
+            onClick={handleDeleteAllAuctions}
+            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            title={`Delete all ${auctions.length} auctions across all catalogs`}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete All Auctions
+          </button>
+          <button
+            onClick={handleDeleteAllCatalogs}
+            className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+            title={`Delete all ${catalogs.length} catalogs`}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete All Catalogs
           </button>
           <button
             onClick={() => setIsCreateModalOpen(true)}
@@ -354,11 +446,24 @@ export default function AdminAuctions() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-6 text-sm text-zinc-400">
-                    <span>{catalog.totalBidders} bidders</span>
-                    <span className={`px-2 py-1 rounded-full ${catalog.activeLots > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                      {catalog.activeLots > 0 ? 'Active' : 'Inactive'}
-                    </span>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-6 text-sm text-zinc-400">
+                      <span>{catalog.totalBidders} bidders</span>
+                      <span className={`px-2 py-1 rounded-full ${catalog.activeLots > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {catalog.activeLots > 0 ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteAllAuctionsByCategory(catalog.id, catalog.name);
+                      }}
+                      className="flex items-center px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
+                      title={`Delete all ${catalog.totalLots} auctions in this catalog`}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete All
+                    </button>
                   </div>
                 </div>
               </div>

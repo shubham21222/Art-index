@@ -38,6 +38,8 @@ const PartnershipForm = () => {
         setError('');
         setSuccess('');
 
+        console.log('Submitting partnership form with data:', formData);
+
         try {
             const response = await fetch(`${BASE_URL}/partnership/submit`, {
                 method: 'POST',
@@ -48,6 +50,7 @@ const PartnershipForm = () => {
             });
 
             const data = await response.json();
+            console.log('Partnership submission response:', { status: response.status, data });
 
             if (response.ok) {
                 setSuccess('Partnership request submitted successfully! You will receive a confirmation email shortly.');

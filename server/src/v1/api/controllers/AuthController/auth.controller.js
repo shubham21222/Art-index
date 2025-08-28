@@ -910,6 +910,8 @@ export const getAllUsersAdmin = async (req, res, next) => {
     try {
         const { page = 1, limit = 10, role, search } = req.query;
         const skip = (page - 1) * limit;
+        
+        console.log('getAllUsersAdmin request:', { page, limit, role, search, skip });
 
         let query = {};
         
@@ -927,6 +929,8 @@ export const getAllUsersAdmin = async (req, res, next) => {
             ];
         }
 
+        console.log('Database query:', JSON.stringify(query));
+
         const users = await User.find(query)
             .select('-password')
             .sort({ createdAt: -1 })
@@ -934,8 +938,10 @@ export const getAllUsersAdmin = async (req, res, next) => {
             .limit(parseInt(limit));
 
         const total = await User.countDocuments(query);
+        
+        console.log('Database results:', { usersFound: users.length, totalUsers: total });
 
-        return success(res, 'Users retrieved successfully', {
+        const response = {
             items: users,
             pagination: {
                 currentPage: parseInt(page),
@@ -943,8 +949,17 @@ export const getAllUsersAdmin = async (req, res, next) => {
                 totalItems: total,
                 itemsPerPage: parseInt(limit),
             }
+        };
+        
+        console.log('Sending response:', { 
+            status: true, 
+            itemsCount: response.items.length, 
+            pagination: response.pagination 
         });
+
+        return success(res, 'Users retrieved successfully', response);
     } catch (error) {
+        console.error('Error in getAllUsersAdmin:', error);
         return onError(res, error);
     }
 };
@@ -952,6 +967,8 @@ export const getAllUsersAdmin = async (req, res, next) => {
 // Get user statistics (admin only)
 export const getUserStats = async (req, res, next) => {
     try {
+        console.log('getUserStats request received');
+        
         const stats = await User.aggregate([
             {
                 $group: {
@@ -970,7 +987,7 @@ export const getUserStats = async (req, res, next) => {
         const totalFairs = await User.countDocuments({ role: 'FAIRS' });
         const totalRegularUsers = await User.countDocuments({ role: 'USER' });
 
-        return success(res, 'User statistics retrieved successfully', {
+        const response = {
             total: totalUsers,
             byRole: stats,
             breakdown: {
@@ -982,8 +999,23 @@ export const getUserStats = async (req, res, next) => {
                 fairs: totalFairs,
                 regularUsers: totalRegularUsers
             }
+        };
+        
+        console.log('User stats calculated:', { 
+            totalUsers, 
+            totalAdmins, 
+            totalSponsors, 
+            totalGalleries, 
+            totalMuseums, 
+            totalAuctions, 
+            totalFairs, 
+            totalRegularUsers 
         });
+        console.log('Sending stats response:', { status: true, itemsCount: Object.keys(response).length });
+
+        return success(res, 'User statistics retrieved successfully', response);
     } catch (error) {
+        console.error('Error in getUserStats:', error);
         return onError(res, error);
     }
 };
@@ -992,32 +1024,47 @@ export const getUserStats = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
     try {
         const { id } = req.params;
+        console.log('Delete user request received:', { id, params: req.params, user: req.user?._id });
         
-        if (!validateMongoDbId(id)) {
+        // Validate MongoDB ID - this function throws an error if invalid
+        try {
+            validateMongoDbId(id);
+            console.log('MongoDB ID validation passed for:', id);
+        } catch (error) {
+            console.log('MongoDB ID validation failed for:', id, 'Error:', error.message);
             return badRequest(res, 'Invalid user ID');
         }
 
         const user = await User.findById(id);
+        console.log('User lookup result:', { found: !!user, userId: id, userRole: user?.role });
+        
         if (!user) {
+            console.log('User not found for ID:', id);
             return notFound(res, 'User not found');
         }
 
         // Prevent admin from deleting themselves
         if (user._id.toString() === req.user._id.toString()) {
+            console.log('Admin attempted to delete themselves:', req.user._id);
             return badRequest(res, 'You cannot delete your own account');
         }
 
         // Prevent deletion of the last admin
         if (user.role === 'ADMIN') {
             const adminCount = await User.countDocuments({ role: 'ADMIN' });
+            console.log('Admin count check:', { currentAdminCount: adminCount, attemptingToDeleteAdmin: true });
             if (adminCount <= 1) {
+                console.log('Cannot delete last admin user');
                 return badRequest(res, 'Cannot delete the last admin user');
             }
         }
 
+        console.log('Proceeding with user deletion for ID:', id);
         await User.findByIdAndDelete(id);
+        console.log('User successfully deleted:', id);
         return success(res, 'User deleted successfully');
     } catch (error) {
+        console.error('Error in deleteUser:', error);
         return onError(res, error);
     }
 };

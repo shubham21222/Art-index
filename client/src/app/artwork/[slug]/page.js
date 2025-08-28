@@ -735,7 +735,7 @@ export default function ArtworkPage() {
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     className="absolute right-2 left-2 sm:left-auto sm:right-0 top-20 bg-white rounded-xl shadow-xl border p-4 z-10 w-auto sm:w-48"
                   >
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <button
                         onClick={handleShare}
                         className="flex items-center space-x-2 w-full px-4 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
@@ -750,7 +750,7 @@ export default function ArtworkPage() {
                         <Download className="w-4 h-4" />
                         <span>Download</span>
                       </button>
-                    </div>
+                    </div> */}
                   </motion.div>
                 )}
               </AnimatePresence>

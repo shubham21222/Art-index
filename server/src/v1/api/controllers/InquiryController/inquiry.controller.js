@@ -413,7 +413,7 @@ export const updateInquiry = async (req, res) => {
     try {
         if (!(await isValidObjectId(res, req.params.id))) return;
 
-        const { name, itemName, email, phone, message } = req.body;
+        const { name, itemName, email, phone, message, response, status } = req.body;
 
         // Validate required fields
         if (!name || !itemName || !email || !message) {
@@ -425,11 +425,151 @@ export const updateInquiry = async (req, res) => {
             return notFound(res, "Inquiry not found");
         }
 
+        // Prepare update data
+        const updateData = { name, itemName, email, phone, message };
+        
+        // If status is being updated to 'responded' and response is provided, include them
+        if (status === 'responded' && response) {
+            updateData.status = status;
+            updateData.response = response;
+            updateData.respondedAt = new Date();
+        }
+
         const updatedInquiry = await InquiryModel.findByIdAndUpdate(
             req.params.id,
-            { name, itemName, email, phone, message },
+            updateData,
             { new: true, runValidators: true }
         );
+
+        // Send response email if status is 'responded' and response is provided
+        if (status === 'responded' && response) {
+            try {
+                console.log('Sending response email to:', email);
+                console.log('Response content:', response);
+                console.log('Inquiry details:', {
+                    id: inquiry._id,
+                    name: name,
+                    itemName: itemName,
+                    email: email
+                });
+                
+                const emailContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inquiry Response - Art Index</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f8fafc; }
+        .email-container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center; color: white; }
+        .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .header .subtitle { font-size: 16px; opacity: 0.9; font-weight: 300; }
+        .content { padding: 40px 30px; }
+        .greeting { font-size: 18px; color: #2d3748; margin-bottom: 25px; font-weight: 600; }
+        .message { font-size: 16px; color: #4a5568; margin-bottom: 20px; line-height: 1.7; }
+        .response-box { background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); border: 2px solid #48bb78; padding: 25px; margin: 25px 0; border-radius: 12px; }
+        .response-box h3 { color: #22543d; font-size: 18px; margin-bottom: 15px; font-weight: 600; }
+        .response-text { background: white; border: 1px solid #c6f6d5; border-radius: 8px; padding: 20px; color: #22543d; font-style: italic; line-height: 1.6; }
+        .inquiry-details { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 25px 0; }
+        .inquiry-details h3 { color: #2d3748; font-size: 16px; margin-bottom: 15px; font-weight: 600; }
+        .detail-item { margin-bottom: 10px; }
+        .detail-label { font-weight: 600; color: #4a5568; }
+        .footer { background: #2d3748; color: white; text-align: center; padding: 30px; }
+        .footer h3 { font-size: 18px; margin-bottom: 10px; font-weight: 600; }
+        .footer p { opacity: 0.8; font-size: 14px; margin-bottom: 5px; }
+        .social-links { margin-top: 20px; }
+        .social-links a { display: inline-block; margin: 0 10px; color: white; text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s ease; }
+        .social-links a:hover { opacity: 1; }
+        .divider { height: 1px; background: linear-gradient(90deg, transparent, #e2e8f0, transparent); margin: 30px 0; }
+        @media (max-width: 600px) { .email-container { margin: 10px; border-radius: 8px; } .header, .content, .footer { padding: 20px; } .header h1 { font-size: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>📧 Inquiry Response</h1>
+            <p class="subtitle">We've responded to your inquiry</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Dear ${name},</div>
+            
+            <div class="message">Thank you for your inquiry about <strong>${itemName}</strong>. We appreciate your interest in our artwork and are pleased to provide you with a response.</div>
+            
+            <div class="response-box">
+                <h3>💬 Our Response</h3>
+                <div class="response-text">${response}</div>
+            </div>
+            
+            <div class="inquiry-details">
+                <h3>📋 Inquiry Details</h3>
+                <div class="detail-item">
+                    <span class="detail-label">Artwork:</span> ${itemName}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Your Message:</span> ${message}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Response Date:</span> ${new Date().toLocaleDateString()}
+                </div>
+            </div>
+            
+            <div class="message">If you have any additional questions or need further clarification, please don't hesitate to reach out to us. We're here to help!</div>
+            
+            <div class="divider"></div>
+            
+            <div style="text-align: center; color: #718096; font-size: 14px;">
+                <p><strong>Inquiry ID:</strong> ${inquiry._id}</p>
+                <p><strong>Response Date:</strong> ${new Date().toLocaleDateString()}</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <h3>Art Index</h3>
+            <p>Connecting art professionals worldwide</p>
+            <p>Your trusted partner in the art industry</p>
+            
+            <div class="social-links">
+                <a href="#">Website</a> | <a href="#">LinkedIn</a> | <a href="#">Twitter</a> | <a href="#">Instagram</a>
+            </div>
+            
+            <div style="margin-top: 20px; font-size: 12px; opacity: 0.6;">
+                <p>This email was sent to ${email}</p>
+                <p>© 2024 Art Index. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>`;
+
+                console.log('Email content prepared, length:', emailContent.length);
+
+                const emailResult = await sendEmail({
+                    to: email,
+                    subject: `Response to Your Inquiry - ${itemName}`,
+                    html: emailContent
+                });
+
+                console.log('Response email sent successfully:', emailResult);
+
+                // Update response email sent status
+                updatedInquiry.responseEmailSent = true;
+                await updatedInquiry.save();
+                console.log('Response email sent status updated in database');
+
+            } catch (emailError) {
+                console.error('Failed to send response email:', emailError);
+                console.error('Email error details:', {
+                    message: emailError.message,
+                    stack: emailError.stack,
+                    inquiryId: inquiry._id,
+                    email: email
+                });
+                // Continue with the update even if email fails
+            }
+        }
 
         return success(res, "Inquiry updated successfully", updatedInquiry);
     } catch (error) {

@@ -16,7 +16,7 @@ import {
 
 export default function ArtistCarousel({ slug }) {
     const [images, setImages] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);l
     const [error, setError] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [isZoomed, setIsZoomed] = useState(false);
@@ -307,23 +307,23 @@ export default function ArtistCarousel({ slug }) {
                                 {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
                             </motion.button>
 
-                            <motion.button
+                            {/* <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleDownload}
                                 className="p-3 bg-black/50 text-white rounded-full backdrop-blur-sm hover:bg-black/70 transition-colors"
                             >
                                 <Download className="w-5 h-5" />
-                            </motion.button>
+                            </motion.button> */}
 
-                            <motion.button
+                            {/* <motion.button  
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleShare}
                                 className="p-3 bg-black/50 text-white rounded-full backdrop-blur-sm hover:bg-black/70 transition-colors"
                             >
                                 <Share2 className="w-5 h-5" />
-                            </motion.button>
+                            </motion.button> */}
                         </motion.div>
                     )}
                 </AnimatePresence>

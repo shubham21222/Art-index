@@ -227,9 +227,9 @@ const ArtworkDetails = ({ artwork }) => {
                 >
                   <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
                 </button>
-                <button className="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors">
+                {/* <button className="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors">
                   <Share2 className="w-6 h-6" />
-                </button>
+                </button> */}
               </div>
             </div>
 

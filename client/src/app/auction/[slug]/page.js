@@ -299,9 +299,9 @@ const AuctionDetailPage = () => {
                   <button className="p-2 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100 transition-colors">
                     <Heart className="w-5 h-5 text-gray-600" />
                   </button>
-                  <button className="p-2 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100 transition-colors">
+                  {/* <button className="p-2 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100 transition-colors">
                     <Share2 className="w-5 h-5 text-gray-600" />
-                  </button>
+                  </button> */}
                 </div>
               </div>
 

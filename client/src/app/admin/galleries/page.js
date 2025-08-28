@@ -432,10 +432,10 @@ export default function GalleriesPage() {
       <Toaster />
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-white">Galleries & Museums</h1>
-        <Button className="bg-white text-black hover:bg-zinc-200">
+        {/* <Button className="bg-white text-black hover:bg-zinc-200">
           <Plus className="w-4 h-4 mr-2" />
           Add New Item
-        </Button>
+        </Button> */}
       </div>
 
       {/* Search and Filter */}

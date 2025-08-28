@@ -529,10 +529,10 @@ export default function ArtistDetailPage({ params }) {
                     <Heart className={`w-4 h-4 mr-2 ${isFavorited ? 'fill-current' : ''}`} />
                     {isFavorited ? 'Favorited' : 'Add to Favorites'}
                   </Button>
-                  <Button variant="outline" onClick={handleShare}>
+                  {/* <Button variant="outline" onClick={handleShare}>
                     <Share2 className="w-4 h-4 mr-2" />
                     Share Artist
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             </div>

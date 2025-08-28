@@ -38,6 +38,10 @@ const InquirySchema = new mongoose.Schema({
     respondedAt: {
         type: Date,
     },
+    responseEmailSent: {
+        type: Boolean,
+        default: false
+    }
 }, {
     timestamps: true
 });

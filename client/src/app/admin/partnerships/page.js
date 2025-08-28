@@ -160,7 +160,7 @@ const PartnershipsAdmin = () => {
     return (
         <div className="p-8 space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold">Partnership Management</h1>
+                <h1 className="text-3xl font-bold text-white">Partnership Management</h1>
                 <Select value={filter} onValueChange={setFilter}>
                     <SelectTrigger className="w-48">
                         <SelectValue placeholder="Filter by status" />

@@ -60,6 +60,10 @@ const partnershipSchema = new mongoose.Schema({
     approvalEmailSent: {
         type: Boolean,
         default: false
+    },
+    rejectionEmailSent: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
