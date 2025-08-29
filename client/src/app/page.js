@@ -20,7 +20,7 @@ import SponsorBanner from "../components/SponsorBanner";
 import Footer from "./components/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Metadata is handled in layout.js for client components
+// Metadata is handled in layout for client components
 
 // Skeleton Components
 const CarouselSkeleton = () => (
