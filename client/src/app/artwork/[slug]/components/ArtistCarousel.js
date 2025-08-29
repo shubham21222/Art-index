@@ -16,7 +16,7 @@ import {
 
 export default function ArtistCarousel({ slug }) {
     const [images, setImages] = useState([]);
-    const [loading, setLoading] = useState(true);l
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [isZoomed, setIsZoomed] = useState(false);
