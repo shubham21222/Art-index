@@ -16,6 +16,11 @@ import {
 } from "../../formatters/globalResponse.js";
 import { ArtworkPricing, GlobalPricingAdjustment } from "../../models/ArtworkPricing/artworkPricing.model.js";
 
+// Helper function to calculate cumulative adjustment percentage
+const calculateCumulativeAdjustment = (originalPrice, adjustedPrice) => {
+    return ((adjustedPrice / originalPrice) - 1) * 100;
+};
+
 // Create or update artwork pricing
 export const createOrUpdateArtworkPricing = async (req, res) => {
     try {
@@ -194,19 +199,31 @@ const applyGlobalAdjustmentToAllArtworks = async (globalAdjustment) => {
         for (const pricing of allPricing) {
             let adjustedPrice, adjustedMinPrice, adjustedMaxPrice;
 
+            // Determine the base price for calculation
+            // If there's already an adjustment, use the current adjusted price as base
+            // Otherwise, use the original price as base
+            const basePrice = pricing.adjustmentPercentage !== 0 ? pricing.adjustedPrice : pricing.originalPrice;
+            const baseMinPrice = pricing.adjustmentPercentage !== 0 ? pricing.adjustedMinPrice : pricing.originalMinPrice;
+            const baseMaxPrice = pricing.adjustmentPercentage !== 0 ? pricing.adjustedMaxPrice : pricing.originalMaxPrice;
+
             if (pricing.originalPriceType === 'Money') {
-                adjustedPrice = pricing.originalPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                adjustedPrice = basePrice * (1 + globalAdjustment.adjustmentPercentage / 100);
             } else if (pricing.originalPriceType === 'PriceRange') {
-                adjustedMinPrice = pricing.originalMinPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
-                adjustedMaxPrice = pricing.originalMaxPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                adjustedMinPrice = baseMinPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                adjustedMaxPrice = baseMaxPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
                 adjustedPrice = (adjustedMinPrice + adjustedMaxPrice) / 2;
             }
+
+            // Calculate cumulative adjustment percentage
+            const cumulativeAdjustmentPercentage = pricing.adjustmentPercentage !== 0 
+                ? calculateCumulativeAdjustment(pricing.originalPrice, adjustedPrice)
+                : globalAdjustment.adjustmentPercentage;
 
             await ArtworkPricing.findByIdAndUpdate(pricing._id, {
                 adjustedPrice,
                 adjustedMinPrice,
                 adjustedMaxPrice,
-                adjustmentPercentage: globalAdjustment.adjustmentPercentage,
+                adjustmentPercentage: cumulativeAdjustmentPercentage,
                 adjustmentReason: globalAdjustment.adjustmentReason,
                 updatedBy: globalAdjustment.createdBy
             });
@@ -498,6 +515,19 @@ export const resetAllArtworkPricing = async (req, res) => {
             { isActive: false, updatedBy: req.user._id }
         );
 
+        // Reset all artwork pricing to original values
+        await ArtworkPricing.updateMany(
+            { isActive: true },
+            {
+                adjustedPrice: '$originalPrice',
+                adjustedMinPrice: '$originalMinPrice',
+                adjustedMaxPrice: '$originalMaxPrice',
+                adjustmentPercentage: 0,
+                adjustmentReason: null,
+                updatedBy: req.user._id
+            }
+        );
+
         return success(res, `Reset ${result.modifiedCount} artwork pricing records to original prices`);
     } catch (error) {
         return unknownError(res, error.message);
@@ -548,16 +578,37 @@ export const applyGlobalAdjustmentToPricing = async (req, res) => {
         }
 
         if (shouldApplyGlobal) {
+            // Check if there's an existing pricing record for this artwork
+            let existingPricing = null;
+            if (artworkId) {
+                existingPricing = await ArtworkPricing.findOne({ artworkId, isActive: true });
+            }
+
             // Apply global adjustment on-the-fly
             let adjustedPrice, adjustedMinPrice, adjustedMaxPrice;
 
             if (originalPriceType === 'Money') {
-                adjustedPrice = originalPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                // If there's existing pricing with adjustments, compound the new adjustment
+                if (existingPricing && existingPricing.adjustmentPercentage !== 0) {
+                    adjustedPrice = existingPricing.adjustedPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                } else {
+                    adjustedPrice = originalPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                }
             } else if (originalPriceType === 'PriceRange') {
-                adjustedMinPrice = originalMinPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
-                adjustedMaxPrice = originalMaxPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                if (existingPricing && existingPricing.adjustmentPercentage !== 0) {
+                    adjustedMinPrice = existingPricing.adjustedMinPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                    adjustedMaxPrice = existingPricing.adjustedMaxPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                } else {
+                    adjustedMinPrice = originalMinPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                    adjustedMaxPrice = originalMaxPrice * (1 + globalAdjustment.adjustmentPercentage / 100);
+                }
                 adjustedPrice = (adjustedMinPrice + adjustedMaxPrice) / 2;
             }
+
+            // Calculate cumulative adjustment percentage for display
+            const cumulativeAdjustmentPercentage = existingPricing && existingPricing.adjustmentPercentage !== 0
+                ? calculateCumulativeAdjustment(originalPrice, adjustedPrice)
+                : globalAdjustment.adjustmentPercentage;
 
             const adjustedPricing = {
                 originalPrice,
@@ -568,7 +619,7 @@ export const applyGlobalAdjustmentToPricing = async (req, res) => {
                 adjustedPriceType: originalPriceType,
                 adjustedMinPrice,
                 adjustedMaxPrice,
-                adjustmentPercentage: globalAdjustment.adjustmentPercentage,
+                adjustmentPercentage: cumulativeAdjustmentPercentage,
                 adjustmentReason: globalAdjustment.adjustmentReason,
                 globalAdjustmentApplied: true
             };

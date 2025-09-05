@@ -22,6 +22,31 @@ import { logout } from "@/redux/features/authSlice";
 import { toast } from "sonner";
 import Cookies from 'js-cookie';
 
+// Custom scrollbar styles
+const scrollbarStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #52525b;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #71717a;
+  }
+  
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #52525b transparent;
+  }
+`;
+
 export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -54,6 +79,17 @@ export default function AdminLayout({ children }) {
 
     checkAuth();
   }, [isAuthenticated, user, router, isLoginPage]);
+
+  // Inject custom scrollbar styles
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = scrollbarStyles;
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   // For login page, render children without the admin layout
   if (isLoginPage) {
@@ -111,14 +147,14 @@ export default function AdminLayout({ children }) {
   return (
     <div className="flex h-screen bg-zinc-950">
       {/* Sidebar */}
-      <aside className="w-64 bg-black border-r border-zinc-800 fixed h-full">
-        <div className="p-6 border-b border-zinc-800">
+      <aside className="w-64 bg-black border-r border-zinc-800 fixed h-full flex flex-col">
+        <div className="p-6 border-b border-zinc-800 flex-shrink-0">
           <h1 className="text-2xl font-bold text-white">Art Index</h1>
           <p className="text-sm text-zinc-400">Admin Panel</p>
         </div>
 
-        {/* Navigation */}
-        <nav className="px-4 py-4 space-y-1">
+        {/* Navigation - Scrollable */}
+        <nav className="px-4 py-4 space-y-1 flex-1 overflow-y-auto custom-scrollbar">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.path;
@@ -142,7 +178,7 @@ export default function AdminLayout({ children }) {
         </nav>
 
         {/* Bottom Section */}
-        <div className="absolute bottom-0 w-full p-4 border-t border-zinc-800 bg-black">
+        <div className="p-4 border-t border-zinc-800 bg-black flex-shrink-0">
           <div className="flex items-center space-x-4">
             {/* <div className="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center">
               <Bell className="w-4 h-4 text-white" />
