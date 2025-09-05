@@ -12,6 +12,7 @@ import session from 'express-session';
 const app = express();
 import morgan from 'morgan';
 
+// Serve static files
 
 // Stripe Webhook Route (MUST be before express.json())
 // app.post("/v1/api/auction/stripe-webhook", express.raw({ type: "application/json" }), stripeWebhook);

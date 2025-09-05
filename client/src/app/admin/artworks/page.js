@@ -455,7 +455,7 @@ export default function ArtworksPage() {
       console.error('Error updating item:', error);
       alert(`Failed to update item: ${error.message}`);
     } finally {
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
     }
   };
 
