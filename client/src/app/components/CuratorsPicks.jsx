@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ContactModal from '@/app/components/ContactModal';
+import SoldBadge from '@/components/SoldBadge';
 
 export default function CuratorsPicks() {
   const [artworks, setArtworks] = useState([]);
@@ -133,6 +134,13 @@ export default function CuratorsPicks() {
                     className="object-cover w-full h-full rounded-md shadow-md transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                  
+                  {/* Sold Status Badge */}
+                  {art.soldStatus && art.soldStatus !== 'available' && (
+                    <div className="absolute top-3 right-3 z-20">
+                      <SoldBadge status={art.soldStatus} />
+                    </div>
+                  )}
                   
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10">
                     <h3 className="text-sm font-semibold drop-shadow-md mb-1">

@@ -425,42 +425,56 @@ export const addArtwork = async (req, res) => {
 
 // Update artwork in gallery
 export const updateArtwork = async (req, res) => {
-    try {
-        const { galleryId, artworkId } = req.params;
-        
-        const gallery = await GalleryModel.findById(galleryId);
-        if (!gallery) return notFound(res, "Gallery not found");
+  try {
+    const { galleryId, artworkId } = req.params;
+    
+    const gallery = await GalleryModel.findById(galleryId);
+    if (!gallery) return notFound(res, "Gallery not found");
 
-        const artworkIndex = gallery.artworks.findIndex(artwork => artwork._id.toString() === artworkId);
-        if (artworkIndex === -1) return notFound(res, "Artwork not found");
+    const artworkIndex = gallery.artworks.findIndex(artwork => artwork._id.toString() === artworkId);
+    if (artworkIndex === -1) return notFound(res, "Artwork not found");
 
-        // Format artwork images URLs if provided
-        let artworkImages = req.body.images;
-        if (artworkImages && Array.isArray(artworkImages)) {
-            artworkImages = artworkImages.map(img => {
-                if (img && typeof img === 'string') {
-                    if (img.startsWith('www.')) {
-                        return `https://${img}`;
-                    } else if (!img.startsWith('http://') && !img.startsWith('https://') && !img.startsWith('/')) {
-                        return null; // Set to null if invalid URL
-                    }
-                }
-                return img;
-            }).filter(img => img !== null); // Remove null values
+    // Format artwork images URLs if provided
+    let artworkImages = req.body.images;
+    if (artworkImages && Array.isArray(artworkImages)) {
+      artworkImages = artworkImages.map(img => {
+        if (img && typeof img === 'string') {
+          if (img.startsWith('www.')) {
+            return `https://${img}`;
+          } else if (!img.startsWith('http://') && !img.startsWith('https://') && !img.startsWith('/')) {
+            return null; // Set to null if invalid URL
+          }
         }
-
-        const updateData = {
-            ...req.body,
-            images: artworkImages,
-        };
-
-        gallery.artworks[artworkIndex] = { ...gallery.artworks[artworkIndex].toObject(), ...updateData };
-        await gallery.save();
-
-        return success(res, "Artwork updated successfully", gallery);
-    } catch (error) {
-        return unknownError(res, error.message);
+        return img;
+      }).filter(img => img !== null); // Remove null values
     }
+
+    const updateData = {
+      ...req.body,
+      images: artworkImages,
+    };
+
+    // Handle sold status updates
+    if (req.body.soldStatus) {
+      if (req.body.soldStatus === 'sold') {
+        updateData.soldAt = new Date();
+        updateData.soldBy = req.user._id;
+      } else if (req.body.soldStatus === 'available') {
+        updateData.soldAt = null;
+        updateData.soldPrice = null;
+        updateData.soldTo = null;
+        updateData.soldBy = null;
+        updateData.soldNotes = '';
+      }
+    }
+
+    gallery.artworks[artworkIndex] = { ...gallery.artworks[artworkIndex].toObject(), ...updateData };
+    await gallery.save();
+
+    return success(res, "Artwork updated successfully", gallery);
+  } catch (error) {
+    return unknownError(res, error.message);
+  }
 };
 
 // Delete artwork from gallery

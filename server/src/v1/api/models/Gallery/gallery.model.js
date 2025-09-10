@@ -108,6 +108,33 @@ const ArtworkSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  // Sold status fields
+  soldStatus: {
+    type: String,
+    enum: ['available', 'sold', 'reserved'],
+    default: 'available'
+  },
+  soldAt: {
+    type: Date,
+    default: null
+  },
+  soldPrice: {
+    type: Number,
+    default: null
+  },
+  soldTo: {
+    type: String,
+    default: null
+  },
+  soldBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  soldNotes: {
+    type: String,
+    default: ""
+  }
 }, { timestamps: true });
 
 const GallerySchema = new mongoose.Schema(

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import ContactModal from '../../components/ContactModal';
-import { MapPin, Palette, Eye, Heart, Share2, ShoppingCart, Star, ArrowLeft, DollarSign } from 'lucide-react';
+import { MapPin, Palette, Eye, Heart, Share2, ShoppingCart, Star, ArrowLeft, DollarSign, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -358,6 +358,35 @@ export default function ArtworkPage({ params }) {
 
         if (artworkData) {
           setArtwork(artworkData);
+          
+          // Check if this Saatchi Art is marked as sold in our database
+          try {
+            const soldStatusResponse = await fetch(`/api/artworks/status?slug=${slug}`);
+            const soldStatusData = await soldStatusResponse.json();
+            
+            if (soldStatusData.status && soldStatusData.items.artwork) {
+              console.log("Custom Saatchi Art data found:", soldStatusData.items.artwork);
+              
+              // Update artwork with custom data from our database
+              setArtwork(prev => ({
+                ...prev,
+                // Update title if custom title exists
+                title: soldStatusData.items.artwork.title || prev.artwork_title || prev.title,
+                // Update artist name if custom artist name exists
+                full_name: soldStatusData.items.artwork.artistName || prev.full_name,
+                // Update sold status and related fields
+                soldStatus: soldStatusData.items.soldStatus || 'available',
+                soldPrice: soldStatusData.items.artwork.soldPrice,
+                soldTo: soldStatusData.items.artwork.soldTo,
+                soldNotes: soldStatusData.items.artwork.soldNotes,
+                soldAt: soldStatusData.items.artwork.soldAt
+              }));
+            }
+          } catch (error) {
+            console.log("Could not fetch sold status for Saatchi Art:", error);
+            // Continue without sold status - not critical
+          }
+          
           setRelatedArtworks(await fetchRelatedArtworks(artworkData.id_user, artworkData.artId));
           
           // Fetch global pricing adjustment
@@ -489,11 +518,40 @@ export default function ArtworkPage({ params }) {
               {/* Title and Artist */}
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {artwork.artwork_title}
+                  {artwork.title || artwork.artwork_title}
                 </h1>
                 <p className="text-xl text-gray-600 mb-4">
                   by {artwork.full_name}
                 </p>
+                
+                {/* Sold Status Badge */}
+                {artwork.soldStatus && artwork.soldStatus !== 'available' && (
+                  <div className="mt-4 mb-4">
+                    <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
+                      artwork.soldStatus === 'sold' 
+                        ? 'bg-red-100 text-red-800 border border-red-200' 
+                        : artwork.soldStatus === 'reserved'
+                        ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                        : 'bg-gray-100 text-gray-800 border border-gray-200'
+                    }`}>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      {artwork.soldStatus === 'sold' ? 'SOLD' : 
+                       artwork.soldStatus === 'reserved' ? 'RESERVED' : 
+                       artwork.soldStatus.toUpperCase()}
+                      {artwork.soldPrice && (
+                        <span className="ml-2 font-bold">
+                          ${artwork.soldPrice.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    {artwork.soldNotes && (
+                      <p className="mt-2 text-sm text-gray-600 italic">
+                        Note: {artwork.soldNotes}
+                      </p>
+                    )}
+                  </div>
+                )}
+                
                 <div className="flex items-center text-sm text-gray-500 mb-4">
                   <MapPin className="w-4 h-4 mr-1" />
                   {artwork.city}, {artwork.country}

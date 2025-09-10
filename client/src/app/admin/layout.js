@@ -16,7 +16,10 @@ import {
     Handshake,
     Megaphone,
     DollarSign,
-    MessageSquare
+    MessageSquare,
+    ShoppingCart,
+    CheckCircle,
+    Brush
 } from "lucide-react";
 import { logout } from "@/redux/features/authSlice";
 import { toast } from "sonner";
@@ -117,9 +120,12 @@ export default function AdminLayout({ children }) {
   const menuItems = [
     { title: "Dashboard", path: "/admin/dashboard", icon: Home },
     { title: "Artworks", path: "/admin/artworks", icon: Palette },
+    { title: "Saatchi Arts", path: "/admin/saatchi-arts", icon: Brush },
+    { title: "Sold Items", path: "/admin/sold-items", icon: CheckCircle },
     { title: "Auctions", path: "/admin/auctions", icon: Gavel },
     { title: "Galleries", path: "/admin/galleries", icon: Users },
     { title: "User Galleries", path: "/admin/user-galleries", icon: Building2 },
+    
     { title: "Inquiries", path: "/admin/inquiries", icon: MessageSquare },
     // { title: "Analytics", path: "/admin/analytics", icon: BarChart3 },
     // { title: "Settings", path: "/admin/settings", icon: Settings },
@@ -132,6 +138,7 @@ export default function AdminLayout({ children }) {
     // { title: "Artwork Pricing", path: "/admin/artwork-pricing", icon: DollarSign },
     { title: "Global Pricing", path: "/admin/global-pricing", icon: DollarSign },
     { title: "Offers", path: "/admin/offers", icon: DollarSign },
+    // { title: "Products", path: "/admin/products", icon: DollarSign },
   ];
 
   const handleLogout = async () => {

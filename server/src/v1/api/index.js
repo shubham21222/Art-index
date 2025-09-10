@@ -17,6 +17,8 @@ import SponsorBanner from './routes/SponsorBanner/sponsorBanner.routes.js';
 import Newsletter from './routes/Newsletter/index.js';
 import Users from './routes/users/users.routes.js';
 import Dashboard from './routes/dashboard/dashboard.routes.js';
+import SoldItems from './routes/SoldItems/soldItems.routes.js';
+import ExternalSoldArtwork from './routes/ExternalSoldArtwork/externalSoldArtwork.routes.js';
 
 import google from "./routes/googleRoutes/google.routes.js";
 import Gallery from "./routes/gallery/gallery.routes.js";
@@ -91,6 +93,12 @@ router.use('/users', Users);
 
 // Add API routes here for DASHBOARD //
 router.use('/dashboard', Dashboard);
+
+// Add API routes here for SOLD ITEMS //
+router.use('/sold-items', SoldItems);
+
+// Add API routes here for EXTERNAL SOLD ARTWORKS //
+router.use('/artworks', ExternalSoldArtwork);
 
 
 export default router;

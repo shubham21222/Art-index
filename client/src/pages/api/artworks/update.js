@@ -11,12 +11,67 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Item ID is required' });
   }
 
-  if (!category) {
-    return res.status(400).json({ error: 'Category is required' });
-  }
-
   if (!updates || typeof updates !== 'object') {
     return res.status(400).json({ error: 'Updates object is required' });
+  }
+
+  // Check if this is an external artwork (from Artsy API)
+  const isExternalArtwork = updates.__typename || updates.displayType || id.includes('U2VhcmNoYWJsZUl0ZW0') || id.includes('search-');
+  
+  if (isExternalArtwork) {
+    // Handle external artwork - forward to server API
+    try {
+      const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/v1/api';
+      const serverEndpoint = `${serverUrl}/artworks/update`;
+      
+      console.log('Forwarding external artwork update to:', serverEndpoint);
+      console.log('Request payload:', { id, category: category || 'Artwork', updates });
+      
+      // Prepare headers for server request
+      const serverHeaders = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Forward authentication header if present
+      if (req.headers.authorization) {
+        serverHeaders['Authorization'] = req.headers.authorization;
+      }
+      
+      const serverResponse = await fetch(serverEndpoint, {
+        method: 'PUT',
+        headers: serverHeaders,
+        body: JSON.stringify({
+          id,
+          category: category || 'Artwork',
+          updates
+        })
+      });
+
+      const data = await serverResponse.json();
+      console.log('Server response:', { status: serverResponse.status, data });
+
+      if (!serverResponse.ok) {
+        console.error('Server error response:', data);
+        return res.status(serverResponse.status).json({ 
+          error: data.error || 'Failed to update external artwork',
+          details: data.details || 'Unknown server error'
+        });
+      }
+
+      return res.status(200).json(data);
+    } catch (error) {
+      console.error('Error updating external artwork:', error);
+      return res.status(500).json({ 
+        error: 'Failed to update external artwork', 
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
+    }
+  }
+
+  // Handle local database artwork (existing logic)
+  if (!category) {
+    return res.status(400).json({ error: 'Category is required for local artworks' });
   }
 
   const uri = process.env.MONGODB_URI;
@@ -115,6 +170,22 @@ export default async function handler(req, res) {
       } else {
         // For artwork collections, store just the URL string
         updateObject.image = updates.image;
+      }
+    }
+    
+    // Handle sold status updates
+    if (updates.soldStatus) {
+      updateObject.soldStatus = updates.soldStatus;
+      if (updates.soldStatus === 'sold') {
+        updateObject.soldAt = new Date();
+        updateObject.soldPrice = updates.soldPrice || null;
+        updateObject.soldTo = updates.soldTo || null;
+        updateObject.soldNotes = updates.soldNotes || '';
+      } else if (updates.soldStatus === 'available') {
+        updateObject.soldAt = null;
+        updateObject.soldPrice = null;
+        updateObject.soldTo = null;
+        updateObject.soldNotes = '';
       }
     }
 

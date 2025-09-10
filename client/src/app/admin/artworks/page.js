@@ -4,13 +4,14 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit, Trash2, Filter, ChevronLeft, ChevronRight, X, Save } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Filter, ChevronLeft, ChevronRight, X, Save, CheckCircle, Clock, XCircle } from "lucide-react";
 import Image from "next/image";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import toast, { Toaster } from 'react-hot-toast';
+import SoldBadge from '@/components/SoldBadge';
 
 // Define all artwork categories and their API endpoints
 const ARTWORK_CATEGORIES = [
@@ -59,6 +60,11 @@ const ALL_CATEGORIES = [
 
 const ITEMS_PER_PAGE = 12;
 
+// Generate unique IDs for React keys
+const generateUniqueId = () => {
+  return `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
 export default function ArtworksPage() {
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -69,6 +75,7 @@ export default function ArtworksPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -86,12 +93,163 @@ export default function ArtworksPage() {
     if (node) observer.current.observe(node);
   }, [loading, hasMore, isFetching]);
 
+  const performSearch = useCallback(async (query) => {
+    setIsSearching(true);
+    
+    try {
+      const response = await fetch('/api/artwork', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `
+            query SearchBarInputSuggestQuery(
+              $term: String!
+              $hasTerm: Boolean!
+              $entities: [SearchEntity]
+            ) {
+              viewer {
+                searchConnectionAggregation: searchConnection(first: 0, mode: AUTOSUGGEST, query: $term, aggregations: [TYPE]) {
+                  aggregations {
+                    counts {
+                      count
+                      name
+                    }
+                  }
+                }
+                searchConnection(query: $term, entities: $entities, mode: AUTOSUGGEST, first: 20) @include(if: $hasTerm) {
+                  edges {
+                    node {
+                      displayLabel
+                      href
+                      imageUrl
+                      __typename
+                      ... on SearchableItem {
+                        displayType
+                        slug
+                      }
+                      ... on Artist {
+                        statuses {
+                          artworks
+                          auctionLots
+                        }
+                        coverArtwork {
+                          image {
+                            src: url(version: ["square"])
+                          }
+                          id
+                        }
+                      }
+                      ... on Node {
+                        __isNode: __typename
+                        id
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            term: query,
+            hasTerm: true,
+            entities: ["ARTWORK"]
+          }
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.data?.viewer?.searchConnection?.edges) {
+        // Transform search results to match our data structure - simplified to match price database
+        const searchResults = data.data.viewer.searchConnection.edges.map((edge, index) => {
+          const node = edge.node;
+          const uniqueKey = `${node.id || 'unknown'}-${node.__typename || 'unknown'}-${index}-${generateUniqueId()}`;
+          
+          return {
+            _id: node.id || `search-${index}`,
+            uniqueId: uniqueKey,
+            title: node.displayLabel,
+            name: node.displayLabel,
+            image: node.imageUrl || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E",
+            artistNames: node.displayLabel, // Use displayLabel directly like price database
+            category: node.displayType || 'Search Result',
+            type: 'artwork',
+            slug: node.slug,
+            href: node.href,
+            __typename: node.__typename,
+            displayType: node.displayType,
+            // Preserve original node data for better matching
+            originalNode: node
+          };
+        });
+        
+        setFilteredArtworks(searchResults);
+        setArtworks(searchResults.slice(0, ITEMS_PER_PAGE));
+        setCurrentPage(1);
+        setHasMore(searchResults.length > ITEMS_PER_PAGE);
+      } else {
+        // If no API results, fall back to local search
+        const localFiltered = allArtworks.filter(item => 
+          item.title?.toLowerCase().includes(query.toLowerCase()) ||
+          item.name?.toLowerCase().includes(query.toLowerCase()) ||
+          item.artistNames?.toLowerCase().includes(query.toLowerCase()) ||
+          item.category?.toLowerCase().includes(query.toLowerCase()) ||
+          item.saleMessage?.toLowerCase().includes(query.toLowerCase()) ||
+          item.partner?.name?.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        setFilteredArtworks(localFiltered);
+        setArtworks(localFiltered.slice(0, ITEMS_PER_PAGE));
+        setCurrentPage(1);
+        setHasMore(localFiltered.length > ITEMS_PER_PAGE);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      // Fall back to local search on error
+      const localFiltered = allArtworks.filter(item => 
+        item.title?.toLowerCase().includes(query.toLowerCase()) ||
+        item.name?.toLowerCase().includes(query.toLowerCase()) ||
+        item.artistNames?.toLowerCase().includes(query.toLowerCase()) ||
+        item.category?.toLowerCase().includes(query.toLowerCase()) ||
+        item.saleMessage?.toLowerCase().includes(query.toLowerCase()) ||
+        item.partner?.name?.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      setFilteredArtworks(localFiltered);
+      setArtworks(localFiltered.slice(0, ITEMS_PER_PAGE));
+      setCurrentPage(1);
+      setHasMore(localFiltered.length > ITEMS_PER_PAGE);
+    } finally {
+      setIsSearching(false);
+    }
+  }, [allArtworks]);
+
   useEffect(() => {
     fetchAllArtworks();
   }, []);
 
+  // Debounced search effect
   useEffect(() => {
-    // Filter artworks based on search query and selected category
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim()) {
+        performSearch(searchQuery);
+      } else {
+        // Reset to show all items when search is cleared
+        setFilteredArtworks(allArtworks);
+        setArtworks(allArtworks.slice(0, ITEMS_PER_PAGE));
+        setCurrentPage(1);
+        setHasMore(allArtworks.length > ITEMS_PER_PAGE);
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, allArtworks, performSearch]);
+
+  useEffect(() => {
+    // Filter artworks based on selected category only (search is now handled in handleSearch)
     let filtered = allArtworks;
     
     // Apply category filter
@@ -102,18 +260,6 @@ export default function ArtworksPage() {
       }
     }
     
-    // Apply search filter
-    if (searchQuery) {
-      filtered = filtered.filter(item => 
-        item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.artistNames?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.saleMessage?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.partner?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
     setFilteredArtworks(filtered);
     setCurrentPage(1); // Reset pagination when filters change
     setHasMore(filtered.length > ITEMS_PER_PAGE);
@@ -121,15 +267,9 @@ export default function ArtworksPage() {
     // Initialize displayed items
     const initialItems = filtered.slice(0, ITEMS_PER_PAGE);
     setArtworks(initialItems);
-  }, [searchQuery, selectedCategory, allArtworks]);
+  }, [selectedCategory, allArtworks]);
 
-  useEffect(() => {
-    if (currentPage > 1 && !isFetching) {
-      loadMoreItems();
-    }
-  }, [currentPage]);
-
-  const loadMoreItems = async () => {
+  const loadMoreItems = useCallback(async () => {
     if (isFetching) return;
     
     setIsFetching(true);
@@ -149,7 +289,13 @@ export default function ArtworksPage() {
     } finally {
       setIsFetching(false);
     }
-  };
+  }, [isFetching, currentPage, filteredArtworks]);
+
+  useEffect(() => {
+    if (currentPage > 1 && !isFetching) {
+      loadMoreItems();
+    }
+  }, [currentPage, isFetching, loadMoreItems]);
 
   const fetchAllArtworks = async () => {
     try {
@@ -206,7 +352,7 @@ export default function ArtworksPage() {
               medium: artwork.mediumType,
               slug: artwork.slug,
               _id: artwork._id, // Use MongoDB _id as primary identifier
-              uniqueId: `${category.name}-${artwork._id || index}-${index}`
+              uniqueId: `${category.name}-${artwork._id || 'unknown'}-${index}-${generateUniqueId()}`
             };
           });
         } catch (error) {
@@ -257,7 +403,7 @@ export default function ArtworksPage() {
               image: imageUrl,
               artistNames: artist.nationalityAndBirthday || "Artist",
               _id: artist._id, // Use MongoDB _id as primary identifier
-              uniqueId: `${category.name}-${artist._id || index}-${index}`
+              uniqueId: `${category.name}-${artist._id || 'unknown'}-${index}-${generateUniqueId()}`
             };
           });
         } catch (error) {
@@ -310,7 +456,7 @@ export default function ArtworksPage() {
               image: imageUrl,
               artistNames: museum.locations?.map(loc => loc.city).join(", ") || "Location not specified",
               _id: museum._id, // Use MongoDB _id as primary identifier
-              uniqueId: `${category.name}-${museum._id || index}-${index}`
+              uniqueId: `${category.name}-${museum._id || 'unknown'}-${index}-${generateUniqueId()}`
             };
           });
         } catch (error) {
@@ -391,15 +537,35 @@ export default function ArtworksPage() {
     
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/artworks/update', {
+      // Check if this is an external artwork (from Artsy API)
+      const isExternalArtwork = editingItem.originalNode || editingItem.__typename || editingItem.uniqueId?.includes('search-');
+      
+      const apiEndpoint = isExternalArtwork ? '/api/artworks/update' : '/api/artworks/update';
+      
+      // Get authentication token for external artwork updates
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add authentication header for external artworks
+      if (isExternalArtwork && token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(apiEndpoint, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           id: itemId,
-          category: editingItem.category,
-          updates: updatedData
+          category: editingItem.category || 'Artwork',
+          updates: {
+            ...updatedData,
+            slug: editingItem.slug,
+            href: editingItem.href,
+            __typename: editingItem.__typename,
+            displayType: editingItem.displayType
+          }
         }),
       });
 
@@ -559,6 +725,11 @@ export default function ArtworksPage() {
             value={searchQuery}
             onChange={handleSearch}
           />
+          {isSearching && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-zinc-400 border-t-white"></div>
+            </div>
+          )}
         </div>
         <div className="w-full md:w-64">
           <Select value={selectedCategory} onValueChange={handleCategoryChange}>
@@ -598,7 +769,7 @@ export default function ArtworksPage() {
         ) : displayedItems.length > 0 ? (
           displayedItems.map((item, index) => (
             <Card 
-              key={item.uniqueId || `${item.category}-${item._id || index}-${index}`} 
+              key={item.uniqueId || `item-${item._id || 'unknown'}-${index}-${generateUniqueId()}`} 
               className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors"
               ref={index === displayedItems.length - 1 ? lastItemRef : null}
             >
@@ -614,6 +785,13 @@ export default function ArtworksPage() {
                       e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
                     }}
                   />
+                  {/* Sold Status Badge */}
+                  {item.soldStatus && item.soldStatus !== 'available' && (
+                    <div className="absolute top-2 left-2 z-10">
+                      <SoldBadge status={item.soldStatus} />
+                    </div>
+                  )}
+                  
                   <div className="absolute top-2 right-2 flex gap-2">
                     <Button 
                       size="icon" 
@@ -773,8 +951,28 @@ function EditItemForm({ item, onSave, onCancel, isSubmitting }) {
     medium: item.medium || item.mediumType || '',
     date: item.date || '',
     saleMessage: item.saleMessage || '',
-    locations: item.locations || []
+    locations: item.locations || [],
+    soldStatus: item.soldStatus || 'available',
+    soldPrice: item.soldPrice || '',
+    soldTo: item.soldTo || '',
+    soldNotes: item.soldNotes || ''
   });
+  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isDropdownOpen && !event.target.closest('.dropdown-container')) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -849,6 +1047,114 @@ function EditItemForm({ item, onSave, onCancel, isSubmitting }) {
             value={formData.saleMessage}
             onChange={(e) => handleChange('saleMessage', e.target.value)}
             className="bg-zinc-800 border-zinc-700 text-white"
+          />
+        </div>
+      </div>
+
+      {/* Sold Status Section */}
+      <div className="border-t border-zinc-700 pt-4">
+        <h3 className="text-lg font-semibold text-white mb-4">Sold Status</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative">
+            <Label htmlFor="soldStatus" className="text-white">Status</Label>
+            <div className="relative dropdown-container">
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Dropdown clicked, current state:', isDropdownOpen);
+                  setIsDropdownOpen(!isDropdownOpen);
+                }}
+                className="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 rounded-md hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  {formData.soldStatus === 'available' && <XCircle className="h-4 w-4 text-blue-400" />}
+                  {formData.soldStatus === 'sold' && <CheckCircle className="h-4 w-4 text-green-400" />}
+                  {formData.soldStatus === 'reserved' && <Clock className="h-4 w-4 text-yellow-400" />}
+                  <span className="capitalize">{formData.soldStatus}</span>
+                </div>
+                <svg className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isDropdownOpen && (
+                <div className="absolute z-50 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg">
+                  <div className="py-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleChange('soldStatus', 'available');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-white hover:bg-zinc-700 flex items-center gap-2"
+                    >
+                      <XCircle className="h-4 w-4 text-blue-400" />
+                      Available
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleChange('soldStatus', 'sold');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-white hover:bg-zinc-700 flex items-center gap-2"
+                    >
+                      <CheckCircle className="h-4 w-4 text-green-400" />
+                      Sold
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleChange('soldStatus', 'reserved');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-white hover:bg-zinc-700 flex items-center gap-2"
+                    >
+                      <Clock className="h-4 w-4 text-yellow-400" />
+                      Reserved
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {formData.soldStatus === 'sold' && (
+            <>
+              <div>
+                <Label htmlFor="soldPrice" className="text-white">Sold Price</Label>
+                <Input
+                  id="soldPrice"
+                  type="number"
+                  value={formData.soldPrice}
+                  onChange={(e) => handleChange('soldPrice', e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                  placeholder="Enter sold price"
+                />
+              </div>
+              <div>
+                <Label htmlFor="soldTo" className="text-white">Sold To</Label>
+                <Input
+                  id="soldTo"
+                  value={formData.soldTo}
+                  onChange={(e) => handleChange('soldTo', e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                  placeholder="Buyer name or contact"
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <Label htmlFor="soldNotes" className="text-white">Notes</Label>
+          <Textarea
+            id="soldNotes"
+            value={formData.soldNotes}
+            onChange={(e) => handleChange('soldNotes', e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-white"
+            placeholder="Additional notes about the sale..."
+            rows={3}
           />
         </div>
       </div>

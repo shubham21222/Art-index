@@ -1,7 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import ArtistCarousel from "./components/ArtistCarousel";
+import ArtworkImage from "./components/ArtworkImage";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import OtherWorks from "./components/OtherWorks";
@@ -294,6 +294,35 @@ export default function ArtworkPage() {
 
         console.log("Artwork Data Fetched:", artworkResult.data.artwork);
         setArtwork(artworkResult.data.artwork);
+
+        // Check if this artwork is marked as sold in our database
+        try {
+          // Use slug for status check since artsyId formats differ between search and direct fetch
+          const soldStatusResponse = await fetch(`/api/artworks/status?slug=${slug}`);
+          const soldStatusData = await soldStatusResponse.json();
+          
+          console.log("Sold status response:", soldStatusData);
+          
+          if (soldStatusData.status && soldStatusData.items.artwork) {
+            console.log("Custom artwork data found:", soldStatusData.items.artwork);
+            
+            // Update artwork with custom data from our database
+            setArtwork(prev => ({
+              ...prev,
+              // Update title if custom title exists
+              title: soldStatusData.items.artwork.title || prev.title,
+              // Update sold status and related fields
+              soldStatus: soldStatusData.items.soldStatus || 'available',
+              soldPrice: soldStatusData.items.artwork.soldPrice,
+              soldTo: soldStatusData.items.artwork.soldTo,
+              soldNotes: soldStatusData.items.artwork.soldNotes,
+              soldAt: soldStatusData.items.artwork.soldAt
+            }));
+          }
+        } catch (error) {
+          console.log("Could not fetch sold status:", error);
+          // Continue without sold status - not critical
+        }
 
         // Fetch Pricing Data
         const pricingResponse = await fetch("/api/artwork", {
@@ -690,7 +719,7 @@ export default function ArtworkPage() {
               className="space-y-6"
             >
               <div className="w-full h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] bg-white rounded-2xl shadow-xl overflow-hidden flex items-center justify-center">
-                <ArtistCarousel slug={artist.slug} />
+                <ArtworkImage artwork={artwork} />
               </div>
             </motion.div>
 
@@ -712,6 +741,35 @@ export default function ArtworkPage() {
                 <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
                   {artwork.title || "Untitled Artwork"}
                 </h1>
+                
+                {/* Sold Status Badge */}
+                {artwork.soldStatus && artwork.soldStatus !== 'available' && (
+                  <div className="mt-4 mb-4">
+                    <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
+                      artwork.soldStatus === 'sold' 
+                        ? 'bg-red-100 text-red-800 border border-red-200' 
+                        : artwork.soldStatus === 'reserved'
+                        ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                        : 'bg-gray-100 text-gray-800 border border-gray-200'
+                    }`}>
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      {artwork.soldStatus === 'sold' ? 'SOLD' : 
+                       artwork.soldStatus === 'reserved' ? 'RESERVED' : 
+                       artwork.soldStatus.toUpperCase()}
+                      {artwork.soldPrice && (
+                        <span className="ml-2 font-bold">
+                          ${artwork.soldPrice.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    {artwork.soldNotes && (
+                      <p className="mt-2 text-sm text-gray-600 italic">
+                        Note: {artwork.soldNotes}
+                      </p>
+                    )}
+                  </div>
+                )}
+                
                 <div className="flex items-center space-x-4 text-gray-600">
                   <div className="flex items-center space-x-1">
                     <User className="w-4 h-4" />
