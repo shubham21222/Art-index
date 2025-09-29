@@ -63,7 +63,7 @@ const ArtCategoriesSkeleton = () => (
 );
 
 const CuratorsPicksSkeleton = () => (
-  <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
+  <div className="flex flex-col items-center justify-center mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
     <div className="flex flex-col items-center justify-between w-full mb-6">
       <div className="text-center">
         <Skeleton className="h-8 w-48 mb-2" />
@@ -71,11 +71,11 @@ const CuratorsPicksSkeleton = () => (
       </div>
       <Skeleton className="h-4 w-24 mt-4 md:mt-0" />
     </div>
-    <div className="relative h-[400px] w-full">
-      <div className="absolute inset-0 flex items-center justify-center">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="w-[350px] h-[300px] rounded-md overflow-hidden mx-2">
-            <Skeleton className="w-full h-full rounded-md" />
+    <div className="w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="w-full h-[300px] rounded-lg overflow-hidden">
+            <Skeleton className="w-full h-full rounded-lg" />
           </div>
         ))}
       </div>
@@ -84,7 +84,7 @@ const CuratorsPicksSkeleton = () => (
 );
 
 const AuctionCarouselSkeleton = () => (
-  <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
+  <div className="flex flex-col items-center justify-center mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
     <div className="flex flex-col items-center justify-between w-full mb-6">
       <div className="text-center">
         <Skeleton className="h-8 w-32 mb-2" />
@@ -92,11 +92,11 @@ const AuctionCarouselSkeleton = () => (
       </div>
       <Skeleton className="h-4 w-28 mt-4 md:mt-0" />
     </div>
-    <div className="relative h-[400px] w-full">
-      <div className="absolute inset-0 flex items-center justify-center">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="w-[350px] h-[300px] rounded-md overflow-hidden mx-2">
-            <Skeleton className="w-full h-full rounded-md" />
+    <div className="w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="w-full h-[300px] rounded-lg overflow-hidden">
+            <Skeleton className="w-full h-full rounded-lg" />
           </div>
         ))}
       </div>

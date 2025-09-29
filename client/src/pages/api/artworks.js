@@ -24,8 +24,8 @@ export default async function handler(req, res) {
     const db = client.db(dbName);
     const collection = db.collection("artworks");
 
-    // Fetch up to 20 artworks to match your component's original limit
-    const artworks = await collection.find({}).limit(20).toArray();
+    // Fetch up to 200 artworks for carousel components
+    const artworks = await collection.find({}).limit(200).toArray();
     
     // Log the first artwork to see its structure
     console.log("Sample artwork data:", JSON.stringify(artworks[0], null, 2));

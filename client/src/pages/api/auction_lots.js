@@ -25,8 +25,8 @@ export default async function handler(req, res) {
     const db = client.db(dbName);
     const collection = db.collection("auctions");
 
-    // Fetch up to 20 auction lots
-    const auctionLots = await collection.find({}).limit(20).toArray();
+    // Fetch up to 200 auction lots for carousel components
+    const auctionLots = await collection.find({}).limit(200).toArray();
     console.log(`Found ${auctionLots.length} auction lots`);
 
     // Map data to match the provided sample schema with better error handling

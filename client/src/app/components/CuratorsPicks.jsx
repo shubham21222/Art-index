@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,12 @@ import SoldBadge from '@/components/SoldBadge';
 
 export default function CuratorsPicks() {
   const [artworks, setArtworks] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(null);
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const carouselRef = useRef(null);
+  const autoPlayRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,8 +27,11 @@ export default function CuratorsPicks() {
         } else {
           console.log("Fetched artworks:", result.artworks); // Debug log
           const artworksData = result.artworks || [];
-          setArtworks(artworksData);
-          setCurrentIndex(Math.floor(artworksData.length / 2));
+          // Shuffle the array to randomize items on each refresh
+          const shuffledData = [...artworksData].sort(() => Math.random() - 0.5);
+          // Take 200 items for carousel
+          const selectedArtworks = shuffledData.slice(0, 200);
+          setArtworks(selectedArtworks);
         }
       } catch (error) {
         console.error("Error fetching artworks:", error);
@@ -35,13 +41,46 @@ export default function CuratorsPicks() {
     fetchData();
   }, []);
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? artworks.length - 1 : prev - 1));
+  // Calculate number of slides (4 cards per slide)
+  const cardsPerSlide = 4;
+  const totalSlides = Math.ceil(artworks.length / cardsPerSlide);
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (isAutoPlaying && totalSlides > 0) {
+      autoPlayRef.current = setInterval(() => {
+        setCurrentIndex((prevIndex) => 
+          prevIndex === totalSlides - 1 ? 0 : prevIndex + 1
+        );
+      }, 3000);
+    }
+
+    return () => {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+      }
+    };
+  }, [isAutoPlaying, totalSlides]);
+
+  // Navigation functions
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? totalSlides - 1 : prevIndex - 1
+    );
+    setIsAutoPlaying(false);
+    // Resume auto-play after 5 seconds
+    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev === artworks.length - 1 ? 0 : prev + 1));
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === totalSlides - 1 ? 0 : prevIndex + 1
+    );
+    setIsAutoPlaying(false);
+    // Resume auto-play after 5 seconds
+    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
+
 
   const handleContactClick = (e, artwork) => {
     e.preventDefault(); // Prevent the Link navigation
@@ -63,46 +102,13 @@ export default function CuratorsPicks() {
     return originalPrice ? `$${(originalPrice * 1.1).toLocaleString()}` : null;
   };
 
-  const getSlideStyle = (index) => {
-    if (currentIndex === null) {
-      return {
-        opacity: 0,
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%) scale(0)",
-        transition: "all 0.8s ease",
-      };
-    }
-
-    const total = artworks.length;
-    const angle = (360 / total) * (index - currentIndex);
-    const radius = 600;
-    const translateZ = -radius;
-    const rotateY = angle;
-    const opacity = Math.abs(angle) > 90 ? 0 : 1 - Math.abs(angle) / 120;
-    const scale = 1 - Math.abs(angle) / 180;
-
-    return {
-      transform: `rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
-      opacity,
-      transition: "transform 0.8s ease, opacity 0.8s ease",
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transformOrigin: "center center",
-      zIndex: Math.round(5 - Math.abs(angle)),
-      marginLeft: "-175px",
-      marginTop: "-150px",
-    };
-  };
 
   return (
-    <div className="flex flex-col items-center justify-center max-w-[1500px] mx-auto px-6 py-8">
+    <div className="flex flex-col items-center justify-center mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <div className="flex flex-col items-center justify-between w-full mb-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Modern Paintings</h2>
-          <p className="text-gray-900 text-lg mt-2">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Modern Paintings</h2>
+          <p className="text-gray-900 text-base sm:text-lg mt-2">
             The best works by rising talents on Art Index, all available now.
           </p>
         </div>
@@ -114,121 +120,129 @@ export default function CuratorsPicks() {
         </Link>
       </div>
 
-      <div className="relative h-[400px] w-full perspective-[1000px] overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          {artworks.length === 0 ? (
-            <p>Loading artworks...</p>
-          ) : (
-            artworks.map((art, index) => (
-              <div
-                key={art.internalID}
-                style={getSlideStyle(index)}
-                className="group w-[350px] h-[300px] rounded-md overflow-hidden transition-all duration-300 hover:shadow-xl"
+      <div className="w-full relative">
+        {artworks.length === 0 ? (
+          <div className="flex items-center justify-center h-96">
+            <p className="text-gray-500">Loading artworks...</p>
+          </div>
+        ) : (
+          <>
+            {/* Navigation Buttons */}
+            <button
+              onClick={goToPrevious}
+              className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-all duration-200"
+              aria-label="Previous artwork"
+            >
+              <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <button
+              onClick={goToNext}
+              className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-all duration-200"
+              aria-label="Next artwork"
+            >
+              <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Carousel Container */}
+            <div 
+              ref={carouselRef}
+              className="overflow-hidden rounded-lg"
+            >
+              <div 
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
               >
-                <div className="relative w-full h-full">
-                  <Image
-                    src={art.image.resized.src}
-                    alt={art.title}
-                    width={350}
-                    height={art.image.resized.height}
-                    className="object-cover w-full h-full rounded-md shadow-md transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                  
-                  {/* Sold Status Badge */}
-                  {art.soldStatus && art.soldStatus !== 'available' && (
-                    <div className="absolute top-3 right-3 z-20">
-                      <SoldBadge status={art.soldStatus} />
-                    </div>
-                  )}
-                  
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10">
-                    <h3 className="text-sm font-semibold drop-shadow-md mb-1">
-                      {art.artistNames}
-                    </h3>
-                    <p className="text-xs italic drop-shadow-md mb-2">
-                      {art.title}
-                    </p>
-                    <div className="flex justify-between items-center gap-2">
-                      <Button 
-                        variant="secondary" 
-                        size="sm"
-                        className="text-xs bg-white/90 hover:bg-white text-black w-full"
-                        onClick={(e) => handleContactClick(e, art)}
-                      >
-                        I'm Interested
-                      </Button>
-                      <Link 
-                        href={`/artwork/${art.slug}`}
-                        className="text-xs bg-black/40 hover:bg-black/60 px-3 py-1.5 rounded-md transition-colors duration-200"
-                      >
-                        View
-                      </Link>
+                {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+                  <div
+                    key={slideIndex}
+                    className="w-full flex-shrink-0 px-1 sm:px-2"
+                  >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                      {artworks
+                        .slice(slideIndex * cardsPerSlide, (slideIndex + 1) * cardsPerSlide)
+                        .map((art, cardIndex) => (
+                          <div
+                            key={art.internalID}
+                            className="group relative w-full h-[300px] sm:h-[350px] lg:h-[400px] rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
+                          >
+                            <div className="relative w-full h-full">
+                              <Image
+                                src={art.image.resized.src}
+                                alt={art.title}
+                                width={400}
+                                height={300}
+                                className="object-cover w-full h-full rounded-lg shadow-md transition-transform duration-500 group-hover:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                              
+                              {/* Sold Status Badge */}
+                              {art.soldStatus && art.soldStatus !== 'available' && (
+                                <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20">
+                                  <SoldBadge status={art.soldStatus} />
+                                </div>
+                              )}
+                              
+                              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 lg:p-6 text-white z-10">
+                                <h3 className="text-sm sm:text-base lg:text-lg font-semibold drop-shadow-md mb-1 sm:mb-2">
+                                  {art.artistNames}
+                                </h3>
+                                <p className="text-xs sm:text-sm italic drop-shadow-md mb-2 sm:mb-3 lg:mb-4">
+                                  {art.title}
+                                </p>
+                                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-3">
+                                  <Button 
+                                    variant="secondary" 
+                                    size="sm"
+                                    className="text-xs sm:text-sm bg-white/90 hover:bg-white text-black px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2"
+                                    onClick={(e) => handleContactClick(e, art)}
+                                  >
+                                    I'm Interested
+                                  </Button>
+                                  <Link 
+                                    href={`/artwork/${art.slug}`}
+                                    className="text-xs sm:text-sm bg-black/40 hover:bg-black/60 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md transition-colors duration-200 text-center"
+                                  >
+                                    View Details
+                                  </Link>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))
-          )}
-        </div>
+            </div>
 
-        {currentIndex !== null && (
-          <>
-            <button
-              onClick={handlePrev}
-              className="absolute left-2 sm:left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-3 sm:p-2 rounded-full z-[50] transition-transform duration-300 hover:scale-110 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
-              style={{ touchAction: 'manipulation' }}
-            >
-              <svg
-                className="w-6 h-6 sm:w-5 sm:h-5 text-gray-700"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 19l-7-7 7-7"
+            {/* Carousel Indicators */}
+            <div className="flex justify-center mt-4 space-x-2">
+              {Array.from({ length: totalSlides }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setCurrentIndex(index);
+                    setIsAutoPlaying(false);
+                    setTimeout(() => setIsAutoPlaying(true), 5000);
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                    index === currentIndex 
+                      ? 'bg-black' 
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
                 />
-              </svg>
-            </button>
-            <button
-              onClick={handleNext}
-              className="absolute right-2 sm:right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md p-3 sm:p-2 rounded-full z-[50] transition-transform duration-300 hover:scale-110 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
-              style={{ touchAction: 'manipulation' }}
-            >
-              <svg
-                className="w-6 h-6 sm:w-5 sm:h-5 text-gray-700"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+              ))}
+            </div>
           </>
         )}
       </div>
 
-      {/* {currentIndex !== null && (
-        <div className="hidden sm:flex justify-center mt-6 space-x-2">
-          {artworks.map((_, index) => (
-            <div
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex ? "bg-black scale-150" : "bg-gray-300"
-              }`}
-              onClick={() => setCurrentIndex(index)}
-            />
-          ))}
-        </div>
-      )} */}
 
       {/* Contact Modal */}
       <ContactModal 
